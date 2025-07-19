@@ -7,6 +7,9 @@ import Destinations from "./pages/Destinations";
 import StargazingSpots from "./pages/StargazingSpots";
 import NotFound from "./pages/NotFound";
 import Login from "./pages/auth/Login";
+import SignUp from "./pages/auth/SignUpRoleSelection";
+import CustomerRegistration from "./pages/auth/CustomerRegistration";
+import ServiceProviderRegistration from "./pages/auth/ServiceProviderRegistration";
 
 function App() {
   return (
@@ -19,6 +22,12 @@ function App() {
       <Route path="/stargazing-spots" element={<StargazingSpots />} />
       <Route path="*" element={<NotFound />} />
       <Route path="/login" element={<Login />} />
+      <Route path="/signup" element={<SignUp />} />
+      <Route path="/customer-registration" element={<CustomerRegistration />} />
+      <Route
+        path="/service-provider-registration"
+        element={<ServiceProviderRegistration />}
+      />
     </Routes>
   );
 }
