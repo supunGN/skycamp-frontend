@@ -8,11 +8,8 @@ import DropdownSelect from "../molecules/DropdownSelect";
 const categories = [
   "Camping Destinations",
   "Stargazing Spots",
-  "Gear Rentals",
-  "Tour Guides",
-  "Photography Services",
-  "Equipment Repair",
-  "Outdoor Training",
+  "Rentals",
+  "Guides",
 ];
 
 const districts = [
