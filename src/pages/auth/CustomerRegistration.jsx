@@ -1,4 +1,5 @@
 import React, { useState, useRef } from "react";
+import axios from "axios";
 import {
   ArrowLeftIcon,
   CloudArrowUpIcon,
@@ -8,9 +9,80 @@ import Button from "../../components/atoms/Button";
 import { Input } from "../../components/molecules/Input";
 import { Link } from "react-router-dom";
 
+// ---------------------------
+// FileUpload Component
+// ---------------------------
+function FileUpload({ id, label, preview, setPreview, uploadRef }) {
+  const handleFileUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) setPreview(URL.createObjectURL(file));
+  };
+
+  const handleCancelUpload = () => {
+    setPreview(null);
+    if (uploadRef.current) uploadRef.current.value = "";
+  };
+
+  return (
+    <div className="space-y-3">
+      {label && (
+        <label htmlFor={id} className="block text-sm font-medium text-gray-700">
+          {label}
+        </label>
+      )}
+      <div className="relative w-full h-32">
+        <input
+          type="file"
+          accept="image/*"
+          onChange={handleFileUpload}
+          ref={uploadRef}
+          className="hidden"
+          id={id}
+        />
+        {!preview ? (
+          <label
+            htmlFor={id}
+            className="flex flex-col items-center justify-center w-full h-full border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-cyan-400 transition-colors text-center"
+          >
+            <CloudArrowUpIcon className="w-6 h-6 text-gray-400 mb-1" />
+            <p className="text-cyan-600 text-xs font-medium">Upload File</p>
+            <p className="text-[10px] text-gray-500 p-2">PNG, JPG up to 5MB</p>
+          </label>
+        ) : (
+          <>
+            <img
+              src={preview}
+              alt="Preview"
+              className="w-full h-full object-cover rounded-lg border border-gray-200 p-2"
+            />
+            <button
+              type="button"
+              className="absolute -top-2 -right-2 p-1 bg-white rounded-full shadow hover:bg-gray-100"
+              onClick={handleCancelUpload}
+            >
+              <XMarkIcon className="w-4 h-4 text-gray-500" />
+            </button>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function CustomerRegistrationForm() {
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    dateOfBirth: "", // Ensure correct key
+    phone: "",
+    email: "",
+    address: "",
+    password: "",
+    confirmPassword: "",
+  });
+
   const [gender, setGender] = useState("");
-  const [travelBuddy, setTravelBuddy] = useState(""); // No default selection
+  const [travelBuddy, setTravelBuddy] = useState("");
   const [agreeTerms, setAgreeTerms] = useState(false);
 
   const [profilePreview, setProfilePreview] = useState(null);
@@ -21,23 +93,82 @@ export default function CustomerRegistrationForm() {
   const nicFrontUploadRef = useRef(null);
   const nicBackUploadRef = useRef(null);
 
-  const handleFileUpload = (e, setPreview) => {
-    const file = e.target.files[0];
-    if (file) setPreview(URL.createObjectURL(file));
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.id]: e.target.value,
+    });
   };
 
-  const handleCancelUpload = (setPreview, ref) => {
-    setPreview(null);
-    if (ref.current) ref.current.value = "";
-  };
-
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+
     if (!agreeTerms) {
       alert("Please agree to the terms and conditions.");
       return;
     }
-    console.log("Form Submitted");
+
+    if (formData.password !== formData.confirmPassword) {
+      alert("Passwords do not match.");
+      return;
+    }
+
+    const data = new FormData();
+    data.append("firstName", formData.firstName);
+    data.append("lastName", formData.lastName);
+    data.append("dateOfBirth", formData.dateOfBirth);
+    data.append("phone", formData.phone);
+    data.append("email", formData.email);
+    data.append("address", formData.address);
+    data.append("gender", gender);
+    data.append("password", formData.password);
+    data.append("userRole", "customer");
+    data.append("travelBuddyOption", travelBuddy);
+
+    if (profileUploadRef.current?.files[0]) {
+      data.append("profilePicture", profileUploadRef.current.files[0]);
+    }
+    if (nicFrontUploadRef.current?.files[0]) {
+      data.append("nicFront", nicFrontUploadRef.current.files[0]);
+    }
+    if (nicBackUploadRef.current?.files[0]) {
+      data.append("nicBack", nicBackUploadRef.current.files[0]);
+    }
+
+    console.log("Submitting the following data:");
+    for (let [key, value] of data.entries()) {
+      console.log(key, value);
+    }
+
+    try {
+      const response = await axios.post(
+        "http://localhost/skycamp-backend/api/register.php",
+        data,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      console.log("Response from backend:", response.data);
+
+      const result = response.data;
+      if (result.success) {
+        alert(result.message || "Registration successful!");
+        if (result.redirect_url) {
+          window.location.href = result.redirect_url;
+        }
+      } else {
+        alert(result.message || "Registration failed.");
+      }
+    } catch (error) {
+      console.error("Full error details:", error.response?.data || error);
+      alert(
+        error.response?.data?.message ||
+          "An error occurred during registration."
+      );
+    }
   };
 
   return (
@@ -84,8 +215,12 @@ export default function CustomerRegistrationForm() {
               </label>
               <Input
                 id="firstName"
+                name="firstName"
                 placeholder="Enter your first name"
+                autoComplete="given-name"
                 required
+                value={formData.firstName}
+                onChange={handleChange}
               />
             </div>
             <div className="space-y-2">
@@ -97,8 +232,12 @@ export default function CustomerRegistrationForm() {
               </label>
               <Input
                 id="lastName"
+                name="lastName"
                 placeholder="Enter your last name"
+                autoComplete="family-name"
                 required
+                value={formData.lastName}
+                onChange={handleChange}
               />
             </div>
           </div>
@@ -107,12 +246,20 @@ export default function CustomerRegistrationForm() {
           <div className="grid sm:grid-cols-2 gap-4">
             <div className="space-y-2">
               <label
-                htmlFor="dob"
+                htmlFor="dateOfBirth"
                 className="block text-sm font-medium text-gray-700"
               >
                 Date of Birth
               </label>
-              <Input id="dob" type="date" required />
+              <Input
+                id="dateOfBirth"
+                name="dateOfBirth"
+                type="date"
+                autoComplete="bday"
+                required
+                value={formData.dateOfBirth}
+                onChange={handleChange}
+              />
             </div>
             <div className="space-y-2">
               <label
@@ -121,7 +268,15 @@ export default function CustomerRegistrationForm() {
               >
                 Phone Number
               </label>
-              <Input id="phone" placeholder="0xxxxxxxxx" required />
+              <Input
+                id="phone"
+                name="phone"
+                placeholder="0xxxxxxxxx"
+                autoComplete="tel"
+                required
+                value={formData.phone}
+                onChange={handleChange}
+              />
             </div>
           </div>
 
@@ -135,9 +290,13 @@ export default function CustomerRegistrationForm() {
             </label>
             <Input
               id="email"
+              name="email"
               placeholder="Enter your email"
               type="email"
+              autoComplete="email"
               required
+              value={formData.email}
+              onChange={handleChange}
             />
           </div>
 
@@ -151,9 +310,13 @@ export default function CustomerRegistrationForm() {
             </label>
             <textarea
               id="address"
+              name="address"
               placeholder="Enter your postal address"
+              autoComplete="street-address"
               className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 min-h-[80px] resize-none"
               required
+              value={formData.address}
+              onChange={handleChange}
             />
           </div>
 
@@ -183,52 +346,13 @@ export default function CustomerRegistrationForm() {
           </div>
 
           {/* Profile Picture Upload */}
-          <div className="space-y-3">
-            <label className="block text-sm font-medium text-gray-700">
-              Profile Picture
-            </label>
-            <div className="relative w-32 h-32">
-              <input
-                type="file"
-                accept="image/*"
-                onChange={(e) => handleFileUpload(e, setProfilePreview)}
-                ref={profileUploadRef}
-                className="hidden"
-                id="profileUpload"
-              />
-              {!profilePreview ? (
-                <label
-                  htmlFor="profileUpload"
-                  className="flex flex-col items-center justify-center w-full h-full border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-cyan-400 transition-colors text-center"
-                >
-                  <CloudArrowUpIcon className="w-6 h-6 text-gray-400 mb-1" />
-                  <p className="text-cyan-600 text-xs font-medium">
-                    Upload Photo
-                  </p>
-                  <p className="text-[10px] text-gray-500 p-2">
-                    PNG, JPG up to 5MB with 1:1 ratio
-                  </p>
-                </label>
-              ) : (
-                <>
-                  <img
-                    src={profilePreview}
-                    alt="Profile Preview"
-                    className="w-full h-full object-cover rounded-lg border border-gray-200 p-2"
-                  />
-                  <button
-                    type="button"
-                    className="absolute -top-2 -right-2 p-1 bg-white rounded-full shadow hover:bg-gray-100"
-                    onClick={() =>
-                      handleCancelUpload(setProfilePreview, profileUploadRef)
-                    }
-                  >
-                    <XMarkIcon className="w-4 h-4 text-gray-500" />
-                  </button>
-                </>
-              )}
-            </div>
-          </div>
+          <FileUpload
+            id="profileUpload"
+            label="Profile Picture"
+            preview={profilePreview}
+            setPreview={setProfilePreview}
+            uploadRef={profileUploadRef}
+          />
 
           {/* NIC Front & Back Upload */}
           <div className="space-y-3">
@@ -236,94 +360,18 @@ export default function CustomerRegistrationForm() {
               Upload Your NIC
             </label>
             <div className="grid sm:grid-cols-2 gap-4">
-              {/* NIC Front */}
-              <div className="relative w-full h-32">
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => handleFileUpload(e, setNicFrontPreview)}
-                  ref={nicFrontUploadRef}
-                  className="hidden"
-                  id="nicFrontUpload"
-                />
-                {!nicFrontPreview ? (
-                  <label
-                    htmlFor="nicFrontUpload"
-                    className="flex flex-col items-center justify-center w-full h-full border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-cyan-400 transition-colors text-center"
-                  >
-                    <CloudArrowUpIcon className="w-6 h-6 text-gray-400 mb-1" />
-                    <p className="text-cyan-600 text-xs font-medium">
-                      Upload NIC Front
-                    </p>
-                    <p className="text-[10px] text-gray-500 p-2">
-                      PNG, JPG up to 5MB
-                    </p>
-                  </label>
-                ) : (
-                  <>
-                    <img
-                      src={nicFrontPreview}
-                      alt="NIC Front Preview"
-                      className="w-full h-full object-cover rounded-lg border border-gray-200 p-2"
-                    />
-                    <button
-                      type="button"
-                      className="absolute -top-2 -right-2 p-1 bg-white rounded-full shadow hover:bg-gray-100"
-                      onClick={() =>
-                        handleCancelUpload(
-                          setNicFrontPreview,
-                          nicFrontUploadRef
-                        )
-                      }
-                    >
-                      <XMarkIcon className="w-4 h-4 text-gray-500" />
-                    </button>
-                  </>
-                )}
-              </div>
-
-              {/* NIC Back */}
-              <div className="relative w-full h-32">
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => handleFileUpload(e, setNicBackPreview)}
-                  ref={nicBackUploadRef}
-                  className="hidden"
-                  id="nicBackUpload"
-                />
-                {!nicBackPreview ? (
-                  <label
-                    htmlFor="nicBackUpload"
-                    className="flex flex-col items-center justify-center w-full h-full border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-cyan-400 transition-colors text-center"
-                  >
-                    <CloudArrowUpIcon className="w-6 h-6 text-gray-400 mb-1" />
-                    <p className="text-cyan-600 text-xs font-medium">
-                      Upload NIC Back
-                    </p>
-                    <p className="text-[10px] text-gray-500 p-2">
-                      PNG, JPG up to 5MB
-                    </p>
-                  </label>
-                ) : (
-                  <>
-                    <img
-                      src={nicBackPreview}
-                      alt="NIC Back Preview"
-                      className="w-full h-full object-cover rounded-lg border border-gray-200 p-2"
-                    />
-                    <button
-                      type="button"
-                      className="absolute -top-2 -right-2 p-1 bg-white rounded-full shadow hover:bg-gray-100"
-                      onClick={() =>
-                        handleCancelUpload(setNicBackPreview, nicBackUploadRef)
-                      }
-                    >
-                      <XMarkIcon className="w-4 h-4 text-gray-500" />
-                    </button>
-                  </>
-                )}
-              </div>
+              <FileUpload
+                id="nicFrontUpload"
+                preview={nicFrontPreview}
+                setPreview={setNicFrontPreview}
+                uploadRef={nicFrontUploadRef}
+              />
+              <FileUpload
+                id="nicBackUpload"
+                preview={nicBackPreview}
+                setPreview={setNicBackPreview}
+                uploadRef={nicBackUploadRef}
+              />
             </div>
           </div>
 
@@ -337,9 +385,13 @@ export default function CustomerRegistrationForm() {
             </label>
             <Input
               id="password"
+              name="password"
               type="password"
               placeholder="Enter your password"
+              autoComplete="new-password"
               required
+              value={formData.password}
+              onChange={handleChange}
             />
             <p className="text-xs text-gray-500">
               At least 8 characters with uppercase, lowercase, and number
@@ -356,9 +408,13 @@ export default function CustomerRegistrationForm() {
             </label>
             <Input
               id="confirmPassword"
+              name="confirmPassword"
               type="password"
               placeholder="Confirm your password"
+              autoComplete="new-password"
               required
+              value={formData.confirmPassword}
+              onChange={handleChange}
             />
           </div>
         </div>
@@ -379,51 +435,35 @@ export default function CustomerRegistrationForm() {
               Do you wish to use the Travel Buddy option?
             </label>
             <div className="space-y-3">
-              <label
-                className={`flex items-start p-4 rounded-lg border cursor-pointer transition-colors ${
-                  travelBuddy === "yes"
-                    ? "border-cyan-500 bg-cyan-50"
-                    : "border-gray-200 hover:border-gray-300"
-                }`}
-              >
-                <input
-                  type="radio"
-                  name="travelBuddy"
-                  value="yes"
-                  checked={travelBuddy === "yes"}
-                  onChange={() => setTravelBuddy("yes")}
-                  className="w-4 h-4 text-cyan-600 border-gray-300 focus:ring-cyan-500 mt-0.5 mr-3"
-                />
-                <div>
-                  <span className="font-medium text-gray-900">Yes</span>
-                  <p className="text-sm text-gray-600 mt-1">
-                    Find and connect with fellow campers
-                  </p>
-                </div>
-              </label>
-
-              <label
-                className={`flex items-start p-4 rounded-lg border cursor-pointer transition-colors ${
-                  travelBuddy === "no"
-                    ? "border-cyan-500 bg-cyan-50"
-                    : "border-gray-200 hover:border-gray-300"
-                }`}
-              >
-                <input
-                  type="radio"
-                  name="travelBuddy"
-                  value="no"
-                  checked={travelBuddy === "no"}
-                  onChange={() => setTravelBuddy("no")}
-                  className="w-4 h-4 text-cyan-600 border-gray-300 focus:ring-cyan-500 mt-0.5 mr-3"
-                />
-                <div>
-                  <span className="font-medium text-gray-900">No</span>
-                  <p className="text-sm text-gray-600 mt-1">
-                    Continue solo. You can enable it later.
-                  </p>
-                </div>
-              </label>
+              {["yes", "no"].map((option) => (
+                <label
+                  key={option}
+                  className={`flex items-start p-4 rounded-lg border cursor-pointer transition-colors ${
+                    travelBuddy === option
+                      ? "border-cyan-500 bg-cyan-50"
+                      : "border-gray-200 hover:border-gray-300"
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="travelBuddy"
+                    value={option}
+                    checked={travelBuddy === option}
+                    onChange={() => setTravelBuddy(option)}
+                    className="w-4 h-4 text-cyan-600 border-gray-300 focus:ring-cyan-500 mt-0.5 mr-3"
+                  />
+                  <div>
+                    <span className="font-medium text-gray-900">
+                      {option === "yes" ? "Yes" : "No"}
+                    </span>
+                    <p className="text-sm text-gray-600 mt-1">
+                      {option === "yes"
+                        ? "Find and connect with fellow campers"
+                        : "Continue solo. You can enable it later."}
+                    </p>
+                  </div>
+                </label>
+              ))}
             </div>
           </div>
         </div>
