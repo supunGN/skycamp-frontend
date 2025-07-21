@@ -34,7 +34,7 @@ export default function Navbar() {
           <nav className="flex items-center space-x-8">
             <Link
               to="/"
-              className="text-gray-700 hover:text-cyan-600 font-medium "
+              className="text-gray-700 hover:text-cyan-600 font-medium"
             >
               Home
             </Link>
@@ -101,15 +101,12 @@ export default function Navbar() {
       {/* Mobile Navigation */}
       <header className="lg:hidden fixed top-0 left-0 w-full z-50 bg-white shadow-lg">
         <div className="flex items-center justify-between px-4 py-4">
-          {/* Mobile Logo */}
           <Link
             to="/"
             className="flex items-center text-xl font-bold text-cyan-600"
           >
             <img src="/logo.svg" alt="SkyCamp" className="h-8 mr-2" />
           </Link>
-
-          {/* Mobile Menu Button */}
           <button
             onClick={() => setMenuOpen(!menuOpen)}
             className="p-2 text-gray-600 hover:text-cyan-600"
@@ -125,13 +122,11 @@ export default function Navbar() {
           menuOpen ? "block" : "hidden"
         }`}
       >
-        {/* Backdrop */}
         <div
           className="fixed inset-0 bg-black bg-opacity-50"
           onClick={() => setMenuOpen(false)}
         ></div>
 
-        {/* Menu Panel */}
         <div className="fixed left-0 top-0 h-full w-80 bg-white shadow-xl">
           {/* Menu Header */}
           <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
@@ -193,10 +188,8 @@ export default function Navbar() {
                   <ChevronDownIcon className="w-5 h-5" />
                 )}
               </button>
-
-              {/* Destinations Submenu */}
               {dropdownOpen && (
-                <div className="mt-4 ml-4">
+                <div className="mt-4 bg-white border rounded-md shadow-lg py-3 px-3">
                   <Link
                     to="/destinations?type=camping"
                     onClick={() => setMenuOpen(false)}
@@ -211,7 +204,6 @@ export default function Navbar() {
                       </p>
                     </div>
                   </Link>
-
                   <Link
                     to="/destinations?type=stargazing"
                     onClick={() => setMenuOpen(false)}
@@ -229,6 +221,34 @@ export default function Navbar() {
                 </div>
               )}
             </div>
+          </div>
+
+          {/* Mobile Icons (Notification, Cart, Wishlist) - Above Login Button */}
+          <div className="absolute bottom-24 left-6 right-6 space-y-4">
+            <Link
+              to="/notifications"
+              onClick={() => setMenuOpen(false)}
+              className="flex items-center space-x-3 text-lg font-medium text-gray-900 hover:text-cyan-600"
+            >
+              <BellIcon className="w-6 h-6 text-gray-600" />
+              <span>Notification</span>
+            </Link>
+            <Link
+              to="/cart"
+              onClick={() => setMenuOpen(false)}
+              className="flex items-center space-x-3 text-lg font-medium text-gray-900 hover:text-cyan-600"
+            >
+              <ShoppingCartIcon className="w-6 h-6 text-gray-600" />
+              <span>Cart</span>
+            </Link>
+            <Link
+              to="/wishlist"
+              onClick={() => setMenuOpen(false)}
+              className="flex items-center space-x-3 text-lg font-medium text-gray-900 hover:text-cyan-600"
+            >
+              <HeartIcon className="w-6 h-6 text-gray-600" />
+              <span>Wishlist</span>
+            </Link>
           </div>
 
           {/* Login Button */}
