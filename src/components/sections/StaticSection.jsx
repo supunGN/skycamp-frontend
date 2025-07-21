@@ -10,7 +10,7 @@ export default function StaticSection() {
     >
       {/* Content */}
       <div className="relative z-10 container mx-auto text-center flex flex-col items-center justify-center h-full gap-0">
-        <p className="text-cyan-700 text-lg font-medium">About SkyCamp</p>
+        <p className="text-cyan-700 text-lg font-small">About SkyCamp</p>
         <h1 className="text-gray-900 text-[48px] font-bold">About Us</h1>
       </div>
     </section>
