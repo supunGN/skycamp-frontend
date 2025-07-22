@@ -6,9 +6,9 @@ export default function AimSection() {
           {/* Left Image */}
           <div className="relative">
             <img
-              src="/placeholder.svg?height=400&width=500"
+              src="src\assets\about_us\people_camping.png"
               alt="Campers by lake"
-              className="w-full h-96 object-cover rounded-lg shadow-lg"
+              className="w-full h-96 object-cover rounded-lg"
             />
           </div>
 
@@ -17,7 +17,7 @@ export default function AimSection() {
             <div>
               <h3 className="text-teal-600 text-lg font-semibold mb-4">Our Aim</h3>
               <div className="flex items-start space-x-3">
-                <img src="/check-icon.png" alt="Check" className="w-5 h-5 mt-1 flex-shrink-0" />
+                <img src="src/assets/about_us/Check icon.png" alt="Check" className="w-5 h-5 mt-1 flex-shrink-0" />
                 <p className="text-gray-700 text-base leading-relaxed">
                   To design and develop a user-friendly, responsive web platform that connects camping and stargazing
                   enthusiasts with reliable local service providers across Sri Lanka.
@@ -29,21 +29,21 @@ export default function AimSection() {
               <h3 className="text-teal-600 text-lg font-semibold mb-4">Our Objectives</h3>
               <div className="space-y-4">
                 <div className="flex items-start space-x-3">
-                  <img src="/check-icon.png" alt="Check" className="w-5 h-5 mt-1 flex-shrink-0" />
+                  <img src="src/assets/about_us/Check icon.png" alt="Check" className="w-5 h-5 mt-1 flex-shrink-0" />
                   <p className="text-gray-700 text-base leading-relaxed">
                     To empower campers by enabling them to find camping gear and guides either from their hometown or
                     near the chosen destination based on preference.
                   </p>
                 </div>
                 <div className="flex items-start space-x-3">
-                  <img src="/check-icon.png" alt="Check" className="w-5 h-5 mt-1 flex-shrink-0" />
+                  <img src="src/assets/about_us/Check icon.png" alt="Check" className="w-5 h-5 mt-1 flex-shrink-0" />
                   <p className="text-gray-700 text-base leading-relaxed">
                     To provide a sustainable digital marketplace for service providers to earn an income by renting
                     equipment or offering guide services.
                   </p>
                 </div>
                 <div className="flex items-start space-x-3">
-                  <img src="/check-icon.png" alt="Check" className="w-5 h-5 mt-1 flex-shrink-0" />
+                  <img src="src/assets/about_us/Check icon.png" alt="Check" className="w-5 h-5 mt-1 flex-shrink-0" />
                   <p className="text-gray-700 text-base leading-relaxed">
                     To introduce a Travel Buddy system that helps solo campers connect with fellow campers.
                   </p>

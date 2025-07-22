@@ -7,6 +7,8 @@ import Destinations from "./pages/Destinations";
 import StargazingSpots from "./pages/StargazingSpots";
 import NotFound from "./pages/NotFound";
 import Login from "./pages/auth/Login";
+import AboutUs from "./pages/AboutUs";
+import TermsAndConditions from "./pages/TermsAndCoditions";
 
 function App() {
   return (
@@ -20,6 +22,7 @@ function App() {
       <Route path="*" element={<NotFound />} />
       <Route path="/login" element={<Login />} />
       <Route path="/about" element={<AboutUs />} />
+      <Route path="/terms" element={<TermsAndConditions />} />
       {/* Add more routes as needed */}
     </Routes>
   );

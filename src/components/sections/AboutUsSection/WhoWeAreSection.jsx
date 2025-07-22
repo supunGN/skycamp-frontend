@@ -18,9 +18,9 @@ export default function WhoWeAreSection() {
           {/* Right Single Image */}
           <div className="relative">
             <img
-              src="/placeholder.svg?height=400&width=500"
+              src="src/assets/about_us/Contents.png"
               alt="Camping and outdoor activities collage"
-              className="w-full h-96 object-cover rounded-lg shadow-lg"
+              className="w-full h-96 object-cover rounded-lg"
             />
           </div>
         </div>
