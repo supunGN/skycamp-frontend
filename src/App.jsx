@@ -14,6 +14,7 @@ import ForgotPassword from "./pages/auth/ForgotPassword";
 import CheckEmail from "./pages/auth/CheckEmail";
 import SetNewPassword from "./pages/auth/SetNewPassword";
 import PasswordResetSuccess from "./pages/auth/PasswordResetSuccess";
+import ContactUs from "./pages/ContactUs";
 
 function App() {
   return (
@@ -39,6 +40,7 @@ function App() {
         path="/password-reset-success"
         element={<PasswordResetSuccess />}
       />
+      <Route path="/contact-us" element={<ContactUs />} />
     </Routes>
   );
 }

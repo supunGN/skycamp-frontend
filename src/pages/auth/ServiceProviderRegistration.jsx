@@ -8,8 +8,20 @@ import { Link } from "react-router-dom";
 import Button from "../../components/atoms/Button";
 import { Input } from "../../components/molecules/Input";
 import MultiSelectDropdown from "../../components/molecules/MultiSelectDropdown";
+import axios from "axios";
 
 export default function ServiceProviderRegistration() {
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    dob: "",
+    phone: "",
+    email: "",
+    address: "",
+    password: "",
+    confirmPassword: "",
+  });
+
   const [gender, setGender] = useState("");
   const [role, setRole] = useState("");
   const [agreeTerms, setAgreeTerms] = useState(false);
@@ -22,7 +34,6 @@ export default function ServiceProviderRegistration() {
   const nicFrontUploadRef = useRef(null);
   const nicBackUploadRef = useRef(null);
 
-  // Dropdown states
   const [selectedCamping, setSelectedCamping] = useState([]);
   const [selectedStargazing, setSelectedStargazing] = useState([]);
   const [selectedDistricts, setSelectedDistricts] = useState([]);
@@ -59,7 +70,15 @@ export default function ServiceProviderRegistration() {
     "Trincomalee",
   ];
 
-  // Upload Handlers
+  // Handle text input
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.id]: e.target.value,
+    });
+  };
+
+  // Handle file uploads
   const handleFileUpload = (e, setPreview) => {
     const file = e.target.files[0];
     if (file) setPreview(URL.createObjectURL(file));
@@ -67,21 +86,87 @@ export default function ServiceProviderRegistration() {
 
   const handleCancelUpload = (setPreview, ref) => {
     setPreview(null);
-    if (ref.current) ref.current.value = ""; // Reset file input
+    if (ref.current) ref.current.value = "";
   };
 
-  const handleSubmit = (e) => {
+  // Submit form
+  const handleSubmit = async (e) => {
     e.preventDefault();
+
     if (!agreeTerms) {
       alert("Please agree to the terms and conditions.");
       return;
     }
-    console.log("Form Submitted", {
-      selectedCamping,
-      selectedStargazing,
-      selectedDistricts,
-      role,
-    });
+
+    if (formData.password !== formData.confirmPassword) {
+      alert("Passwords do not match.");
+      return;
+    }
+
+    console.log("Selected Camping:", selectedCamping);
+    console.log("Selected Stargazing:", selectedStargazing);
+    console.log("Selected Districts:", selectedDistricts);
+
+    // Prepare FormData
+    const data = new FormData();
+    data.append("firstName", formData.firstName);
+    data.append("lastName", formData.lastName);
+    data.append("dateOfBirth", formData.dob); // Ensure this matches backend key
+    data.append("phone", formData.phone);
+    data.append("email", formData.email);
+    data.append("address", formData.address);
+    data.append("gender", gender);
+    data.append("password", formData.password);
+    data.append("userRole", "service_provider");
+    data.append("serviceRole", role || "");
+
+    // Convert arrays to comma-separated strings or empty string
+    data.append("campingLocations", selectedCamping.join(","));
+    data.append("stargazingLocations", selectedStargazing.join(","));
+    data.append("districts", selectedDistricts.join(","));
+
+    // File uploads
+    if (profileUploadRef.current?.files[0]) {
+      data.append("profilePicture", profileUploadRef.current.files[0]);
+    }
+    if (nicFrontUploadRef.current?.files[0]) {
+      data.append("nicFront", nicFrontUploadRef.current.files[0]);
+    }
+    if (nicBackUploadRef.current?.files[0]) {
+      data.append("nicBack", nicBackUploadRef.current.files[0]);
+    }
+
+    // Debug log
+    console.log("Submitting form data:");
+    for (let [key, value] of data.entries()) {
+      console.log(`${key}: ${value}`);
+    }
+
+    try {
+      const response = await axios.post(
+        "http://localhost/skycamp-backend/api/register.php",
+        data,
+        {
+          headers: { "Content-Type": "multipart/form-data" },
+        }
+      );
+
+      const result = response.data;
+      if (result.success) {
+        alert("Registration successful!");
+        if (result.redirect_url) {
+          window.location.href = result.redirect_url;
+        }
+      } else {
+        alert(result.message || "Registration failed.");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      alert(
+        error.response?.data?.message ||
+          "An error occurred during registration."
+      );
+    }
   };
 
   return (
@@ -129,6 +214,8 @@ export default function ServiceProviderRegistration() {
                 id="firstName"
                 placeholder="Enter your first name"
                 required
+                value={formData.firstName}
+                onChange={handleChange}
               />
             </div>
             <div className="space-y-2">
@@ -139,6 +226,8 @@ export default function ServiceProviderRegistration() {
                 id="lastName"
                 placeholder="Enter your last name"
                 required
+                value={formData.lastName}
+                onChange={handleChange}
               />
             </div>
           </div>
@@ -149,27 +238,26 @@ export default function ServiceProviderRegistration() {
               <label className="block text-sm font-medium text-gray-700">
                 Date of Birth
               </label>
-              <Input id="dob" type="date" required />
+              <Input
+                id="dob"
+                type="date"
+                required
+                value={formData.dob}
+                onChange={handleChange}
+              />
             </div>
             <div className="space-y-2">
               <label className="block text-sm font-medium text-gray-700">
                 Phone Number
               </label>
-              <Input id="phone" placeholder="0xxxxxxxxx" required />
+              <Input
+                id="phone"
+                placeholder="0xxxxxxxxx"
+                required
+                value={formData.phone}
+                onChange={handleChange}
+              />
             </div>
-          </div>
-
-          {/* Email */}
-          <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-700">
-              Email
-            </label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="Enter your email"
-              required
-            />
           </div>
 
           {/* Address */}
@@ -182,6 +270,8 @@ export default function ServiceProviderRegistration() {
               placeholder="Enter your postal address"
               className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 min-h-[80px] resize-none"
               required
+              value={formData.address}
+              onChange={handleChange}
             />
           </div>
 
@@ -430,6 +520,75 @@ export default function ServiceProviderRegistration() {
             selected={selectedDistricts}
             setSelected={setSelectedDistricts}
           />
+        </div>
+
+        {/* authentication */}
+        <div className="mt-8 mb-4">
+          <h2 className="text-lg font-semibold text-gray-900">
+            Set Up Your Account Access
+          </h2>
+          <p className="text-sm text-gray-600">
+            Secure your profile and define your service availability
+          </p>
+        </div>
+        <div className="bg-gray-50 rounded-lg p-6 sm:p-8 space-y-6 shadow-sm">
+          {/* Email */}
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-gray-700">
+              Email
+            </label>
+            <Input
+              id="email"
+              type="email"
+              placeholder="Enter your email"
+              required
+              value={formData.email}
+              onChange={handleChange}
+            />
+          </div>
+
+          {/* Password */}
+          <div className="space-y-2">
+            <label
+              htmlFor="password"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Password
+            </label>
+            <Input
+              id="password"
+              name="password"
+              type="password"
+              placeholder="Enter your password"
+              autoComplete="new-password"
+              required
+              value={formData.password}
+              onChange={handleChange}
+            />
+            <p className="text-xs text-gray-500">
+              At least 8 characters with uppercase, lowercase, and number
+            </p>
+          </div>
+
+          {/* Confirm Password */}
+          <div className="space-y-2">
+            <label
+              htmlFor="confirmPassword"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Confirm Password
+            </label>
+            <Input
+              id="confirmPassword"
+              name="confirmPassword"
+              type="password"
+              placeholder="Confirm your password"
+              autoComplete="new-password"
+              required
+              value={formData.confirmPassword}
+              onChange={handleChange}
+            />
+          </div>
         </div>
 
         {/* Terms */}

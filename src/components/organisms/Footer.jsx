@@ -43,7 +43,7 @@ export default function Footer() {
             About Us
           </Link>
           <Link
-            to="/contact"
+            to="/contact-us"
             className="hover:text-cyan-600 font-semibold block"
           >
             Contact Us
