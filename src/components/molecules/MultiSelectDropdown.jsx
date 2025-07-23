@@ -5,10 +5,11 @@ export default function MultiSelectDropdown({
   label = "Select",
   options = [],
   defaultSelected = [],
+  selected, // <- controlled value from parent
+  setSelected, // <- function from parent
 }) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
-  const [selected, setSelected] = useState(defaultSelected);
   const dropdownRef = useRef(null);
 
   // Close dropdown when clicking outside
@@ -24,16 +25,15 @@ export default function MultiSelectDropdown({
 
   // Toggle selection
   const toggleSelection = (option) => {
-    setSelected((prev) =>
-      prev.includes(option)
-        ? prev.filter((item) => item !== option)
-        : [...prev, option]
-    );
+    const updated = selected.includes(option)
+      ? selected.filter((item) => item !== option)
+      : [...selected, option];
+    setSelected(updated); // update parent
   };
 
   // Remove selected item
   const removeSelection = (option) => {
-    setSelected((prev) => prev.filter((item) => item !== option));
+    setSelected(selected.filter((item) => item !== option));
   };
 
   // Filtered options based on search
@@ -64,16 +64,22 @@ export default function MultiSelectDropdown({
                   className="bg-cyan-100 text-cyan-700 text-xs font-medium px-2 py-1 rounded-full flex items-center"
                 >
                   {item}
-                  <button
-                    type="button"
-                    className="ml-1 text-gray-500 hover:text-gray-700"
+                  <span
+                    role="button"
+                    tabIndex={0}
+                    className="ml-1 cursor-pointer text-gray-500 hover:text-gray-700"
                     onClick={(e) => {
                       e.stopPropagation();
                       removeSelection(item);
                     }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        removeSelection(item);
+                      }
+                    }}
                   >
                     ×
-                  </button>
+                  </span>
                 </span>
               ))
             ) : (

@@ -11,6 +11,14 @@ import AboutUs from "./pages/AboutUs";
 import TermsAndConditions from "./pages/TermsAndCoditions";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import FAQ from "./pages/FAQ";
+import SignUp from "./pages/auth/SignUpRoleSelection";
+import CustomerRegistration from "./pages/auth/CustomerRegistration";
+import ServiceProviderRegistration from "./pages/auth/ServiceProviderRegistration";
+import ForgotPassword from "./pages/auth/ForgotPassword";
+import CheckEmail from "./pages/auth/CheckEmail";
+import SetNewPassword from "./pages/auth/SetNewPassword";
+import PasswordResetSuccess from "./pages/auth/PasswordResetSuccess";
+import ContactUs from "./pages/ContactUs";
 
 function App() {
   return (
@@ -20,16 +28,23 @@ function App() {
       <Route path="/travel-buddy" element={<TravelBuddy />} />
       <Route path="/destinations" element={<Destinations />} />
       <Route path="/stargazing-spots" element={<StargazingSpots />} />
-      <Route path="*" element={<NotFound />} />
+      <Route path="/guides" element={<Guides />} />
       <Route path="/login" element={<Login />} />
       <Route path="/about" element={<AboutUs />} />
       <Route path="/terms" element={<TermsAndConditions />} />
       <Route path="/privacy" element={<PrivacyPolicy />} />
       <Route path="/faq" element={<FAQ />} />
-      <Route path="/guides" element={<Guides />} />
-      {/* Add more routes as needed */}
-      </Routes>
-    );
+      <Route path="/signup" element={<SignUp />} />
+      <Route path="/customer-registration" element={<CustomerRegistration />} />
+      <Route path="/service-provider-registration" element={<ServiceProviderRegistration />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/check-email" element={<CheckEmail />} />
+      <Route path="/set-new-password" element={<SetNewPassword />} />
+      <Route path="/password-reset-success" element={<PasswordResetSuccess />} />
+      <Route path="/contact-us" element={<ContactUs />} />
+      <Route path="*" element={<NotFound />} />
+    </Routes>
+  );
 }
 
 export default App;
