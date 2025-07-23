@@ -19,6 +19,8 @@ import CheckEmail from "./pages/auth/CheckEmail";
 import SetNewPassword from "./pages/auth/SetNewPassword";
 import PasswordResetSuccess from "./pages/auth/PasswordResetSuccess";
 import ContactUs from "./pages/ContactUs";
+import Cart from "./pages/Cart";
+import IndividualDestination from "./pages/IndividualDestination";
 
 function App() {
   return (
@@ -40,8 +42,13 @@ function App() {
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/check-email" element={<CheckEmail />} />
       <Route path="/set-new-password" element={<SetNewPassword />} />
-      <Route path="/password-reset-success" element={<PasswordResetSuccess />} />
+      <Route
+        path="/password-reset-success"
+        element={<PasswordResetSuccess />}
+      />
       <Route path="/contact-us" element={<ContactUs />} />
+      <Route path="/cart" element={<Cart />} />
+      <Route path="/individual-destination" element={<IndividualDestination />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );

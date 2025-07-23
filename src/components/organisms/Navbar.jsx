@@ -65,7 +65,7 @@ export default function Navbar() {
               </button>
               <div className="absolute top-full left-1/2 -translate-x-1/2 bg-white border rounded-md shadow-lg w-72 z-50 group-hover:block hidden transition-all duration-150 py-2 px-2">
                 <Link
-                  to="/destination"
+                  to="/destinations"
                   className="block px-4 py-3 hover:bg-gray-50 rounded-md"
                 >
                   <div className="font-medium">Camping Destination</div>
@@ -89,7 +89,9 @@ export default function Navbar() {
           {/* Right Side Icons and Login */}
           <div className="flex items-center space-x-4">
             <BellIcon className="w-6 h-6 text-gray-600 hover:text-cyan-600 cursor-pointer" />
-            <ShoppingCartIcon className="w-6 h-6 text-gray-600 hover:text-cyan-600 cursor-pointer" />
+            <Link to="/cart">
+              <ShoppingCartIcon className="w-6 h-6 text-gray-600 hover:text-cyan-600 cursor-pointer" />
+            </Link>
             <HeartIcon className="w-6 h-6 text-gray-600 hover:text-cyan-600 cursor-pointer" />
             <Link to="/login">
               <Button size="md">Log in</Button>
@@ -191,7 +193,7 @@ export default function Navbar() {
               {dropdownOpen && (
                 <div className="mt-4 bg-white border rounded-md shadow-lg py-3 px-3">
                   <Link
-                    to="/destinations?type=camping"
+                    to="/destinations"
                     onClick={() => setMenuOpen(false)}
                     className="flex items-start space-x-3 hover:bg-gray-50 py-3 px-3 rounded-md"
                   >
@@ -205,7 +207,7 @@ export default function Navbar() {
                     </div>
                   </Link>
                   <Link
-                    to="/destinations?type=stargazing"
+                    to="/stargazing-spots"
                     onClick={() => setMenuOpen(false)}
                     className="flex items-start space-x-3 hover:bg-gray-50 py-3 px-3 rounded-md"
                   >
