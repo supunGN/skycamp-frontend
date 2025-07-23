@@ -40,15 +40,25 @@ const districts = [
   "Kegalle",
 ];
 
-export default function SearchSection() {
+export default function SearchSection({
+  selectedDistrict = "",
+  onDistrictChange,
+  hideCategory = false,
+  title = "Search by Category & District",
+  subtitle = "Search for destinations or services by category and district.",
+}) {
   const [selectedCategory, setSelectedCategory] = useState("");
-  const [selectedDistrict, setSelectedDistrict] = useState("");
+  const [internalDistrict, setInternalDistrict] = useState(selectedDistrict);
+
+  const handleDistrictChange = (district) => {
+    setInternalDistrict(district);
+    if (onDistrictChange) onDistrictChange(district);
+  };
 
   const handleSearch = () => {
-    console.log("Searching for:", {
-      category: selectedCategory,
-      district: selectedDistrict,
-    });
+    // Only call onDistrictChange if provided
+    if (onDistrictChange) onDistrictChange(internalDistrict);
+    // Optionally handle category search for other pages
   };
 
   return (
@@ -57,28 +67,35 @@ export default function SearchSection() {
         {/* Header */}
         <div className="text-center mb-10">
           <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2">
-            Search by <span className="text-cyan-700">Category</span> &{" "}
-            <span className="text-cyan-700">District</span>
+            {title.includes("District") ? (
+              <>
+                Search by <span className="text-cyan-700">District</span>
+              </>
+            ) : (
+              title
+            )}
           </h2>
           <p className="text-base text-gray-600">
-            Search for destinations or services by category and district.
+            {subtitle}
           </p>
         </div>
 
         {/* Form */}
         <div className="max-w-4xl mx-auto">
           <div className="flex flex-col lg:flex-row gap-4 lg:gap-6 items-center">
-            <DropdownSelect
-              label="Select Category"
-              options={categories}
-              selected={selectedCategory}
-              onSelect={setSelectedCategory}
-            />
+            {!hideCategory && (
+              <DropdownSelect
+                label="Select Category"
+                options={categories}
+                selected={selectedCategory}
+                onSelect={setSelectedCategory}
+              />
+            )}
             <DropdownSelect
               label="Where"
               options={districts}
-              selected={selectedDistrict}
-              onSelect={setSelectedDistrict}
+              selected={internalDistrict}
+              onSelect={handleDistrictChange}
             />
             <div className="w-full lg:w-auto">
               <Button onClick={handleSearch} className="w-full lg:w-auto">

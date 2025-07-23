@@ -7,6 +7,10 @@ import Destinations from "./pages/Destinations";
 import StargazingSpots from "./pages/StargazingSpots";
 import NotFound from "./pages/NotFound";
 import Login from "./pages/auth/Login";
+import AboutUs from "./pages/AboutUs";
+import TermsAndConditions from "./pages/TermsAndCoditions";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import FAQ from "./pages/FAQ";
 import SignUp from "./pages/auth/SignUpRoleSelection";
 import CustomerRegistration from "./pages/auth/CustomerRegistration";
 import ServiceProviderRegistration from "./pages/auth/ServiceProviderRegistration";
@@ -21,26 +25,24 @@ function App() {
     <Routes>
       <Route path="/" element={<Home />} />
       <Route path="/rentals" element={<Rentals />} />
-      <Route path="/guides" element={<Guides />} />
       <Route path="/travel-buddy" element={<TravelBuddy />} />
       <Route path="/destinations" element={<Destinations />} />
       <Route path="/stargazing-spots" element={<StargazingSpots />} />
-      <Route path="*" element={<NotFound />} />
+      <Route path="/guides" element={<Guides />} />
       <Route path="/login" element={<Login />} />
+      <Route path="/about" element={<AboutUs />} />
+      <Route path="/terms" element={<TermsAndConditions />} />
+      <Route path="/privacy" element={<PrivacyPolicy />} />
+      <Route path="/faq" element={<FAQ />} />
       <Route path="/signup" element={<SignUp />} />
       <Route path="/customer-registration" element={<CustomerRegistration />} />
-      <Route
-        path="/service-provider-registration"
-        element={<ServiceProviderRegistration />}
-      />
+      <Route path="/service-provider-registration" element={<ServiceProviderRegistration />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/check-email" element={<CheckEmail />} />
       <Route path="/set-new-password" element={<SetNewPassword />} />
-      <Route
-        path="/password-reset-success"
-        element={<PasswordResetSuccess />}
-      />
+      <Route path="/password-reset-success" element={<PasswordResetSuccess />} />
       <Route path="/contact-us" element={<ContactUs />} />
+      <Route path="*" element={<NotFound />} />
     </Routes>
   );
 }
