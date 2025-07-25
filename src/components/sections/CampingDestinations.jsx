@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import wewathennaMountainImg from "../../assets/camping_destinations/Wewathenna Mountain.png";
 import hortonPlainsImg from "../../assets/camping_destinations/Horton Plains.png";
 import riverstonPeakImg from "../../assets/camping_destinations/Riverston Peak.png";
+import { useState } from "react";
 
 const CampingDestinations = () => {
   // Sample data - using all your provided images
@@ -36,6 +37,34 @@ const CampingDestinations = () => {
     },
   ]
 
+  // State to control how many destinations are shown
+  const [showAll, setShowAll] = useState(false);
+
+  // Simulate a longer list for demonstration (replace with real data as needed)
+  const allDestinations = [
+    ...topDestinations,
+    // Example extra destinations (remove or replace with real data)
+    {
+      id: 4,
+      name: "Knuckles Range",
+      description: "Camp in the heart of Sri Lanka's misty mountains.",
+      image: wewathennaMountainImg,
+      rating: 4.5,
+      reviewCount: 10,
+    },
+    {
+      id: 5,
+      name: "Sinharaja Forest",
+      description: "Experience the rainforest wilderness overnight.",
+      image: hortonPlainsImg,
+      rating: 4.8,
+      reviewCount: 15,
+    },
+  ];
+
+  // Show only 3 by default, or all if showAll is true
+  const destinationsToShow = showAll ? allDestinations : allDestinations.slice(0, 3);
+
   const navigate = useNavigate();
 
   const handleCardClick = (destinationName) => {
@@ -53,10 +82,10 @@ const CampingDestinations = () => {
     // Add wishlist logic here
   }
 
+  // Remove navigation from show all button
   const handleShowAllClick = () => {
-    navigate('/destinations');
-    window.scrollTo(0, 0);
-  }
+    setShowAll(true);
+  };
 
   return (
     <section className="py-8 xs:py-12 sm:py-16 px-3 xs:px-4 sm:px-6 lg:px-8 bg-gray-50">
@@ -78,7 +107,7 @@ const CampingDestinations = () => {
 
         {/* Destinations Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 xs:gap-6 sm:gap-8">
-          {topDestinations.map((destination) => (
+          {destinationsToShow.map((destination) => (
             <DestinationCard
               key={destination.id}
               image={destination.image}
@@ -92,12 +121,14 @@ const CampingDestinations = () => {
           ))}
         </div>
 
-        {/* Show All Button - Moved below the destinations */}
-        <div className="flex justify-left mt-8 xs:mt-10 sm:mt-12">
-          <Button onClick={handleShowAllClick} size="md" variant="primary" className="w-full sm:w-auto">
-            Show all destinations
-          </Button>
-        </div>
+        {/* Show All Button - Only show if there are more than 3 and not already showing all */}
+        {allDestinations.length > 3 && !showAll && (
+          <div className="flex justify-left mt-8 xs:mt-10 sm:mt-12">
+            <Button onClick={handleShowAllClick} size="md" variant="primary" className="w-full sm:w-auto">
+              Show all destinations
+            </Button>
+          </div>
+        )}
       </div>
     </section>
   )

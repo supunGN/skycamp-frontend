@@ -6,6 +6,7 @@ import hortonPlainsImg from "../../assets/stargazing_spots/horton_plains.png";
 import namunukulaRangeImg from "../../assets/stargazing_spots/namunukula_range.png";
 import ritigalaReserveImg from "../../assets/stargazing_spots/ritigala_reserve.png";
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 
 const StargazingSpots = () => {
   const navigate = useNavigate();
@@ -37,6 +38,34 @@ const StargazingSpots = () => {
     },
   ]
 
+  // State to control how many spots are shown
+  const [showAll, setShowAll] = useState(false);
+
+  // Simulate a longer list for demonstration (replace with real data as needed)
+  const allStargazingSpots = [
+    ...topStargazingSpots,
+    // Example extra spots (remove or replace with real data)
+    {
+      id: 4,
+      name: "Knuckles Mountains",
+      description: "Remote peaks with crystal-clear night skies.",
+      image: hortonPlainsImg,
+      rating: 4.2,
+      reviewCount: 8,
+    },
+    {
+      id: 5,
+      name: "Yala Buffer Zone",
+      description: "Wildlife and stars in Sri Lanka's southern wilderness.",
+      image: namunukulaRangeImg,
+      rating: 4.7,
+      reviewCount: 14,
+    },
+  ];
+
+  // Show only 3 by default, or all if showAll is true
+  const spotsToShow = showAll ? allStargazingSpots : allStargazingSpots.slice(0, 3);
+
   const handleCardClick = (spotName) => {
     if (spotName === "Horton Plains") {
       navigate("/individual-destination");
@@ -52,10 +81,10 @@ const StargazingSpots = () => {
     // Add wishlist logic here
   }
 
+  // Remove navigation from show all button
   const handleShowAllClick = () => {
-    navigate('/stargazing-spots');
-    window.scrollTo(0, 0);
-  }
+    setShowAll(true);
+  };
 
   return (
     <section className="py-8 xs:py-12 sm:py-16 px-3 xs:px-4 sm:px-6 lg:px-8 bg-gray-50">
@@ -79,7 +108,7 @@ const StargazingSpots = () => {
 
         {/* Stargazing Spots Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 xs:gap-6 sm:gap-8">
-          {topStargazingSpots.map((spot) => (
+          {spotsToShow.map((spot) => (
             <DestinationCard
               key={spot.id}
               image={spot.image}
@@ -93,12 +122,14 @@ const StargazingSpots = () => {
           ))}
         </div>
 
-        {/* Show All Button - Moved below the destinations */}
-        <div className="flex justify-left mt-8 xs:mt-10 sm:mt-12">
-          <Button onClick={handleShowAllClick} size="md" variant="primary" className="w-full sm:w-auto">
-            Show all Spots
-          </Button>
-        </div>
+        {/* Show All Button - Only show if there are more than 3 and not already showing all */}
+        {allStargazingSpots.length > 3 && !showAll && (
+          <div className="flex justify-left mt-8 xs:mt-10 sm:mt-12">
+            <Button onClick={handleShowAllClick} size="md" variant="primary" className="w-full sm:w-auto">
+              Show all Spots
+            </Button>
+          </div>
+        )}
       </div>
     </section>
   )
