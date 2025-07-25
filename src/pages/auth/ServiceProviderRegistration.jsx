@@ -4,11 +4,12 @@ import {
   CloudArrowUpIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Button from "../../components/atoms/Button";
 import { Input } from "../../components/molecules/Input";
 import MultiSelectDropdown from "../../components/molecules/MultiSelectDropdown";
 import axios from "axios";
+import { API_BASE_URL } from "../../api";
 
 export default function ServiceProviderRegistration() {
   const [formData, setFormData] = useState({
@@ -69,6 +70,8 @@ export default function ServiceProviderRegistration() {
     "Anuradhapura",
     "Trincomalee",
   ];
+
+  const navigate = useNavigate();
 
   // Handle text input
   const handleChange = (e) => {
@@ -143,20 +146,23 @@ export default function ServiceProviderRegistration() {
     }
 
     try {
-      const response = await axios.post(
-        "http://localhost/skycamp-backend/api/register.php",
-        data,
-        {
-          headers: { "Content-Type": "multipart/form-data" },
-        }
-      );
+      const response = await axios.post(`${API_BASE_URL}register.php`, data, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
 
       const result = response.data;
       if (result.success) {
-        alert("Registration successful!");
-        if (result.redirect_url) {
-          window.location.href = result.redirect_url;
+        if (result.user) {
+          localStorage.setItem("user", JSON.stringify(result.user));
+          if (result.user.user_role === "customer") {
+            window.location.href = "/settings";
+          } else if (result.user.user_role === "service_provider") {
+            window.location.href = "/dashboard";
+          } else {
+            window.location.href = "/";
+          }
         }
+        alert("Registration successful!");
       } else {
         alert(result.message || "Registration failed.");
       }

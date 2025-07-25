@@ -34,7 +34,9 @@ export default function GuideCard({
           aria-label="Favorite"
         >
           <HeartIcon
-            className={`w-6 h-6 ${favorite ? "text-cyan-600" : "text-gray-300"}`}
+            className={`w-6 h-6 ${
+              favorite ? "text-cyan-600" : "text-gray-300"
+            }`}
             fill={favorite ? "#06b6d4" : "none"}
           />
         </button>
@@ -43,16 +45,22 @@ export default function GuideCard({
         <span className="inline-block w-2 h-2 bg-cyan-400 rounded-full"></span>
         {location}
       </div>
-      <div className="font-bold text-lg text-gray-900 mb-1 truncate">{name}</div>
+      <div className="font-bold text-lg text-gray-900 mb-1 truncate">
+        {name}
+      </div>
       <div className="text-gray-600 text-sm mb-1">{contact}</div>
-      <div className="font-bold text-cyan-700 text-base mb-2">{rate} LKR/Day</div>
+      <div className="font-bold text-cyan-700 text-base mb-2">
+        {rate} LKR/Day
+      </div>
       <div className="flex items-center gap-1 text-sm">
         <span className="font-semibold text-yellow-500">{rating}</span>
         <span className="flex gap-0.5">
           {[...Array(5)].map((_, i) => (
             <svg
               key={i}
-              className={`w-4 h-4 ${i < Math.round(rating) ? "text-yellow-400" : "text-gray-200"}`}
+              className={`w-4 h-4 ${
+                i < Math.round(rating) ? "text-yellow-400" : "text-gray-200"
+              }`}
               fill="currentColor"
               viewBox="0 0 20 20"
             >
@@ -64,4 +72,4 @@ export default function GuideCard({
       </div>
     </div>
   );
-} 
+}

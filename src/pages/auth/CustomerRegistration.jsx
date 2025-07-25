@@ -8,6 +8,7 @@ import {
 import Button from "../../components/atoms/Button";
 import { Input } from "../../components/molecules/Input";
 import { Link } from "react-router-dom";
+import { API_BASE_URL } from "../../api";
 
 // ---------------------------
 // FileUpload Component
@@ -141,20 +142,26 @@ export default function CustomerRegistrationForm() {
     }
 
     try {
-      const response = await axios.post(
-        "http://localhost/skycamp-backend/api/register.php",
-        data,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
+      const response = await axios.post(`${API_BASE_URL}register.php`, data, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
 
       console.log("Response from backend:", response.data);
 
       const result = response.data;
       if (result.success) {
+        if (result.user) {
+          localStorage.setItem("user", JSON.stringify(result.user));
+          if (result.user.user_role === "customer") {
+            window.location.href = "/profile";
+          } else if (result.user.user_role === "service_provider") {
+            window.location.href = "/dashboard";
+          } else {
+            window.location.href = "/";
+          }
+        }
         alert(result.message || "Registration successful!");
         if (result.redirect_url) {
           window.location.href = result.redirect_url;

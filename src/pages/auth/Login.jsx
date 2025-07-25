@@ -1,11 +1,58 @@
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import LoginImage from "../../assets/login/login.png";
 import { Link } from "react-router-dom";
 import { EnvelopeIcon } from "@heroicons/react/24/outline";
 
 import Button from "../../components/atoms/Button";
 import { Input } from "../../components/molecules/Input";
+import { API_BASE_URL } from "../../api";
 
 export default function LoginPage() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const navigate = useNavigate();
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+
+    try {
+      const response = await fetch(`${API_BASE_URL}login.php`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+      console.log("Login Response:", data); // Debug log
+
+      if (!response.ok || !data.success) {
+        localStorage.removeItem("user");
+        setError(data.message || "Login failed");
+        return;
+      }
+
+      if (data.user) {
+        localStorage.setItem("user", JSON.stringify(data.user));
+
+        // Force full page reload with redirect
+        window.location.href = data.redirect_url || "/";
+      }
+    } catch (err) {
+      console.error("Login error:", err);
+      setError("An error occurred. Please try again.");
+      localStorage.removeItem("user");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen h-screen w-full overflow-hidden lg:grid lg:grid-cols-2">
       {/* Left Column: Login Form */}
@@ -33,7 +80,7 @@ export default function LoginPage() {
                 </p>
               </div>
 
-              <form className="space-y-3 sm:space-y-4">
+              <form className="space-y-3 sm:space-y-4" onSubmit={handleSubmit}>
                 <div className="space-y-1 sm:space-y-2">
                   <label
                     htmlFor="email"
@@ -46,6 +93,8 @@ export default function LoginPage() {
                     type="email"
                     placeholder="Enter your email"
                     required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                   />
                 </div>
 
@@ -61,6 +110,8 @@ export default function LoginPage() {
                     type="password"
                     placeholder="Enter your password"
                     required
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
                   />
                 </div>
 
@@ -83,8 +134,14 @@ export default function LoginPage() {
                   </Link>
                 </div>
 
-                <Button type="submit" className="w-full">
-                  Sign in
+                {error && (
+                  <div className="text-red-600 text-sm text-center">
+                    {error}
+                  </div>
+                )}
+
+                <Button type="submit" className="w-full" disabled={loading}>
+                  {loading ? "Signing in..." : "Sign in"}
                 </Button>
               </form>
 
