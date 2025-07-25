@@ -10,7 +10,6 @@ import DilshanJayasingheImg from "../../assets/guides/DilshanJayasinghe.png";
 
 import { Link } from "react-router-dom";
 
-
 // Mock data for demonstration
 const mockGuides = [
   {
@@ -83,7 +82,8 @@ export default function GuidesSection({ selectedDistrict }) {
     if (selectedDistrict) {
       setGuides(
         mockGuides.filter(
-          (guide) => guide.location.toLowerCase() === selectedDistrict.toLowerCase()
+          (guide) =>
+            guide.location.toLowerCase() === selectedDistrict.toLowerCase()
         )
       );
     } else {
@@ -95,28 +95,21 @@ export default function GuidesSection({ selectedDistrict }) {
   const displayedGuides = guides.slice(0, 6);
 
   return (
-
-    <section className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      {displayedGuides.length > 0 && (
-        <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-8">Guide List</h2>
-      )}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
-        {displayedGuides.length > 0 ? (
-          displayedGuides.map((guide) => (
-            <GuideCard key={guide.id} {...guide} />
-
     <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-8">Guide List</h2>
+      <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-8">
+        Guide List
+      </h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
         {guides.length > 0 ? (
           guides.map((guide) => (
             <Link key={guide.id} to={`/guide/${guide.id}`} className="block">
               <GuideCard {...guide} />
             </Link>
-
           ))
         ) : (
-          <div className="col-span-full text-center text-gray-500 py-12">No guides found for this district.</div>
+          <div className="col-span-full text-center text-gray-500 py-12">
+            No guides found for this district.
+          </div>
         )}
       </div>
       {displayedGuides.length > 0 && (
@@ -126,4 +119,4 @@ export default function GuidesSection({ selectedDistrict }) {
       )}
     </section>
   );
-} 
+}
