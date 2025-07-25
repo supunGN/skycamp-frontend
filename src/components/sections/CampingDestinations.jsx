@@ -1,7 +1,7 @@
-"use client"
+"use client";
 
-import DestinationCard from "../molecules/destination/DestinationCard"
-import Button from "../atoms/Button" // Import your custom Button component
+import DestinationCard from "../molecules/destination/DestinationCard";
+import Button from "../atoms/Button"; // Import your custom Button component
 import { useNavigate } from "react-router-dom";
 import wewathennaMountainImg from "../../assets/camping_destinations/Wewathenna Mountain.png";
 import hortonPlainsImg from "../../assets/camping_destinations/Horton Plains.png";
@@ -14,7 +14,8 @@ const CampingDestinations = () => {
     {
       id: 1,
       name: "Wewathenna Mountain",
-      description: "Wake up to clouds rolling below your highland campsite with panoramic views.",
+      description:
+        "Wake up to clouds rolling below your highland campsite with panoramic views.",
       image: wewathennaMountainImg,
       rating: 5.0,
       reviewCount: 22,
@@ -22,7 +23,8 @@ const CampingDestinations = () => {
     {
       id: 2,
       name: "Horton Plains",
-      description: "Pitch your tent in cool grasslands and explore cloud forests and waterfalls.",
+      description:
+        "Pitch your tent in cool grasslands and explore cloud forests and waterfalls.",
       image: hortonPlainsImg,
       rating: 5.0,
       reviewCount: 22,
@@ -30,15 +32,13 @@ const CampingDestinations = () => {
     {
       id: 3,
       name: "Riverston Peak",
-      description: "Sleep above the clouds near misty cliffs and sweeping mountain plains.",
+      description:
+        "Sleep above the clouds near misty cliffs and sweeping mountain plains.",
       image: riverstonPeakImg,
       rating: 3.5,
       reviewCount: 122,
     },
-  ]
-
-  // State to control how many destinations are shown
-  const [showAll, setShowAll] = useState(false);
+  ];
 
   // Simulate a longer list for demonstration (replace with real data as needed)
   const allDestinations = [
@@ -63,7 +63,7 @@ const CampingDestinations = () => {
   ];
 
   // Show only 3 by default, or all if showAll is true
-  const destinationsToShow = showAll ? allDestinations : allDestinations.slice(0, 3);
+  const destinationsToShow = allDestinations.slice(0, 3);
 
   const navigate = useNavigate();
 
@@ -71,21 +71,23 @@ const CampingDestinations = () => {
     if (destinationName === "Horton Plains") {
       navigate("/individual-destination");
     } else {
-      console.log(`Clicked on ${destinationName}`)
+      console.log(`Clicked on ${destinationName}`);
       // Add navigation logic here
       // For example: navigate(`/destinations/${destinationName.toLowerCase().replace(/\s+/g, '-')}`);
     }
-  }
+  };
 
   const handleHeartClick = (destinationName, isLiked) => {
-    console.log(`${isLiked ? "Added to" : "Removed from"} wishlist: ${destinationName}`)
+    console.log(
+      `${isLiked ? "Added to" : "Removed from"} wishlist: ${destinationName}`
+    );
     // Add wishlist logic here
-  }
+  };
 
   // Remove navigation from show all button
-  const handleShowAllClick = () => {
-    setShowAll(true);
-  };
+  // const handleShowAllClick = () => {
+  //   setShowAll(true);
+  // };
 
   return (
     <section className="py-8 xs:py-12 sm:py-16 px-3 xs:px-4 sm:px-6 lg:px-8 bg-gray-50">
@@ -99,8 +101,9 @@ const CampingDestinations = () => {
             </h2>
             {/* Supporting Text */}
             <p className="text-sm xs:text-base sm:text-lg text-gray-600 max-w-2xl mx-auto sm:mx-0 leading-relaxed">
-              Explore Sri Lanka's top camping spots surrounded by nature. Perfect for outdoor adventures, relaxation,
-              and breathtaking views.
+              Explore Sri Lanka's top camping spots surrounded by nature.
+              Perfect for outdoor adventures, relaxation, and breathtaking
+              views.
             </p>
           </div>
         </div>
@@ -121,17 +124,22 @@ const CampingDestinations = () => {
           ))}
         </div>
 
-        {/* Show All Button - Only show if there are more than 3 and not already showing all */}
-        {allDestinations.length > 3 && !showAll && (
+        {/* Show All Button - Only show if there are more than 3 */}
+        {allDestinations.length > 3 && (
           <div className="flex justify-left mt-8 xs:mt-10 sm:mt-12">
-            <Button onClick={handleShowAllClick} size="md" variant="primary" className="w-full sm:w-auto">
+            <Button
+              onClick={() => navigate("/destinations")}
+              size="md"
+              variant="primary"
+              className="w-full sm:w-auto"
+            >
               Show all destinations
             </Button>
           </div>
         )}
       </div>
     </section>
-  )
-}
+  );
+};
 
-export default CampingDestinations
+export default CampingDestinations;

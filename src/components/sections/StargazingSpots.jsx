@@ -1,7 +1,7 @@
-"use client"
+"use client";
 
-import DestinationCard from "../molecules/destination/DestinationCard"
-import Button from "../atoms/Button" // Import your custom Button component
+import DestinationCard from "../molecules/destination/DestinationCard";
+import Button from "../atoms/Button"; // Import your custom Button component
 import hortonPlainsImg from "../../assets/stargazing_spots/horton_plains.png";
 import namunukulaRangeImg from "../../assets/stargazing_spots/namunukula_range.png";
 import ritigalaReserveImg from "../../assets/stargazing_spots/ritigala_reserve.png";
@@ -15,7 +15,8 @@ const StargazingSpots = () => {
     {
       id: 1,
       name: "Horton Plains",
-      description: "Clear, high-altitude skies perfect for deep-sky views above cloud forests.",
+      description:
+        "Clear, high-altitude skies perfect for deep-sky views above cloud forests.",
       image: hortonPlainsImg,
       rating: 5.0,
       reviewCount: 22,
@@ -23,7 +24,8 @@ const StargazingSpots = () => {
     {
       id: 2,
       name: "Namunukula Range",
-      description: "360° dark skies for both sunrise and Milky Way in one night.",
+      description:
+        "360° dark skies for both sunrise and Milky Way in one night.",
       image: namunukulaRangeImg,
       rating: 3.0,
       reviewCount: 12,
@@ -31,15 +33,13 @@ const StargazingSpots = () => {
     {
       id: 3,
       name: "Ritigala Reserve",
-      description: "Starlit skies above ancient ruins for mystical night photography.",
+      description:
+        "Starlit skies above ancient ruins for mystical night photography.",
       image: ritigalaReserveImg,
       rating: 5.0,
       reviewCount: 22,
     },
-  ]
-
-  // State to control how many spots are shown
-  const [showAll, setShowAll] = useState(false);
+  ];
 
   // Simulate a longer list for demonstration (replace with real data as needed)
   const allStargazingSpots = [
@@ -64,7 +64,7 @@ const StargazingSpots = () => {
   ];
 
   // Show only 3 by default, or all if showAll is true
-  const spotsToShow = showAll ? allStargazingSpots : allStargazingSpots.slice(0, 3);
+  const spotsToShow = allStargazingSpots.slice(0, 3);
 
   const handleCardClick = (spotName) => {
     if (spotName === "Horton Plains") {
@@ -74,17 +74,19 @@ const StargazingSpots = () => {
       // Add navigation logic here
       // For example: navigate(`/stargazing/${spotName.toLowerCase().replace(/\s+/g, '-')}`);
     }
-  }
+  };
 
   const handleHeartClick = (spotName, isLiked) => {
-    console.log(`${isLiked ? "Added to" : "Removed from"} wishlist: ${spotName}`)
+    console.log(
+      `${isLiked ? "Added to" : "Removed from"} wishlist: ${spotName}`
+    );
     // Add wishlist logic here
-  }
+  };
 
   // Remove navigation from show all button
-  const handleShowAllClick = () => {
-    setShowAll(true);
-  };
+  // const handleShowAllClick = () => {
+  //   setShowAll(true);
+  // };
 
   return (
     <section className="py-8 xs:py-12 sm:py-16 px-3 xs:px-4 sm:px-6 lg:px-8 bg-gray-50">
@@ -93,15 +95,14 @@ const StargazingSpots = () => {
         <div className="mb-8 xs:mb-10 sm:mb-12">
           <div className="text-center sm:text-left">
             {/* Main Title */}
-            <h2
-              className="text-2xl xs:text-3xl sm:text-4xl font-bold text-gray-900 mb-3 xs:mb-4"
-            >
+            <h2 className="text-2xl xs:text-3xl sm:text-4xl font-bold text-gray-900 mb-3 xs:mb-4">
               Stargazing Spots
             </h2>
             {/* Supporting Text */}
             <p className="text-sm xs:text-base sm:text-lg text-gray-600 max-w-2xl mx-auto sm:mx-0 leading-relaxed">
-              Discover peaceful, low-light locations in Sri Lanka ideal for stargazing, night photography, and
-              unforgettable skywatching experiences.
+              Discover peaceful, low-light locations in Sri Lanka ideal for
+              stargazing, night photography, and unforgettable skywatching
+              experiences.
             </p>
           </div>
         </div>
@@ -122,17 +123,22 @@ const StargazingSpots = () => {
           ))}
         </div>
 
-        {/* Show All Button - Only show if there are more than 3 and not already showing all */}
-        {allStargazingSpots.length > 3 && !showAll && (
+        {/* Show All Button - Only show if there are more than 3 */}
+        {allStargazingSpots.length > 3 && (
           <div className="flex justify-left mt-8 xs:mt-10 sm:mt-12">
-            <Button onClick={handleShowAllClick} size="md" variant="primary" className="w-full sm:w-auto">
+            <Button
+              onClick={() => navigate("/stargazing-spots")}
+              size="md"
+              variant="primary"
+              className="w-full sm:w-auto"
+            >
               Show all Spots
             </Button>
           </div>
         )}
       </div>
     </section>
-  )
-}
+  );
+};
 
-export default StargazingSpots
+export default StargazingSpots;

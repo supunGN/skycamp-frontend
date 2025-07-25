@@ -36,15 +36,24 @@ export default function Footer() {
         {/* Columns */}
         <div className="space-y-2">
           <h3 className="font-semibold text-gray-500">More Info</h3>
-          <Link to="/faq" className="hover:text-cyan-600 font-semibold block">
+          <Link
+            to="/faq"
+            className="hover:text-cyan-600 font-semibold block"
+            onClick={() => window.scrollTo(0, 0)}
+          >
             FAQ
           </Link>
-          <Link to="/about" className="hover:text-cyan-600 font-semibold block">
+          <Link
+            to="/about"
+            className="hover:text-cyan-600 font-semibold block"
+            onClick={() => window.scrollTo(0, 0)}
+          >
             About Us
           </Link>
           <Link
             to="/contact-us"
             className="hover:text-cyan-600 font-semibold block"
+            onClick={() => window.scrollTo(0, 0)}
           >
             Contact Us
           </Link>
@@ -75,13 +84,13 @@ export default function Footer() {
         <div className="space-y-2">
           <h3 className="font-semibold text-gray-500">Explore Location</h3>
           <Link
-            to="/destinations?type=camping"
+            to="/destinations"
             className="hover:text-cyan-600 font-semibold block"
           >
             Camping Destinations
           </Link>
           <Link
-            to="/destinations?type=stargazing"
+            to="/stargazing-spots"
             className="hover:text-cyan-600 font-semibold block"
           >
             Stargazing Spots
@@ -107,11 +116,19 @@ export default function Footer() {
         <div className="max-w-7xl mx-auto px-6 py-8 flex flex-col sm:flex-row justify-between items-center">
           <p>© 2025 SkyCamp. All rights reserved.</p>
           <div className="flex space-x-4 mt-2 sm:mt-0">
-            <Link to="/privacy" className="hover:text-cyan-600">
+            <Link
+              to="/privacy"
+              className="hover:text-cyan-600"
+              onClick={() => window.scrollTo(0, 0)}
+            >
               Privacy & Cookies
             </Link>
             <span className="border-l h-5"></span>
-            <Link to="/terms" className="hover:text-cyan-600">
+            <Link
+              to="/terms"
+              className="hover:text-cyan-600"
+              onClick={() => window.scrollTo(0, 0)}
+            >
               Terms & Conditions
             </Link>
           </div>

@@ -124,6 +124,7 @@ const CampingGearSidebar = () => {
   const navigate = useNavigate();
   const handleSearch = () => {
     navigate("/selected_individualrenter");
+    window.scrollTo(0, 0);
   };
   return (
     <aside className="bg-white rounded-2xl shadow-sm p-4 mb-8 w-full lg:w-72 text-sm">
@@ -132,129 +133,232 @@ const CampingGearSidebar = () => {
       <div className="mb-6">
         <div className="font-semibold mb-2">Tents</div>
         <div className="space-y-1">
-          <label className="flex items-center gap-2"><input type="checkbox" /> 1-person tent</label>
-          <label className="flex items-center gap-2"><input type="checkbox" /> 2-person tent</label>
-          <label className="flex items-center gap-2"><input type="checkbox" /> 3 or more person tent</label>
+          <label className="flex items-center gap-2">
+            <input type="checkbox" /> 1-person tent
+          </label>
+          <label className="flex items-center gap-2">
+            <input type="checkbox" /> 2-person tent
+          </label>
+          <label className="flex items-center gap-2">
+            <input type="checkbox" /> 3 or more person tent
+          </label>
         </div>
       </div>
       <div className="mb-6">
         <div className="font-semibold mb-2">Sleeping Gear</div>
         <div className="space-y-1">
-          <label className="flex items-center gap-2"><input type="checkbox" /> Sleeping bags</label>
-          <label className="flex items-center gap-2"><input type="checkbox" /> Air mattress</label>
-          <label className="flex items-center gap-2"><input type="checkbox" /> Camping pillow</label>
-          <label className="flex items-center gap-2"><input type="checkbox" /> Emergency blanket</label>
+          <label className="flex items-center gap-2">
+            <input type="checkbox" /> Sleeping bags
+          </label>
+          <label className="flex items-center gap-2">
+            <input type="checkbox" /> Air mattress
+          </label>
+          <label className="flex items-center gap-2">
+            <input type="checkbox" /> Camping pillow
+          </label>
+          <label className="flex items-center gap-2">
+            <input type="checkbox" /> Emergency blanket
+          </label>
         </div>
       </div>
       <div className="mb-6">
         <div className="font-semibold mb-2">Cooking & Kitchen Items</div>
         <div className="space-y-1">
-          <label className="flex items-center gap-2"><input type="checkbox" /> Single gas stove</label>
-          <label className="flex items-center gap-2"><input type="checkbox" /> Double gas stove</label>
-          <label className="flex items-center gap-2"><input type="checkbox" /> Gas BBQ grill</label>
-          <label className="flex items-center gap-2"><input type="checkbox" /> Cooking pot and pan set</label>
-          <label className="flex items-center gap-2"><input type="checkbox" /> Kettle for boiling water</label>
-          <label className="flex items-center gap-2"><input type="checkbox" /> Fork, spoon, knife set</label>
-          <label className="flex items-center gap-2"><input type="checkbox" /> Chopping board</label>
-          <label className="flex items-center gap-2"><input type="checkbox" /> Reusable plates and bowls</label>
-          <label className="flex items-center gap-2"><input type="checkbox" /> Food storage containers</label>
-          <label className="flex items-center gap-2"><input type="checkbox" /> Cooler box</label>
+          <label className="flex items-center gap-2">
+            <input type="checkbox" /> Single gas stove
+          </label>
+          <label className="flex items-center gap-2">
+            <input type="checkbox" /> Double gas stove
+          </label>
+          <label className="flex items-center gap-2">
+            <input type="checkbox" /> Gas BBQ grill
+          </label>
+          <label className="flex items-center gap-2">
+            <input type="checkbox" /> Cooking pot and pan set
+          </label>
+          <label className="flex items-center gap-2">
+            <input type="checkbox" /> Kettle for boiling water
+          </label>
+          <label className="flex items-center gap-2">
+            <input type="checkbox" /> Fork, spoon, knife set
+          </label>
+          <label className="flex items-center gap-2">
+            <input type="checkbox" /> Chopping board
+          </label>
+          <label className="flex items-center gap-2">
+            <input type="checkbox" /> Reusable plates and bowls
+          </label>
+          <label className="flex items-center gap-2">
+            <input type="checkbox" /> Food storage containers
+          </label>
+          <label className="flex items-center gap-2">
+            <input type="checkbox" /> Cooler box
+          </label>
         </div>
       </div>
       <div className="mb-6">
         <div className="font-semibold mb-2">Camping Furniture</div>
         <div className="space-y-1">
-          <label className="flex items-center gap-2"><input type="checkbox" /> Camping chair</label>
-          <label className="flex items-center gap-2"><input type="checkbox" /> Folding table</label>
-          <label className="flex items-center gap-2"><input type="checkbox" /> Hammock</label>
+          <label className="flex items-center gap-2">
+            <input type="checkbox" /> Camping chair
+          </label>
+          <label className="flex items-center gap-2">
+            <input type="checkbox" /> Folding table
+          </label>
+          <label className="flex items-center gap-2">
+            <input type="checkbox" /> Hammock
+          </label>
         </div>
       </div>
       <div className="mb-6">
         <div className="font-semibold mb-2">Lights</div>
         <div className="space-y-1">
-          <label className="flex items-center gap-2"><input type="checkbox" /> Camping lanterns</label>
-          <label className="flex items-center gap-2"><input type="checkbox" /> torch</label>
-          <label className="flex items-center gap-2"><input type="checkbox" /> Tent hanging light</label>
+          <label className="flex items-center gap-2">
+            <input type="checkbox" /> Camping lanterns
+          </label>
+          <label className="flex items-center gap-2">
+            <input type="checkbox" /> torch
+          </label>
+          <label className="flex items-center gap-2">
+            <input type="checkbox" /> Tent hanging light
+          </label>
         </div>
       </div>
       <div className="mb-6">
         <div className="font-semibold mb-2">Navigation & Safety Tools</div>
         <div className="space-y-1">
-          <label className="flex items-center gap-2"><input type="checkbox" /> Compass & Map</label>
-          <label className="flex items-center gap-2"><input type="checkbox" /> Emergency whistle</label>
-          <label className="flex items-center gap-2"><input type="checkbox" /> First-aid kit</label>
-          <label className="flex items-center gap-2"><input type="checkbox" /> Walkie-talkies</label>
+          <label className="flex items-center gap-2">
+            <input type="checkbox" /> Compass & Map
+          </label>
+          <label className="flex items-center gap-2">
+            <input type="checkbox" /> Emergency whistle
+          </label>
+          <label className="flex items-center gap-2">
+            <input type="checkbox" /> First-aid kit
+          </label>
+          <label className="flex items-center gap-2">
+            <input type="checkbox" /> Walkie-talkies
+          </label>
         </div>
       </div>
       <div className="mb-6">
         <div className="font-semibold mb-2">Water & Hydration</div>
         <div className="space-y-1">
-          <label className="flex items-center gap-2"><input type="checkbox" /> Water bottles</label>
-          <label className="flex items-center gap-2"><input type="checkbox" /> Water jugs</label>
+          <label className="flex items-center gap-2">
+            <input type="checkbox" /> Water bottles
+          </label>
+          <label className="flex items-center gap-2">
+            <input type="checkbox" /> Water jugs
+          </label>
         </div>
       </div>
       <div className="mb-6">
         <div className="font-semibold mb-2">Bags & Storage</div>
         <div className="space-y-1">
-          <label className="flex items-center gap-2"><input type="checkbox" /> Hiking backpacks</label>
-          <label className="flex items-center gap-2"><input type="checkbox" /> Dry bags</label>
-          <label className="flex items-center gap-2"><input type="checkbox" /> Waterproof pouches</label>
-          <label className="flex items-center gap-2"><input type="checkbox" /> Gear organizer bag</label>
+          <label className="flex items-center gap-2">
+            <input type="checkbox" /> Hiking backpacks
+          </label>
+          <label className="flex items-center gap-2">
+            <input type="checkbox" /> Dry bags
+          </label>
+          <label className="flex items-center gap-2">
+            <input type="checkbox" /> Waterproof pouches
+          </label>
+          <label className="flex items-center gap-2">
+            <input type="checkbox" /> Gear organizer bag
+          </label>
         </div>
       </div>
       <div className="mb-6">
         <div className="font-semibold mb-2">Clothing</div>
         <div className="space-y-1">
-          <label className="flex items-center gap-2"><input type="checkbox" /> Raincoat</label>
-          <label className="flex items-center gap-2"><input type="checkbox" /> Warm jacket</label>
-          <label className="flex items-center gap-2"><input type="checkbox" /> Waterproof shoes</label>
+          <label className="flex items-center gap-2">
+            <input type="checkbox" /> Raincoat
+          </label>
+          <label className="flex items-center gap-2">
+            <input type="checkbox" /> Warm jacket
+          </label>
+          <label className="flex items-center gap-2">
+            <input type="checkbox" /> Waterproof shoes
+          </label>
         </div>
       </div>
       <div className="mb-6">
         <div className="font-semibold mb-2">Fun & Extras</div>
         <div className="space-y-1">
-          <label className="flex items-center gap-2"><input type="checkbox" /> Card games / Board games</label>
-          <label className="flex items-center gap-2"><input type="checkbox" /> Travel guitar</label>
+          <label className="flex items-center gap-2">
+            <input type="checkbox" /> Card games / Board games
+          </label>
+          <label className="flex items-center gap-2">
+            <input type="checkbox" /> Travel guitar
+          </label>
         </div>
       </div>
       <div className="mb-6">
         <div className="font-semibold mb-2">Power & Charging</div>
         <div className="space-y-1">
-          <label className="flex items-center gap-2"><input type="checkbox" /> Power bank & Cables</label>
+          <label className="flex items-center gap-2">
+            <input type="checkbox" /> Power bank & Cables
+          </label>
         </div>
       </div>
       {/* Stargazing Gears Section */}
-      <h3 className="font-bold text-cyan-700 mb-4 text-xl mt-10">Stargazing Gears</h3>
+      <h3 className="font-bold text-cyan-700 mb-4 text-xl mt-10">
+        Stargazing Gears
+      </h3>
       <div className="mb-6">
         <div className="font-semibold mb-2">Binoculars</div>
         <div className="space-y-1">
-          <label className="flex items-center gap-2"><input type="checkbox" /> Small binoculars</label>
-          <label className="flex items-center gap-2"><input type="checkbox" /> Stargazing binoculars</label>
+          <label className="flex items-center gap-2">
+            <input type="checkbox" /> Small binoculars
+          </label>
+          <label className="flex items-center gap-2">
+            <input type="checkbox" /> Stargazing binoculars
+          </label>
         </div>
       </div>
       <div className="mb-6">
         <div className="font-semibold mb-2">Telescopes</div>
         <div className="space-y-1">
-          <label className="flex items-center gap-2"><input type="checkbox" /> Beginner telescope</label>
-          <label className="flex items-center gap-2"><input type="checkbox" /> Big telescope</label>
+          <label className="flex items-center gap-2">
+            <input type="checkbox" /> Beginner telescope
+          </label>
+          <label className="flex items-center gap-2">
+            <input type="checkbox" /> Big telescope
+          </label>
         </div>
       </div>
       <div className="mb-6">
         <div className="font-semibold mb-2">Tripods & Mounts</div>
         <div className="space-y-1">
-          <label className="flex items-center gap-2"><input type="checkbox" /> Tripod stands for telescope or binoculars</label>
+          <label className="flex items-center gap-2">
+            <input type="checkbox" /> Tripod stands for telescope or binoculars
+          </label>
         </div>
       </div>
       <div className="mb-6">
         <div className="font-semibold mb-2">Accessories</div>
         <div className="space-y-1">
-          <label className="flex items-center gap-2"><input type="checkbox" /> Star maps or books</label>
-          <label className="flex items-center gap-2"><input type="checkbox" /> Power bank for telescope</label>
-          <label className="flex items-center gap-2"><input type="checkbox" /> Laser pointer for pointing at stars</label>
+          <label className="flex items-center gap-2">
+            <input type="checkbox" /> Star maps or books
+          </label>
+          <label className="flex items-center gap-2">
+            <input type="checkbox" /> Power bank for telescope
+          </label>
+          <label className="flex items-center gap-2">
+            <input type="checkbox" /> Laser pointer for pointing at stars
+          </label>
         </div>
       </div>
       {/* Search Button */}
-      <Button size="sm" variant="primary" className="w-full mt-2" onClick={handleSearch}>Search</Button>
+      <Button
+        size="sm"
+        variant="primary"
+        className="w-full mt-2"
+        onClick={handleSearch}
+      >
+        Search
+      </Button>
     </aside>
   );
 };
@@ -278,13 +382,22 @@ const Rentals = () => {
           </div>
           {/* Rental Cards Section */}
           <div className="flex-1 sticky top-28 self-start">
-            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-6">Gear Rentals</h2>
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-6">
+              Gear Rentals
+            </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {rentalData.map((rental, idx) => {
                 // Link Upul Fernando to /fullrenter
                 if (rental.name === "Upul Fernando") {
                   return (
-                    <div key={idx} onClick={() => navigate("/fullrenter")} style={{ cursor: 'pointer' }}>
+                    <div
+                      key={idx}
+                      onClick={() => {
+                        navigate("/fullrenter");
+                        window.scrollTo(0, 0);
+                      }}
+                      style={{ cursor: "pointer" }}
+                    >
                       <RentalCard {...rental} />
                     </div>
                   );

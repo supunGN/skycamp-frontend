@@ -71,12 +71,14 @@ export default function Navbar() {
             <Link
               to="/"
               className="text-gray-700 hover:text-cyan-600 font-medium"
+              onClick={() => window.scrollTo(0, 0)}
             >
               Home
             </Link>
             <Link
               to="/rentals"
               className="text-gray-700 hover:text-cyan-600 font-medium"
+              onClick={() => window.scrollTo(0, 0)}
             >
               Rentals
             </Link>
@@ -225,14 +227,20 @@ export default function Navbar() {
           <div className="px-6 py-6 space-y-6">
             <Link
               to="/"
-              onClick={() => setMenuOpen(false)}
+              onClick={() => {
+                setMenuOpen(false);
+                window.scrollTo(0, 0);
+              }}
               className="block text-lg font-medium text-gray-900 hover:text-cyan-600"
             >
               Home
             </Link>
             <Link
               to="/rentals"
-              onClick={() => setMenuOpen(false)}
+              onClick={() => {
+                setMenuOpen(false);
+                window.scrollTo(0, 0);
+              }}
               className="block text-lg font-medium text-gray-900 hover:text-cyan-600"
             >
               Rentals
