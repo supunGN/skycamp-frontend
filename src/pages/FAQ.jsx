@@ -1,10 +1,13 @@
-import React from "react";
+import React, { useEffect } from "react";
 import Navbar from "../components/organisms/Navbar";
 import Footer from "../components/organisms/Footer";
 import StaticSection from "../components/sections/StaticSection";
 import FAQSection from "../components/sections/FAQSection";
 
 const FAQ = () => {
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
   return (
     <>
       <Navbar />
