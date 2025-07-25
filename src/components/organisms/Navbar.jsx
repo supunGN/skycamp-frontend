@@ -128,6 +128,12 @@ export default function Navbar() {
             <Link to="/cart">
               <ShoppingCartIcon className="w-6 h-6 text-gray-600 hover:text-cyan-600 cursor-pointer" />
             </Link>
+            <Link to="/wishlist">
+              <HeartIcon className="w-6 h-6 text-gray-600 hover:text-cyan-600 cursor-pointer" />
+            </Link>
+            <Link to="/login">
+              <Button size="md">Log in</Button>
+            </Link>
             <HeartIcon className="w-6 h-6 text-gray-600 hover:text-cyan-600 cursor-pointer" />
             {/* Conditional rendering for user/profile */}
             {user ? (

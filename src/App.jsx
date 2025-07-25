@@ -21,6 +21,9 @@ import PasswordResetSuccess from "./pages/auth/PasswordResetSuccess";
 import ContactUs from "./pages/ContactUs";
 import Cart from "./pages/Cart";
 import IndividualDestination from "./pages/IndividualDestination";
+import Wishlist from "./pages/Wishlist";
+import SelectedIndividualRenter from "./pages/selected_individualrenter";
+import FullRenter from "./pages/FullRenter";
 import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -73,6 +76,10 @@ function App() {
       />
       <Route path="/contact-us" element={<ContactUs />} />
       <Route path="/cart" element={<Cart />} />
+      <Route path="/individual-destination" element={<IndividualDestination />} />
+      <Route path="/wishlist" element={<Wishlist />} />
+      <Route path="/selected_individualrenter" element={<SelectedIndividualRenter />} />
+      <Route path="/fullrenter" element={<FullRenter />} />
       <Route
         path="/individual-destination"
         element={<IndividualDestination />}
