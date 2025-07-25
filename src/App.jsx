@@ -19,6 +19,7 @@ import CheckEmail from "./pages/auth/CheckEmail";
 import SetNewPassword from "./pages/auth/SetNewPassword";
 import PasswordResetSuccess from "./pages/auth/PasswordResetSuccess";
 import ContactUs from "./pages/ContactUs";
+import Guide from "./pages/Guide";
 
 function App() {
   return (
@@ -43,6 +44,7 @@ function App() {
       <Route path="/password-reset-success" element={<PasswordResetSuccess />} />
       <Route path="/contact-us" element={<ContactUs />} />
       <Route path="*" element={<NotFound />} />
+      <Route path="/guide/:id" element={<Guide />} />
     </Routes>
   );
 }
