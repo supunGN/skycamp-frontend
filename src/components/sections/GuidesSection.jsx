@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import GuideCard from "../molecules/GuideCard";
+import { Link } from "react-router-dom";
 
 // Mock data for demonstration
 const mockGuides = [
@@ -87,7 +88,9 @@ export default function GuidesSection({ selectedDistrict }) {
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
         {guides.length > 0 ? (
           guides.map((guide) => (
-            <GuideCard key={guide.id} {...guide} />
+            <Link key={guide.id} to={`/guide/${guide.id}`} className="block">
+              <GuideCard {...guide} />
+            </Link>
           ))
         ) : (
           <div className="col-span-full text-center text-gray-500 py-12">No guides found for this district.</div>
