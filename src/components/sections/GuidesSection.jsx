@@ -1,6 +1,15 @@
 import React, { useEffect, useState } from "react";
 import GuideCard from "../molecules/GuideCard";
+import Button from "../atoms/Button";
+
+import SamanthaPradeepImg from "../../assets/guides/SamanthaPradeep.png";
+import AnjanaWeerasingheImg from "../../assets/guides/AnjanaWeerasinghe.png";
+import NiroshaDeAlwisImg from "../../assets/guides/Nirosha De Alwis.png";
+import RavinduSenarathImg from "../../assets/guides/RavinduSenarath.png";
+import DilshanJayasingheImg from "../../assets/guides/DilshanJayasinghe.png";
+
 import { Link } from "react-router-dom";
+
 
 // Mock data for demonstration
 const mockGuides = [
@@ -12,7 +21,7 @@ const mockGuides = [
     rate: 1200,
     rating: 5.0,
     reviews: 22,
-    profileImage: null,
+    profileImage: SamanthaPradeepImg,
   },
   {
     id: 2,
@@ -22,7 +31,7 @@ const mockGuides = [
     rate: 1200,
     rating: 5.0,
     reviews: 22,
-    profileImage: null,
+    profileImage: AnjanaWeerasingheImg,
   },
   {
     id: 3,
@@ -32,7 +41,7 @@ const mockGuides = [
     rate: 1200,
     rating: 5.0,
     reviews: 22,
-    profileImage: null,
+    profileImage: NiroshaDeAlwisImg,
   },
   {
     id: 4,
@@ -42,7 +51,7 @@ const mockGuides = [
     rate: 1200,
     rating: 5.0,
     reviews: 22,
-    profileImage: null,
+    profileImage: SamanthaPradeepImg,
   },
   {
     id: 5,
@@ -52,7 +61,7 @@ const mockGuides = [
     rate: 1200,
     rating: 5.0,
     reviews: 22,
-    profileImage: null,
+    profileImage: RavinduSenarathImg,
   },
   {
     id: 6,
@@ -62,7 +71,7 @@ const mockGuides = [
     rate: 1200,
     rating: 5.0,
     reviews: 22,
-    profileImage: null,
+    profileImage: DilshanJayasingheImg,
   },
 ];
 
@@ -82,7 +91,20 @@ export default function GuidesSection({ selectedDistrict }) {
     }
   }, [selectedDistrict]);
 
+  // Show only first 6 guides
+  const displayedGuides = guides.slice(0, 6);
+
   return (
+
+    <section className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      {displayedGuides.length > 0 && (
+        <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-8">Guide List</h2>
+      )}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+        {displayedGuides.length > 0 ? (
+          displayedGuides.map((guide) => (
+            <GuideCard key={guide.id} {...guide} />
+
     <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-8">Guide List</h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
@@ -91,11 +113,17 @@ export default function GuidesSection({ selectedDistrict }) {
             <Link key={guide.id} to={`/guide/${guide.id}`} className="block">
               <GuideCard {...guide} />
             </Link>
+
           ))
         ) : (
           <div className="col-span-full text-center text-gray-500 py-12">No guides found for this district.</div>
         )}
       </div>
+      {displayedGuides.length > 0 && (
+        <div className="flex justify-center mt-10">
+          <Button>Show All Guides</Button>
+        </div>
+      )}
     </section>
   );
 } 

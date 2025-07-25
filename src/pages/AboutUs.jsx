@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import Navbar from "../components/organisms/Navbar";
 import Footer from "../components/organisms/Footer";
 import StaticSection from "../components/sections/StaticSection";
@@ -7,6 +7,9 @@ import CoreValuesSection from "../components/sections/AboutUsSection/CoreValuesS
 import WhoWeAreSection from "../components/sections/AboutUsSection/WhoWeAreSection";
 
 const AboutUs = () => {
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
   return (
     <>
       <Navbar />

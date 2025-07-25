@@ -46,8 +46,14 @@ const faqData = [
     items: [
       {
         question: "What services can I book through SkyCamp?",
-        answer:
-          "You can book: 1. Camping gear rentals 2. Local guides 3. Stargazing packages 4. Travel Buddy connections",
+        answer: (
+          <ul className="list-disc pl-6 space-y-1">
+            <li>Camping gear rentals</li>
+            <li>Local guides</li>
+            <li>Stargazing packages</li>
+            <li>Travel Buddy connections</li>
+          </ul>
+        ),
       },
       {
         question: "How do I book a service?",
