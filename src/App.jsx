@@ -19,6 +19,7 @@ import CheckEmail from "./pages/auth/CheckEmail";
 import SetNewPassword from "./pages/auth/SetNewPassword";
 import PasswordResetSuccess from "./pages/auth/PasswordResetSuccess";
 import ContactUs from "./pages/ContactUs";
+import Guide from "./pages/Guide";
 import Cart from "./pages/Cart";
 import IndividualDestination from "./pages/IndividualDestination";
 import Wishlist from "./pages/Wishlist";
@@ -133,6 +134,7 @@ function App() {
       {/* Settings & Not Found */}
       <Route path="/settings" element={<Settings />} />
       <Route path="*" element={<NotFound />} />
+      <Route path="/guide/:id" element={<Guide />} />
     </Routes>
   );
 }
