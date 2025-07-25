@@ -33,13 +33,16 @@ const districts = [
   "Kegalle",
 ];
 
-export default function SearchSection() {
-  const [selectedDistrict, setSelectedDistrict] = useState("");
+export default function LocationSearchSection({ selectedDistrict: externalSelectedDistrict, onDistrictChange }) {
+  const [internalSelectedDistrict, setInternalSelectedDistrict] = useState("");
+  const selectedDistrict = externalSelectedDistrict !== undefined ? externalSelectedDistrict : internalSelectedDistrict;
+  const setSelectedDistrict = onDistrictChange || setInternalSelectedDistrict;
 
   const handleSearch = () => {
-    console.log("Searching for:", {
-      district: selectedDistrict,
-    });
+    // Optionally, trigger search logic here
+    if (selectedDistrict) {
+      // Could call onDistrictChange(selectedDistrict) if needed
+    }
   };
 
   return (
@@ -49,7 +52,7 @@ export default function SearchSection() {
         <div className="text-center mb-10">
           <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2">
             Search by
-            <span className="text-cyan-700">District</span>
+            <span className="text-cyan-700"> District</span>
           </h2>
           <p className="text-base text-gray-600">
             Kickstart your adventure by finding a trusted guide in your
