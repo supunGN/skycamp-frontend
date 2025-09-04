@@ -1,4 +1,5 @@
 import { Routes, Route, Navigate } from "react-router-dom";
+import ScrollToTop from "./components/ScrollToTop";
 import Home from "./pages/Home";
 import Rentals from "./pages/Rentals";
 import Guides from "./pages/Guides";
@@ -13,9 +14,12 @@ import PrivacyPolicy from "./pages/PrivacyPolicy";
 import FAQ from "./pages/FAQ";
 import SignUp from "./pages/auth/SignUpRoleSelection";
 import CustomerRegistration from "./pages/auth/CustomerRegistration";
-import ServiceProviderRegistration from "./pages/auth/ServiceProviderRegistration";
+import RenterRegistration from "./pages/auth/RenterRegistration";
+import GuideRegistration from "./pages/auth/GuideRegistration";
+import CustomerDetails from "./pages/auth/CustomerDetails";
 import ForgotPassword from "./pages/auth/ForgotPassword";
 import CheckEmail from "./pages/auth/CheckEmail";
+import OTPVerification from "./pages/auth/OTPVerification";
 import SetNewPassword from "./pages/auth/SetNewPassword";
 import PasswordResetSuccess from "./pages/auth/PasswordResetSuccess";
 import ContactUs from "./pages/ContactUs";
@@ -49,93 +53,159 @@ function App() {
   const user = JSON.parse(localStorage.getItem("user"));
 
   return (
-    <Routes>
-      {/* Public Pages */}
-      <Route path="/" element={<Home />} />
-      <Route path="/rentals" element={<Rentals />} />
-      <Route path="/travel-buddy" element={<TravelBuddy />} />
-      <Route path="/destinations" element={<Destinations />} />
-      <Route path="/stargazing-spots" element={<StargazingSpots />} />
-      <Route path="/guides" element={<Guides />} />
-      <Route path="/login" element={<Login />} />
-      <Route path="/about" element={<AboutUs />} />
-      <Route path="/terms" element={<TermsAndConditions />} />
-      <Route path="/privacy" element={<PrivacyPolicy />} />
-      <Route path="/faq" element={<FAQ />} />
-      <Route path="/signup" element={<SignUp />} />
-      <Route path="/customer-registration" element={<CustomerRegistration />} />
-      <Route
-        path="/service-provider-registration"
-        element={<ServiceProviderRegistration />}
-      />
-      <Route path="/forgot-password" element={<ForgotPassword />} />
-      <Route path="/check-email" element={<CheckEmail />} />
-      <Route path="/set-new-password" element={<SetNewPassword />} />
-      <Route
-        path="/password-reset-success"
-        element={<PasswordResetSuccess />}
-      />
-      <Route path="/contact-us" element={<ContactUs />} />
-      <Route path="/cart" element={<Cart />} />
-      <Route path="/individual-destination" element={<IndividualDestination />} />
-      <Route path="/wishlist" element={<Wishlist />} />
-      <Route path="/selected_individualrenter" element={<SelectedIndividualRenter />} />
-      <Route path="/fullrenter" element={<FullRenter />} />
-      <Route
-        path="/individual-destination"
-        element={<IndividualDestination />}
-      />
+    <>
+      <ScrollToTop />
+      <Routes>
+        {/* Public Pages */}
+        <Route path="/" element={<Home />} />
+        <Route path="/rentals" element={<Rentals />} />
+        <Route path="/travel-buddy" element={<TravelBuddy />} />
+        <Route path="/destinations" element={<Destinations />} />
+        <Route path="/stargazing-spots" element={<StargazingSpots />} />
+        <Route path="/guides" element={<Guides />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/about" element={<AboutUs />} />
+        <Route path="/terms" element={<TermsAndConditions />} />
+        <Route path="/privacy" element={<PrivacyPolicy />} />
+        <Route path="/faq" element={<FAQ />} />
+        <Route path="/signup" element={<SignUp />} />
+        <Route path="/signup-role-selection" element={<SignUp />} />
+        <Route path="/customer-details" element={<CustomerDetails />} />
+        <Route
+          path="/customer-registration"
+          element={<CustomerRegistration />}
+        />
+        <Route path="/renter-registration" element={<RenterRegistration />} />
+        <Route path="/guide-registration" element={<GuideRegistration />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route
+          path="/check-email"
+          element={
+            <ProtectedRoute requireAuth={false} redirectTo="/forgot-password">
+              <CheckEmail />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/verify-otp"
+          element={
+            <ProtectedRoute requireAuth={false} redirectTo="/forgot-password">
+              <OTPVerification />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/set-new-password"
+          element={
+            <ProtectedRoute requireAuth={false} redirectTo="/forgot-password">
+              <SetNewPassword />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/password-reset-success"
+          element={
+            <ProtectedRoute requireAuth={false} redirectTo="/login">
+              <PasswordResetSuccess />
+            </ProtectedRoute>
+          }
+        />
+        <Route path="/contact-us" element={<ContactUs />} />
+        <Route path="/cart" element={<Cart />} />
+        <Route
+          path="/individual-destination"
+          element={<IndividualDestination />}
+        />
+        <Route path="/wishlist" element={<Wishlist />} />
+        <Route
+          path="/selected_individualrenter"
+          element={<SelectedIndividualRenter />}
+        />
+        <Route path="/fullrenter" element={<FullRenter />} />
+        <Route
+          path="/individual-destination"
+          element={<IndividualDestination />}
+        />
 
-      {/* Dashboard Routes with Role Protection */}
-      <Route
-        path="/dashboard/guide/*"
-        element={
-          <ProtectedRoute allowedRoles={["service_provider"]}>
-            {user && user.provider_type === "Local Guide" ? (
+        {/* Protected Routes - Customer Only */}
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute allowedRoles={["customer"]}>
+              <Profile />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Protected Routes - Service Providers Only */}
+        <Route
+          path="/dashboard/guide/*"
+          element={
+            <ProtectedRoute allowedRoles={["service_provider"]}>
               <GuideDashboard />
-            ) : (
-              <Navigate to="/dashboard/renter/overview" replace />
-            )}
-          </ProtectedRoute>
-        }
-      />
+            </ProtectedRoute>
+          }
+        />
 
-      <Route
-        path="/dashboard/renter/*"
-        element={
-          <ProtectedRoute allowedRoles={["service_provider"]}>
-            {user && user.provider_type === "Equipment Renter" ? (
+        <Route
+          path="/dashboard/renter/*"
+          element={
+            <ProtectedRoute allowedRoles={["service_provider"]}>
               <RenterDashboard />
-            ) : (
-              <Navigate to="/dashboard/guide/overview" replace />
-            )}
-          </ProtectedRoute>
-        }
-      />
+            </ProtectedRoute>
+          }
+        />
 
-      {/* Dynamic Dashboard Redirect */}
-      <Route
-        path="/dashboard"
-        element={<Navigate to={getDashboardPath(user)} replace />}
-      />
+        {/* Protected Routes - All Authenticated Users */}
+        <Route
+          path="/settings"
+          element={
+            <ProtectedRoute>
+              <Settings />
+            </ProtectedRoute>
+          }
+        />
 
-      <Route path="/dashboard/*" element={<Dashboard />} />
+        <Route
+          path="/cart"
+          element={
+            <ProtectedRoute>
+              <Cart />
+            </ProtectedRoute>
+          }
+        />
 
-      {/* Customer Profile */}
-      <Route
-        path="/profile"
-        element={
-          <ProtectedRoute allowedRoles={["customer"]}>
-            <Profile />
-          </ProtectedRoute>
-        }
-      />
+        <Route
+          path="/wishlist"
+          element={
+            <ProtectedRoute>
+              <Wishlist />
+            </ProtectedRoute>
+          }
+        />
 
-      {/* Settings & Not Found */}
-      <Route path="/settings" element={<Settings />} />
-      <Route path="*" element={<NotFound />} />
-      <Route path="/guide/:id" element={<Guide />} />
-    </Routes>
+        {/* Dynamic Dashboard Redirect */}
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <Navigate to={getDashboardPath(user)} replace />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/dashboard/*"
+          element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route path="*" element={<NotFound />} />
+        <Route path="/guide/:id" element={<Guide />} />
+      </Routes>
+    </>
   );
 }
 

@@ -7,7 +7,35 @@ export default function PasswordResetSuccess() {
   const navigate = useNavigate();
 
   const handleContinue = () => {
-    navigate("/login"); // Navigate to login after clicking Continue
+    // Get user data from localStorage
+    const userData = localStorage.getItem("user");
+
+    if (userData) {
+      try {
+        const user = JSON.parse(userData);
+
+        // Navigate based on user role
+        if (user.user_role === "customer") {
+          navigate("/profile");
+        } else if (user.user_role === "service_provider") {
+          if (user.provider_type === "Local Guide") {
+            navigate("/dashboard/guide");
+          } else if (user.provider_type === "Equipment Renter") {
+            navigate("/dashboard/renter");
+          } else {
+            navigate("/dashboard");
+          }
+        } else {
+          navigate("/dashboard");
+        }
+      } catch (error) {
+        console.error("Error parsing user data:", error);
+        navigate("/login");
+      }
+    } else {
+      // If no user data, go to login
+      navigate("/login");
+    }
   };
 
   return (
@@ -22,16 +50,16 @@ export default function PasswordResetSuccess() {
 
         {/* Title */}
         <h2 className="text-center text-2xl font-bold text-gray-900 mb-2">
-          Password Reset
+          Password Reset Successful!
         </h2>
         <p className="text-center text-sm text-gray-600 mb-8">
-          Your password has been successfully reset. Click below to log in
-          magically.
+          Your password has been successfully reset. You can now continue to
+          your dashboard.
         </p>
 
         {/* Continue Button */}
         <Button onClick={handleContinue} className="w-full mb-4">
-          Continue
+          Continue to Dashboard
         </Button>
 
         {/* Back to login */}

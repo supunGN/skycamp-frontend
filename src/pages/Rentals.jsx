@@ -393,7 +393,7 @@ const Rentals = () => {
                     <div
                       key={idx}
                       onClick={() => {
-                        navigate("/fullrenter");
+                        navigate("/selected_individualrenter");
                         window.scrollTo(0, 0);
                       }}
                       style={{ cursor: "pointer" }}

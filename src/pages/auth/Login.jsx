@@ -1,52 +1,73 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 import LoginImage from "../../assets/login/login.png";
 import { Link } from "react-router-dom";
-import { EnvelopeIcon } from "@heroicons/react/24/outline";
+import {
+  EnvelopeIcon,
+  ExclamationTriangleIcon,
+} from "@heroicons/react/24/outline";
 
 import Button from "../../components/atoms/Button";
 import { Input } from "../../components/molecules/Input";
-import { API_BASE_URL } from "../../api";
+import { API_ENDPOINTS } from "../../api";
+import { useAuth } from "../../hooks/useAuth.jsx";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [errors, setErrors] = useState({});
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError("");
+    setErrors({});
 
     try {
-      const response = await fetch(`${API_BASE_URL}login.php`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, password }),
-      });
+      const response = await axios.post(
+        API_ENDPOINTS.LOGIN,
+        { email, password },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+          withCredentials: true,
+        }
+      );
 
-      const data = await response.json();
-      console.log("Login Response:", data); // Debug log
+      console.log("Login Response:", response.data);
 
-      if (!response.ok || !data.success) {
+      const result = response.data;
+      if (result.success) {
+        if (result.user) {
+          login(result.user); // Use the auth hook to set user
+        }
+
+        // Show success message briefly
+        setError("");
+
+        // Redirect to the appropriate page
+        const redirectUrl = result.data?.redirect_url || "/";
+        window.location.href = redirectUrl;
+      } else {
+        setError(result.message || "Login failed");
+        setErrors(result.errors || {});
         localStorage.removeItem("user");
-        setError(data.message || "Login failed");
-        return;
-      }
-
-      if (data.user) {
-        localStorage.setItem("user", JSON.stringify(data.user));
-
-        // Force full page reload with redirect
-        window.location.href = data.redirect_url || "/";
       }
     } catch (err) {
       console.error("Login error:", err);
-      setError("An error occurred. Please try again.");
+
+      if (err.response?.data) {
+        setError(err.response.data.message || "Login failed");
+        setErrors(err.response.data.errors || {});
+      } else {
+        setError("An error occurred. Please try again.");
+      }
       localStorage.removeItem("user");
     } finally {
       setLoading(false);
@@ -95,7 +116,18 @@ export default function LoginPage() {
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
+                    className={`${
+                      errors.email || errors.credentials
+                        ? "border-red-300 focus:border-red-500"
+                        : ""
+                    }`}
                   />
+                  {errors.email && (
+                    <p className="text-sm text-red-600 mt-1 flex items-center gap-1">
+                      <ExclamationTriangleIcon className="w-4 h-4" />
+                      {errors.email}
+                    </p>
+                  )}
                 </div>
 
                 <div className="space-y-1 sm:space-y-2">
@@ -112,7 +144,18 @@ export default function LoginPage() {
                     required
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
+                    className={`${
+                      errors.password || errors.credentials
+                        ? "border-red-300 focus:border-red-500"
+                        : ""
+                    }`}
                   />
+                  {errors.password && (
+                    <p className="text-sm text-red-600 mt-1 flex items-center gap-1">
+                      <ExclamationTriangleIcon className="w-4 h-4" />
+                      {errors.password}
+                    </p>
+                  )}
                 </div>
 
                 {/* Remember & Forgot Password */}
@@ -134,9 +177,25 @@ export default function LoginPage() {
                   </Link>
                 </div>
 
-                {error && (
-                  <div className="text-red-600 text-sm text-center">
-                    {error}
+                {(error || errors.credentials) && (
+                  <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+                    <div className="flex items-center gap-2">
+                      <ExclamationTriangleIcon className="w-5 h-5 text-red-500 flex-shrink-0" />
+                      <div className="text-sm text-red-700">
+                        {errors.credentials || error}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {errors.account && (
+                  <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
+                    <div className="flex items-center gap-2">
+                      <ExclamationTriangleIcon className="w-5 h-5 text-amber-500 flex-shrink-0" />
+                      <div className="text-sm text-amber-700">
+                        {errors.account}
+                      </div>
+                    </div>
                   </div>
                 )}
 

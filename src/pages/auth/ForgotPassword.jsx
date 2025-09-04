@@ -6,18 +6,76 @@ import { Input } from "../../components/molecules/Input";
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  const handleResetPassword = (e) => {
+  const handleResetPassword = async (e) => {
     e.preventDefault();
 
     if (!email) {
-      alert("Please enter your email.");
+      setError("Please enter your email address.");
       return;
     }
 
-    // Simulate sending reset link and navigate to CheckEmail page with email
-    navigate("/check-email", { state: { email } });
+    if (!/\S+@\S+\.\S+/.test(email)) {
+      setError("Please enter a valid email address.");
+      return;
+    }
+
+    setIsLoading(true);
+    setError("");
+
+    try {
+      const response = await fetch(
+        "http://localhost/skycamp/skycamp-backend/api/auth/password/forgot.php",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+          },
+          body: new URLSearchParams({
+            email: email,
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (data.success) {
+        // Store email for the auth flow
+        sessionStorage.setItem("resetEmail", email);
+
+        // Navigate to OTP verification with token
+        navigate("/verify-otp", {
+          state: {
+            email: email,
+            token: data.token,
+          },
+        });
+      } else {
+        // Handle specific error cases
+        if (data.message) {
+          setError(data.message);
+        } else {
+          setError("Failed to send reset code. Please try again.");
+        }
+      }
+    } catch (error) {
+      console.error("Reset request error:", error);
+      if (
+        error.name === "TypeError" &&
+        error.message.includes("Failed to fetch")
+      ) {
+        setError(
+          "Unable to connect to server. Please check your internet connection and try again."
+        );
+      } else {
+        setError("Network error. Please check your connection and try again.");
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -35,8 +93,15 @@ export default function ForgotPassword() {
           Forgot Password?
         </h2>
         <p className="text-center text-sm text-gray-600 mb-6">
-          Enter your email, and we’ll send you a reset link.
+          Enter your email, and we'll send you a verification code.
         </p>
+
+        {/* Error Message */}
+        {error && (
+          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+            <p className="text-sm text-red-600 text-center">{error}</p>
+          </div>
+        )}
 
         {/* Email Input */}
         <form onSubmit={handleResetPassword}>
@@ -47,11 +112,15 @@ export default function ForgotPassword() {
             type="email"
             placeholder="Enter your email"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={(e) => {
+              setEmail(e.target.value);
+              setError("");
+            }}
+            disabled={isLoading}
             required
           />
-          <Button type="submit" className="w-full mt-4">
-            Reset Password
+          <Button type="submit" className="w-full mt-4" disabled={isLoading}>
+            {isLoading ? "Sending..." : "Send Verification Code"}
           </Button>
         </form>
 
@@ -59,10 +128,10 @@ export default function ForgotPassword() {
         <div className="mt-6 text-center">
           <Link
             to="/login"
-            className="inline-flex items-center text-sm text-gray-600 hover:text-cyan-600"
+            className="inline-flex items-center text-sm text-gray-600 hover:text-cyan-600 transition-colors"
           >
             <ArrowLeftIcon className="w-4 h-4 mr-1" />
-            back to log in
+            Back to log in
           </Link>
         </div>
       </div>

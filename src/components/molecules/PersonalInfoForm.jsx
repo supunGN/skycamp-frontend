@@ -17,9 +17,9 @@ const defaultUser = {
 };
 
 const API_URL =
-  "http://localhost/skycamp/skycamp-backend/api/update_profile.php";
+  "http://localhost/skycamp/skycamp-backend/api/customer/update-profile.php";
 const FETCH_URL =
-  "http://localhost/skycamp/skycamp-backend/api/get_profile.php";
+  "http://localhost/skycamp/skycamp-backend/api/customer/profile.php";
 
 export default function PersonalInfoForm() {
   const [userData, setUserData] = useState(defaultUser); // Displayed data
