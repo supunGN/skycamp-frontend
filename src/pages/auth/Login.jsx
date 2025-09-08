@@ -11,7 +11,6 @@ import {
 import Button from "../../components/atoms/Button";
 import { Input } from "../../components/molecules/Input";
 import { API_ENDPOINTS } from "../../api";
-import { useAuth } from "../../hooks/useAuth.jsx";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -20,7 +19,6 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [errors, setErrors] = useState({});
   const navigate = useNavigate();
-  const { login } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -44,8 +42,9 @@ export default function LoginPage() {
 
       const result = response.data;
       if (result.success) {
+        // Store user data in localStorage for session management
         if (result.user) {
-          login(result.user); // Use the auth hook to set user
+          localStorage.setItem("user", JSON.stringify(result.user));
         }
 
         // Show success message briefly

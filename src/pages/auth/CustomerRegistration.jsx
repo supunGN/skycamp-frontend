@@ -629,6 +629,18 @@ export default function CustomerRegistrationForm() {
   const [travelBuddyEnabled, setTravelBuddyEnabled] = useState(false);
   const [showTravelBuddyInfo, setShowTravelBuddyInfo] = useState(false);
 
+  // Location state for MapLocationPicker
+  const [selectedLocation, setSelectedLocation] = useState("");
+  const [coordinates, setCoordinates] = useState({ lat: null, lng: null });
+
+  // Image upload state
+  const [profilePreview, setProfilePreview] = useState(null);
+  const [nicFrontPreview, setNicFrontPreview] = useState(null);
+  const [nicBackPreview, setNicBackPreview] = useState(null);
+  const profileUploadRef = useRef();
+  const nicFrontUploadRef = useRef();
+  const nicBackUploadRef = useRef();
+
   // Form validation state
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -657,6 +669,10 @@ export default function CustomerRegistrationForm() {
     // Identity validation
     if (!formData.nicNumber.trim())
       newErrors.nicNumber = "NIC number is required";
+
+    // Location validation
+    if (!selectedLocation.trim())
+      newErrors.location = "Please select your location on the map";
 
     // Email validation
     if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
@@ -745,6 +761,22 @@ export default function CustomerRegistrationForm() {
       "travelBuddyStatus",
       travelBuddyEnabled ? "Active" : "Inactive"
     );
+    data.append("location", selectedLocation);
+    if (coordinates.lat && coordinates.lng) {
+      data.append("latitude", coordinates.lat);
+      data.append("longitude", coordinates.lng);
+    }
+
+    // Add image files if uploaded
+    if (profileUploadRef.current?.files[0]) {
+      data.append("profilePicture", profileUploadRef.current.files[0]);
+    }
+    if (nicFrontUploadRef.current?.files[0]) {
+      data.append("nicFrontImage", nicFrontUploadRef.current.files[0]);
+    }
+    if (nicBackUploadRef.current?.files[0]) {
+      data.append("nicBackImage", nicBackUploadRef.current.files[0]);
+    }
 
     console.log("Submitting complete registration data:");
     for (let [key, value] of data.entries()) {
@@ -983,6 +1015,20 @@ export default function CustomerRegistrationForm() {
             )}
           </div>
 
+          {/* Location Selection */}
+          <div>
+            <MapLocationPicker
+              location={selectedLocation}
+              setLocation={setSelectedLocation}
+              coordinates={coordinates}
+              setCoordinates={setCoordinates}
+              error={errors.location}
+              label="📍 Your Location"
+              required={true}
+              placeholder="Search for your city or area"
+            />
+          </div>
+
           {/* Travel Buddy Section */}
           <div className="bg-gradient-to-r from-cyan-50 to-blue-50 rounded-xl p-6 border border-cyan-100">
             <div className="flex items-center justify-between">
@@ -1110,6 +1156,47 @@ export default function CustomerRegistrationForm() {
                 </div>
               </div>
             )}
+          </div>
+
+          {/* Optional Image Uploads */}
+          <div className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-xl p-6 border border-purple-100">
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                📸 Optional Verification Documents
+              </h3>
+              <p className="text-sm text-gray-600">
+                Upload photos to speed up your verification process (you can
+                skip this and add later)
+              </p>
+            </div>
+
+            <div className="space-y-8">
+              {/* Profile Picture */}
+              <ProfilePictureUpload
+                id="profileUpload"
+                label="Profile Picture"
+                preview={profilePreview}
+                setPreview={setProfilePreview}
+                uploadRef={profileUploadRef}
+                required={false}
+                error={errors.profilePicture}
+              />
+
+              {/* NIC Images */}
+              <NICUpload
+                frontId="nicFrontUpload"
+                backId="nicBackUpload"
+                frontPreview={nicFrontPreview}
+                backPreview={nicBackPreview}
+                setFrontPreview={setNicFrontPreview}
+                setBackPreview={setNicBackPreview}
+                frontUploadRef={nicFrontUploadRef}
+                backUploadRef={nicBackUploadRef}
+                required={false}
+                frontError={errors.nicFrontImage}
+                backError={errors.nicBackImage}
+              />
+            </div>
           </div>
 
           {/* Email */}

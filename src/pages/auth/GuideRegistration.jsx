@@ -1,16 +1,511 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import axios from "axios";
 import {
   ArrowLeftIcon,
   ExclamationTriangleIcon,
   InformationCircleIcon,
+  UserCircleIcon,
+  PhotoIcon,
+  TrashIcon,
 } from "@heroicons/react/24/outline";
 import Button from "../../components/atoms/Button";
 import { Input } from "../../components/molecules/Input";
+import MapLocationPicker from "../../components/molecules/MapLocationPicker";
 import MultiSelectDropdown from "../../components/molecules/MultiSelectDropdown";
 import SearchableDropdown from "../../components/molecules/SearchableDropdown";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { API_ENDPOINTS } from "../../api";
+
+// ---------------------------
+// ProfilePictureUpload Component - Modern UX
+// ---------------------------
+function ProfilePictureUpload({
+  id,
+  label,
+  preview,
+  setPreview,
+  uploadRef,
+  required = false,
+  error = null,
+}) {
+  const [isDragOver, setIsDragOver] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const validateFile = (file) => {
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
+
+    if (!allowedTypes.includes(file.type)) {
+      return "Please upload a valid image file (JPG, PNG, or WebP)";
+    }
+
+    if (file.size > maxSize) {
+      return "File size must be less than 5MB";
+    }
+
+    return null;
+  };
+
+  const handleFileUpload = async (file) => {
+    if (!file) return;
+
+    const validationError = validateFile(file);
+    if (validationError) {
+      alert(validationError);
+      return;
+    }
+
+    setIsLoading(true);
+
+    // Simulate loading for better UX
+    setTimeout(() => {
+      setPreview(URL.createObjectURL(file));
+      setIsLoading(false);
+    }, 300);
+  };
+
+  const handleInputChange = (e) => {
+    const file = e.target.files[0];
+    handleFileUpload(file);
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setIsDragOver(false);
+    const file = e.dataTransfer.files[0];
+    handleFileUpload(file);
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    setIsDragOver(true);
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    setIsDragOver(false);
+  };
+
+  const handleRemove = () => {
+    setPreview(null);
+    if (uploadRef.current) uploadRef.current.value = "";
+  };
+
+  const triggerFileSelect = () => {
+    uploadRef.current?.click();
+  };
+
+  return (
+    <div className="space-y-4">
+      {label && (
+        <label className="block text-sm font-semibold text-gray-700">
+          {label}
+          {required && <span className="text-red-500 ml-1">*</span>}
+          {!required && (
+            <span className="text-xs text-gray-500 ml-2">(Optional)</span>
+          )}
+        </label>
+      )}
+
+      <div className="flex flex-col items-center space-y-4">
+        {/* Profile Picture Display */}
+        <div className="relative">
+          <div
+            className={`w-32 h-32 rounded-full overflow-hidden border-4 transition-all duration-200 ${
+              error ? "border-red-300" : "border-gray-200 hover:border-cyan-300"
+            }`}
+          >
+            {preview ? (
+              <img
+                src={preview}
+                alt="Profile preview"
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className="w-full h-full bg-gray-50 flex items-center justify-center">
+                <UserCircleIcon className="w-20 h-20 text-gray-300" />
+              </div>
+            )}
+          </div>
+
+          {/* Loading Overlay */}
+          {isLoading && (
+            <div className="absolute inset-0 bg-black bg-opacity-50 rounded-full flex items-center justify-center">
+              <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+            </div>
+          )}
+
+          {/* Remove Button */}
+          {preview && !isLoading && (
+            <button
+              type="button"
+              onClick={handleRemove}
+              className="absolute -top-2 -right-2 p-1.5 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors shadow-lg"
+              title="Remove photo"
+            >
+              <TrashIcon className="w-4 h-4" />
+            </button>
+          )}
+        </div>
+
+        {/* Upload Area */}
+        <div
+          className={`relative w-full max-w-sm transition-all duration-200 ${
+            isDragOver ? "scale-105" : ""
+          }`}
+          onDrop={handleDrop}
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+        >
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleInputChange}
+            ref={uploadRef}
+            className="hidden"
+            id={id}
+            required={required}
+          />
+
+          <div
+            className={`border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-all duration-200 ${
+              isDragOver
+                ? "border-cyan-400 bg-cyan-50 scale-105"
+                : error
+                ? "border-red-300 bg-red-50 hover:border-red-400"
+                : "border-gray-300 hover:border-cyan-400 hover:bg-gray-50"
+            }`}
+            onClick={triggerFileSelect}
+          >
+            <PhotoIcon
+              className={`w-8 h-8 mx-auto mb-3 ${
+                isDragOver
+                  ? "text-cyan-500"
+                  : error
+                  ? "text-red-400"
+                  : "text-gray-400"
+              }`}
+            />
+
+            <div className="space-y-2">
+              <p className="text-sm font-medium text-gray-700">
+                {isDragOver ? "Drop your photo here" : "Upload Profile Picture"}
+              </p>
+              <p className="text-xs text-gray-500">
+                Drag & drop or click to browse
+              </p>
+              <p className="text-xs text-gray-400">PNG, JPG, WebP up to 5MB</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Action Buttons */}
+        {preview && !isLoading && (
+          <div className="flex gap-3">
+            <button
+              type="button"
+              onClick={triggerFileSelect}
+              className="px-4 py-2 text-sm font-medium text-cyan-600 bg-cyan-50 border border-cyan-200 rounded-lg hover:bg-cyan-100 transition-colors"
+            >
+              Change Photo
+            </button>
+            <button
+              type="button"
+              onClick={handleRemove}
+              className="px-4 py-2 text-sm font-medium text-gray-600 bg-gray-50 border border-gray-200 rounded-lg hover:bg-gray-100 transition-colors"
+            >
+              Remove
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* Error Message */}
+      {error && (
+        <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-lg">
+          <ExclamationTriangleIcon className="w-4 h-4 text-red-500 flex-shrink-0" />
+          <p className="text-sm text-red-600">{error}</p>
+        </div>
+      )}
+
+      {/* Tips */}
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+        <div className="flex items-start gap-2">
+          <InformationCircleIcon className="w-4 h-4 text-blue-500 mt-0.5 flex-shrink-0" />
+          <div className="text-xs text-blue-700">
+            <p className="font-medium mb-1">
+              {required
+                ? "Tips for a great profile photo:"
+                : "Optional: Add a profile photo to personalize your account"}
+            </p>
+            <ul className="space-y-0.5 text-blue-600">
+              <li>• Use a clear, recent photo of yourself</li>
+              <li>• Make sure your face is well-lit and visible</li>
+              <li>• Square photos work best for profile pictures</li>
+              {!required && (
+                <li>• You can always add this later in your settings</li>
+              )}
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ---------------------------
+// NIC Upload Component - Front and Back
+// ---------------------------
+function NICUpload({
+  frontId,
+  backId,
+  frontPreview,
+  backPreview,
+  setFrontPreview,
+  setBackPreview,
+  frontUploadRef,
+  backUploadRef,
+  required = false,
+  frontError = null,
+  backError = null,
+}) {
+  const [frontLoading, setFrontLoading] = useState(false);
+  const [backLoading, setBackLoading] = useState(false);
+
+  const validateFile = (file) => {
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
+
+    if (!allowedTypes.includes(file.type)) {
+      return "Please upload a valid image file (JPG, PNG, or WebP)";
+    }
+
+    if (file.size > maxSize) {
+      return "File size must be less than 5MB";
+    }
+
+    return null;
+  };
+
+  const handleFileUpload = async (file, side) => {
+    if (!file) return;
+
+    const validationError = validateFile(file);
+    if (validationError) {
+      alert(validationError);
+      return;
+    }
+
+    if (side === "front") {
+      setFrontLoading(true);
+      setTimeout(() => {
+        setFrontPreview(URL.createObjectURL(file));
+        setFrontLoading(false);
+      }, 300);
+    } else {
+      setBackLoading(true);
+      setTimeout(() => {
+        setBackPreview(URL.createObjectURL(file));
+        setBackLoading(false);
+      }, 300);
+    }
+  };
+
+  const handleInputChange = (e, side) => {
+    const file = e.target.files[0];
+    handleFileUpload(file, side);
+  };
+
+  const handleRemove = (side) => {
+    if (side === "front") {
+      setFrontPreview(null);
+      if (frontUploadRef.current) frontUploadRef.current.value = "";
+    } else {
+      setBackPreview(null);
+      if (backUploadRef.current) backUploadRef.current.value = "";
+    }
+  };
+
+  const NICCard = ({
+    side,
+    id,
+    preview,
+    uploadRef,
+    loading,
+    error,
+    onInputChange,
+    onRemove,
+  }) => (
+    <div className="space-y-3">
+      <div className="flex items-center justify-between">
+        <h4 className="text-sm font-semibold text-gray-700">
+          NIC {side === "front" ? "Front" : "Back"} Side
+          {required && <span className="text-red-500 ml-1">*</span>}
+        </h4>
+        {preview && !loading && (
+          <button
+            type="button"
+            onClick={() => onRemove(side)}
+            className="text-xs text-red-500 hover:text-red-700 transition-colors"
+          >
+            Remove
+          </button>
+        )}
+      </div>
+
+      <div className="relative">
+        <input
+          type="file"
+          accept="image/*"
+          onChange={(e) => onInputChange(e, side)}
+          ref={uploadRef}
+          className="hidden"
+          id={id}
+          required={required}
+        />
+
+        <div
+          className={`relative aspect-[1.6/1] border-2 border-dashed rounded-lg overflow-hidden transition-all duration-200 ${
+            error
+              ? "border-red-300 bg-red-50"
+              : "border-gray-300 hover:border-cyan-400 hover:bg-gray-50"
+          }`}
+        >
+          {preview ? (
+            <div className="relative w-full h-full">
+              <img
+                src={preview}
+                alt={`NIC ${side} preview`}
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-10 transition-all duration-200 flex items-center justify-center">
+                <button
+                  type="button"
+                  onClick={() => uploadRef.current?.click()}
+                  className="opacity-0 hover:opacity-100 bg-white bg-opacity-90 text-gray-700 px-3 py-1 rounded-md text-xs font-medium transition-all duration-200"
+                >
+                  Change
+                </button>
+              </div>
+            </div>
+          ) : (
+            <label
+              htmlFor={id}
+              className="w-full h-full flex flex-col items-center justify-center cursor-pointer p-4 text-center"
+            >
+              <div className="space-y-2">
+                <div
+                  className={`w-12 h-8 border-2 border-dashed rounded-md flex items-center justify-center ${
+                    error
+                      ? "border-red-400 text-red-400"
+                      : "border-gray-400 text-gray-400"
+                  }`}
+                >
+                  <PhotoIcon className="w-4 h-4" />
+                </div>
+                <p
+                  className={`text-xs font-medium ${
+                    error ? "text-red-600" : "text-gray-600"
+                  }`}
+                >
+                  Upload {side === "front" ? "Front" : "Back"} Side
+                </p>
+                <p className="text-xs text-gray-500">Click to browse</p>
+              </div>
+            </label>
+          )}
+
+          {/* Loading Overlay */}
+          {loading && (
+            <div className="absolute inset-0 bg-white bg-opacity-80 flex items-center justify-center">
+              <div className="w-5 h-5 border-2 border-cyan-500 border-t-transparent rounded-full animate-spin"></div>
+            </div>
+          )}
+        </div>
+
+        {/* Error Message */}
+        {error && (
+          <div className="flex items-center gap-2 mt-2 p-2 bg-red-50 border border-red-200 rounded-md">
+            <ExclamationTriangleIcon className="w-4 h-4 text-red-500 flex-shrink-0" />
+            <p className="text-xs text-red-600">{error}</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="space-y-6">
+      <div className="text-center">
+        <h3 className="text-sm font-semibold text-gray-800 mb-2">
+          National Identity Card (NIC)
+          {required && <span className="text-red-500 ml-1">*</span>}
+          {!required && (
+            <span className="text-xs text-gray-500 ml-2">(Optional)</span>
+          )}
+        </h3>
+        <p className="text-xs text-gray-600">
+          {required
+            ? "Please upload clear photos of both sides of your NIC"
+            : "Upload clear photos of both sides of your NIC to verify your identity faster"}
+        </p>
+      </div>
+
+      <div className="grid md:grid-cols-2 gap-6">
+        <NICCard
+          side="front"
+          id={frontId}
+          preview={frontPreview}
+          uploadRef={frontUploadRef}
+          loading={frontLoading}
+          error={frontError}
+          onInputChange={handleInputChange}
+          onRemove={handleRemove}
+        />
+
+        <NICCard
+          side="back"
+          id={backId}
+          preview={backPreview}
+          uploadRef={backUploadRef}
+          loading={backLoading}
+          error={backError}
+          onInputChange={handleInputChange}
+          onRemove={handleRemove}
+        />
+      </div>
+
+      {/* Guidelines */}
+      <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+        <div className="flex items-start gap-2">
+          <InformationCircleIcon className="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0" />
+          <div className="text-xs text-amber-800">
+            <p className="font-medium mb-2">
+              {required
+                ? "NIC Photo Guidelines:"
+                : "NIC Photo Guidelines (Optional):"}
+            </p>
+            <ul className="space-y-1 text-amber-700">
+              <li>• Ensure all text and details are clearly visible</li>
+              <li>• Take photos in good lighting without shadows</li>
+              <li>• Make sure the entire NIC is within the frame</li>
+              <li>• Avoid glare or reflections on the card surface</li>
+              <li>
+                •{" "}
+                {required
+                  ? "Both front and back sides are required"
+                  : "Upload both sides for faster verification"}
+              </li>
+              {!required && (
+                <li>• NIC photos help verify your identity and build trust</li>
+              )}
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function GuideRegistrationForm() {
   // Get role from navigation state
@@ -41,6 +536,18 @@ export default function GuideRegistrationForm() {
   const [selectedCampingDestinations, setSelectedCampingDestinations] =
     useState([]);
   const [selectedStargazingSpots, setSelectedStargazingSpots] = useState([]);
+
+  // Location state for MapLocationPicker
+  const [selectedLocation, setSelectedLocation] = useState("");
+  const [coordinates, setCoordinates] = useState({ lat: null, lng: null });
+
+  // Image upload state
+  const [profilePreview, setProfilePreview] = useState(null);
+  const [nicFrontPreview, setNicFrontPreview] = useState(null);
+  const [nicBackPreview, setNicBackPreview] = useState(null);
+  const profileUploadRef = useRef();
+  const nicFrontUploadRef = useRef();
+  const nicBackUploadRef = useRef();
 
   // Form validation state
   const [errors, setErrors] = useState({});
@@ -157,6 +664,10 @@ export default function GuideRegistrationForm() {
       newErrors.serviceAreas =
         "Please select at least one camping destination or stargazing spot where you provide guide services";
 
+    // Location validation
+    if (!selectedLocation.trim())
+      newErrors.location = "Please select your location on the map";
+
     // Email validation
     if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
       newErrors.email = "Please enter a valid email address";
@@ -261,6 +772,22 @@ export default function GuideRegistrationForm() {
     data.append("languages", formData.languages);
     data.append("campingDestinations", selectedCampingDestinations.join(","));
     data.append("stargazingSpots", selectedStargazingSpots.join(","));
+    data.append("location", selectedLocation);
+    if (coordinates.lat && coordinates.lng) {
+      data.append("latitude", coordinates.lat);
+      data.append("longitude", coordinates.lng);
+    }
+
+    // Add image files if uploaded
+    if (profileUploadRef.current?.files[0]) {
+      data.append("profilePicture", profileUploadRef.current.files[0]);
+    }
+    if (nicFrontUploadRef.current?.files[0]) {
+      data.append("nicFrontImage", nicFrontUploadRef.current.files[0]);
+    }
+    if (nicBackUploadRef.current?.files[0]) {
+      data.append("nicBackImage", nicBackUploadRef.current.files[0]);
+    }
 
     console.log("Submitting guide registration data:");
     for (let [key, value] of data.entries()) {
@@ -515,6 +1042,20 @@ export default function GuideRegistrationForm() {
             </div>
           </div>
 
+          {/* Location Selection */}
+          <div>
+            <MapLocationPicker
+              location={selectedLocation}
+              setLocation={setSelectedLocation}
+              coordinates={coordinates}
+              setCoordinates={setCoordinates}
+              error={errors.location}
+              label="📍 Your Location"
+              required={true}
+              placeholder="Search for your city or area"
+            />
+          </div>
+
           {/* Guide Description */}
           <div>
             <label
@@ -697,6 +1238,47 @@ export default function GuideRegistrationForm() {
                   </ul>
                 </div>
               </div>
+            </div>
+          </div>
+
+          {/* Optional Image Uploads */}
+          <div className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-xl p-6 border border-purple-100">
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                📸 Optional Verification Documents
+              </h3>
+              <p className="text-sm text-gray-600">
+                Upload photos to speed up your verification process (you can
+                skip this and add later)
+              </p>
+            </div>
+
+            <div className="space-y-8">
+              {/* Profile Picture */}
+              <ProfilePictureUpload
+                id="profileUpload"
+                label="Profile Picture"
+                preview={profilePreview}
+                setPreview={setProfilePreview}
+                uploadRef={profileUploadRef}
+                required={false}
+                error={errors.profilePicture}
+              />
+
+              {/* NIC Images */}
+              <NICUpload
+                frontId="nicFrontUpload"
+                backId="nicBackUpload"
+                frontPreview={nicFrontPreview}
+                backPreview={nicBackPreview}
+                setFrontPreview={setNicFrontPreview}
+                setBackPreview={setNicBackPreview}
+                frontUploadRef={nicFrontUploadRef}
+                backUploadRef={nicBackUploadRef}
+                required={false}
+                frontError={errors.nicFrontImage}
+                backError={errors.nicBackImage}
+              />
             </div>
           </div>
 

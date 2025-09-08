@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import Navbar from "../components/organisms/Navbar";
 import Footer from "../components/organisms/Footer";
 import Button from "../components/atoms/Button";
-import Calendar from "../components/calendar/Calendar";
+import Calendar from "../components/molecules/Calendar";
 import RatingReviewSection from "../components/sections/RatingReviewSection";
 import GearItemCard from "../components/molecules/GearItemCard";
 import mapImg from "../assets/individual_destination/map.png";
