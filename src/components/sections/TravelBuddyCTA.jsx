@@ -20,7 +20,7 @@ export default function TravelBuddyCTA() {
           </p>
 
           <div className="w-full flex justify-center lg:justify-start">
-            <Link to="/connect" className="w-full lg:w-auto">
+            <Link to="/travel-buddy" className="w-full lg:w-auto">
               <Button size="lg" variant="primary" className="w-full lg:w-auto">
                 Connect
               </Button>

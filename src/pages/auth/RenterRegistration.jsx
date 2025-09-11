@@ -205,7 +205,7 @@ function ProfilePictureUpload({
             <button
               type="button"
               onClick={triggerFileSelect}
-              className="px-4 py-2 text-sm font-medium text-cyan-600 bg-cyan-50 border border-cyan-200 rounded-lg hover:bg-cyan-100 transition-colors"
+              className="px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 border border-blue-200 rounded-lg hover:bg-cyan-100 transition-colors"
             >
               Change Photo
             </button>
@@ -476,16 +476,16 @@ function NICUpload({
       </div>
 
       {/* Guidelines */}
-      <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
         <div className="flex items-start gap-2">
-          <InformationCircleIcon className="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0" />
-          <div className="text-xs text-amber-800">
+          <InformationCircleIcon className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" />
+          <div className="text-xs text-blue-800">
             <p className="font-medium mb-2">
               {required
                 ? "NIC Photo Guidelines:"
                 : "NIC Photo Guidelines (Optional):"}
             </p>
-            <ul className="space-y-1 text-amber-700">
+            <ul className="space-y-1 text-blue-700">
               <li>• Ensure all text and details are clearly visible</li>
               <li>• Take photos in good lighting without shadows</li>
               <li>• Make sure the entire NIC is within the frame</li>
@@ -531,6 +531,7 @@ export default function RenterRegistrationForm() {
   const [selectedCampingDestinations, setSelectedCampingDestinations] =
     useState([]);
   const [selectedStargazingSpots, setSelectedStargazingSpots] = useState([]);
+  const [showDocumentVerification, setShowDocumentVerification] = useState(false);
 
   // Location state for MapLocationPicker
   const [selectedLocation, setSelectedLocation] = useState("");
@@ -787,10 +788,7 @@ export default function RenterRegistrationForm() {
   };
 
   const renderRegistrationForm = () => (
-    <div className="space-y-8">
-      {/* Registration Form */}
-      <div className="bg-white rounded-2xl p-8 border border-gray-100 shadow-sm">
-        <div className="space-y-6">
+    <div className="space-y-6">
           {/* Name Fields */}
           <div className="grid sm:grid-cols-2 gap-6">
             <div>
@@ -902,31 +900,58 @@ export default function RenterRegistrationForm() {
             </div>
           </div>
 
-          {/* Phone Number */}
-          <div>
-            <label
-              htmlFor="phoneNumber"
-              className="block text-sm font-medium text-gray-700 mb-2"
-            >
-              Phone Number <span className="text-red-500">*</span>
-            </label>
-            <Input
-              id="phoneNumber"
-              placeholder="0771234567"
-              value={formData.phoneNumber}
-              onChange={handleChange}
-              className={`${
-                errors.phoneNumber
-                  ? "border-red-300 focus:border-red-500"
-                  : "border-gray-300 focus:border-cyan-500"
-              } rounded-xl h-12`}
-            />
-            {errors.phoneNumber && (
-              <p className="text-sm text-red-600 mt-1 flex items-center gap-1">
-                <ExclamationTriangleIcon className="w-4 h-4" />
-                {errors.phoneNumber}
-              </p>
-            )}
+          {/* Phone Number and NIC Number */}
+          <div className="grid sm:grid-cols-2 gap-6">
+            <div>
+              <label
+                htmlFor="phoneNumber"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
+                Phone Number <span className="text-red-500">*</span>
+              </label>
+              <Input
+                id="phoneNumber"
+                placeholder="0771234567"
+                value={formData.phoneNumber}
+                onChange={handleChange}
+                className={`${
+                  errors.phoneNumber
+                    ? "border-red-300 focus:border-red-500"
+                    : "border-gray-300 focus:border-cyan-500"
+                } rounded-xl h-12`}
+              />
+              {errors.phoneNumber && (
+                <p className="text-sm text-red-600 mt-1 flex items-center gap-1">
+                  <ExclamationTriangleIcon className="w-4 h-4" />
+                  {errors.phoneNumber}
+                </p>
+              )}
+            </div>
+            <div>
+              <label
+                htmlFor="nicNumber"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
+                NIC Number <span className="text-red-500">*</span>
+              </label>
+              <Input
+                id="nicNumber"
+                placeholder="123456789V"
+                value={formData.nicNumber}
+                onChange={handleChange}
+                className={`${
+                  errors.nicNumber
+                    ? "border-red-300 focus:border-red-500"
+                    : "border-gray-300 focus:border-cyan-500"
+                } rounded-xl h-12`}
+              />
+              {errors.nicNumber && (
+                <p className="text-sm text-red-600 mt-1 flex items-center gap-1">
+                  <ExclamationTriangleIcon className="w-4 h-4" />
+                  {errors.nicNumber}
+                </p>
+              )}
+            </div>
           </div>
 
           {/* Home Address */}
@@ -956,47 +981,19 @@ export default function RenterRegistrationForm() {
             )}
           </div>
 
-          {/* NIC Number and District */}
-          <div className="grid sm:grid-cols-2 gap-6">
-            <div>
-              <label
-                htmlFor="nicNumber"
-                className="block text-sm font-medium text-gray-700 mb-2"
-              >
-                NIC Number <span className="text-red-500">*</span>
-              </label>
-              <Input
-                id="nicNumber"
-                placeholder="123456789V"
-                value={formData.nicNumber}
-                onChange={handleChange}
-                className={`${
-                  errors.nicNumber
-                    ? "border-red-300 focus:border-red-500"
-                    : "border-gray-300 focus:border-cyan-500"
-                } rounded-xl h-12`}
-              />
-              {errors.nicNumber && (
-                <p className="text-sm text-red-600 mt-1 flex items-center gap-1">
-                  <ExclamationTriangleIcon className="w-4 h-4" />
-                  {errors.nicNumber}
-                </p>
-              )}
-            </div>
-
-            <div>
-              <SearchableDropdown
-                label="Operating District"
-                options={districts}
-                value={formData.district}
-                onChange={(e) =>
-                  setFormData({ ...formData, district: e.target.value })
-                }
-                placeholder="Search and select your main operating district"
-                required={true}
-                error={errors.district}
-              />
-            </div>
+          {/* District */}
+          <div>
+            <SearchableDropdown
+              label="Operating District"
+              options={districts}
+              value={formData.district}
+              onChange={(e) =>
+                setFormData({ ...formData, district: e.target.value })
+              }
+              placeholder="Search and select your main operating district"
+              required={true}
+              error={errors.district}
+            />
           </div>
 
           {/* Location Selection */}
@@ -1070,45 +1067,93 @@ export default function RenterRegistrationForm() {
             </div>
           </div>
 
-          {/* Optional Image Uploads */}
-          <div className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-xl p-6 border border-purple-100">
-            <div className="mb-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                📸 Optional Verification Documents
-              </h3>
-              <p className="text-sm text-gray-600">
-                Upload photos to speed up your verification process (you can
-                skip this and add later)
-              </p>
+          {/* Document Verification */}
+          <div className="bg-gradient-to-r from-cyan-50 to-blue-50 rounded-xl p-6 border border-cyan-100">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <div className="w-8 h-8 bg-cyan-100 rounded-full flex items-center justify-center">
+                  <svg
+                    className="w-4 h-4 text-blue-600"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                    />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    Document Verification
+                  </h3>
+                  <p className="text-sm text-gray-600">
+                    Upload photos to speed up your verification process (you can
+                    skip this and add later)
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center space-x-3">
+                <button
+                  type="button"
+                  onClick={() => setShowDocumentVerification(!showDocumentVerification)}
+                  className="text-blue-600 hover:text-blue-700 text-sm font-medium flex items-center gap-1 transition-colors"
+                >
+                  {showDocumentVerification ? "Hide" : "Show Documents"}
+                  <svg
+                    className={`w-4 h-4 transform transition-transform ${
+                      showDocumentVerification ? "rotate-180" : ""
+                    }`}
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M19 9l-7 7-7-7"
+                    />
+                  </svg>
+                </button>
+              </div>
             </div>
 
-            <div className="space-y-8">
-              {/* Profile Picture */}
-              <ProfilePictureUpload
-                id="profileUpload"
-                label="Profile Picture"
-                preview={profilePreview}
-                setPreview={setProfilePreview}
-                uploadRef={profileUploadRef}
-                required={false}
-                error={errors.profilePicture}
-              />
+            {/* Expandable Document Upload */}
+            {showDocumentVerification && (
+              <div className="mt-6 pt-6 border-t border-cyan-200 animate-in slide-in-from-top duration-200">
+                <div className="space-y-8">
+                  {/* Profile Picture */}
+                  <ProfilePictureUpload
+                    id="profileUpload"
+                    label="Profile Picture"
+                    preview={profilePreview}
+                    setPreview={setProfilePreview}
+                    uploadRef={profileUploadRef}
+                    required={false}
+                    error={errors.profilePicture}
+                  />
 
-              {/* NIC Images */}
-              <NICUpload
-                frontId="nicFrontUpload"
-                backId="nicBackUpload"
-                frontPreview={nicFrontPreview}
-                backPreview={nicBackPreview}
-                setFrontPreview={setNicFrontPreview}
-                setBackPreview={setNicBackPreview}
-                frontUploadRef={nicFrontUploadRef}
-                backUploadRef={nicBackUploadRef}
-                required={false}
-                frontError={errors.nicFrontImage}
-                backError={errors.nicBackImage}
-              />
-            </div>
+                  {/* NIC Images */}
+                  <NICUpload
+                    frontId="nicFrontUpload"
+                    backId="nicBackUpload"
+                    frontPreview={nicFrontPreview}
+                    backPreview={nicBackPreview}
+                    setFrontPreview={setNicFrontPreview}
+                    setBackPreview={setNicBackPreview}
+                    frontUploadRef={nicFrontUploadRef}
+                    backUploadRef={nicBackUploadRef}
+                    required={false}
+                    frontError={errors.nicFrontImage}
+                    backError={errors.nicBackImage}
+                  />
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Email */}
@@ -1201,64 +1246,90 @@ export default function RenterRegistrationForm() {
             Password must be at least 8 characters with uppercase, lowercase,
             and number
           </div>
-        </div>
-      </div>
 
-      {/* Terms and Conditions */}
-      <div className="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-2xl p-6 border border-blue-200">
-        <div className="flex items-start gap-4">
-          <input
-            type="checkbox"
-            id="terms"
-            checked={agreeTerms}
-            onChange={(e) => setAgreeTerms(e.target.checked)}
-            className="w-5 h-5 text-cyan-600 border-gray-300 rounded-lg focus:ring-cyan-500 mt-1 flex-shrink-0"
-          />
-          <div className="flex-1">
-            <label
-              htmlFor="terms"
-              className="text-sm text-gray-800 leading-relaxed"
-            >
-              I agree to SkyCamp's{" "}
-              <a
-                href="/terms"
-                className="text-cyan-600 hover:text-cyan-700 underline font-medium"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Terms and Conditions
-              </a>{" "}
-              and{" "}
-              <a
-                href="/privacy"
-                className="text-cyan-600 hover:text-cyan-700 underline font-medium"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Privacy Policy
-              </a>
-              . I understand my equipment rental services will be listed on the
-              platform and I commit to providing quality equipment and reliable
-              service.
-            </label>
-            {errors.terms && (
-              <p className="text-sm text-red-600 mt-2 flex items-center gap-2">
-                <ExclamationTriangleIcon className="w-4 h-4" />
-                {errors.terms}
-              </p>
-            )}
+          {/* Terms and Conditions */}
+          <div className="bg-gradient-to-r from-cyan-50 to-blue-50 rounded-2xl p-6 border border-cyan-200">
+            <div className="flex items-start gap-4">
+              <input
+                type="checkbox"
+                id="terms"
+                checked={agreeTerms}
+                onChange={(e) => setAgreeTerms(e.target.checked)}
+                className="w-5 h-5 text-blue-600 border-gray-300 rounded-lg focus:ring-cyan-500 mt-1 flex-shrink-0"
+              />
+              <div className="flex-1">
+                <label
+                  htmlFor="terms"
+                  className="text-sm text-gray-800 leading-relaxed"
+                >
+                  I agree to SkyCamp's{" "}
+                  <a
+                    href="/terms"
+                    className="text-blue-600 hover:text-blue-700 underline font-medium"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Terms and Conditions
+                  </a>{" "}
+                  and{" "}
+                  <a
+                    href="/privacy"
+                    className="text-blue-600 hover:text-blue-700 underline font-medium"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Privacy Policy
+                  </a>
+                  . I understand my equipment rental services will be listed on the
+                  platform and I commit to providing quality equipment and reliable
+                  service.
+                </label>
+                {errors.terms && (
+                  <p className="text-sm text-red-600 mt-2 flex items-center gap-2">
+                    <ExclamationTriangleIcon className="w-4 h-4" />
+                    {errors.terms}
+                  </p>
+                )}
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
 
-      {/* Next Steps Notice */}
-      <div className="text-center bg-gradient-to-r from-emerald-50 to-green-50 rounded-lg p-4 border border-emerald-200">
-        <div className="text-sm text-gray-700">
-          <span className="font-medium">Next:</span> After registration, you'll
-          access your dashboard to add your equipment inventory and manage
-          bookings
-        </div>
-      </div>
+          {/* Next Steps Notice */}
+          <div className="text-center bg-gradient-to-r from-cyan-50 to-blue-50 rounded-lg p-4 border border-cyan-200">
+            <div className="text-sm text-gray-700">
+              <span className="font-medium">Next:</span> After registration, you'll
+              access your dashboard to add your equipment inventory and manage
+              bookings
+            </div>
+          </div>
+
+          {/* Submit Button */}
+          <div className="text-center">
+            <Button
+              type="submit"
+              disabled={isSubmitting}
+              className="px-12 py-4 bg-cyan-600 hover:bg-cyan-700 text-white font-semibold rounded-2xl shadow-lg text-lg"
+            >
+              {isSubmitting ? (
+                <div className="flex items-center gap-3">
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  Creating Your Rental Account...
+                </div>
+              ) : (
+                "Create My Rental Account"
+              )}
+            </Button>
+
+            <p className="text-sm text-gray-500 mt-4">
+              Already have an account?{" "}
+              <Link
+                to="/login"
+                className="text-blue-600 hover:text-blue-700 font-medium"
+              >
+                Sign in here
+              </Link>
+            </p>
+          </div>
     </div>
   );
 
@@ -1268,7 +1339,7 @@ export default function RenterRegistrationForm() {
       <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
         <Link
           to="/signup-role-selection"
-          className="inline-flex items-center text-gray-600 hover:text-cyan-600 text-sm font-medium transition-colors"
+          className="inline-flex items-center text-gray-600 hover:text-blue-600 text-sm font-medium transition-colors"
         >
           <ArrowLeftIcon className="w-4 h-4 mr-2" />
           Back to Role Selection
@@ -1284,42 +1355,14 @@ export default function RenterRegistrationForm() {
           </h1>
           <p className="text-sm sm:text-base text-gray-600">
             Selected Role:{" "}
-            <span className="text-cyan-600 font-semibold">
+            <span className="text-blue-600 font-semibold">
               Equipment Renter
             </span>
           </p>
         </div>
 
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} className="bg-white rounded-2xl p-8 border border-gray-100 shadow-sm">
           {renderRegistrationForm()}
-
-          {/* Submit Button */}
-          <div className="mt-8 text-center">
-            <Button
-              type="submit"
-              disabled={isSubmitting}
-              className="px-12 py-4 bg-cyan-600 hover:bg-cyan-700 text-white font-semibold rounded-2xl shadow-lg text-lg"
-            >
-              {isSubmitting ? (
-                <div className="flex items-center gap-3">
-                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  Creating Your Renter Account...
-                </div>
-              ) : (
-                "Start My Equipment Rental Business"
-              )}
-            </Button>
-
-            <p className="text-sm text-gray-500 mt-4">
-              Already have an account?{" "}
-              <Link
-                to="/login"
-                className="text-cyan-600 hover:text-cyan-700 font-medium"
-              >
-                Sign in here
-              </Link>
-            </p>
-          </div>
         </form>
       </div>
     </div>
