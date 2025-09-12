@@ -207,7 +207,7 @@ function ProfilePictureUpload({
             <button
               type="button"
               onClick={triggerFileSelect}
-              className="px-4 py-2 text-sm font-medium text-cyan-600 bg-cyan-50 border border-cyan-200 rounded-lg hover:bg-cyan-100 transition-colors"
+              className="px-4 py-2 text-sm font-medium text-cyan-600 bg-blue-50 border border-blue-200 rounded-lg hover:bg-cyan-100 transition-colors"
             >
               Change Photo
             </button>
@@ -482,16 +482,16 @@ function NICUpload({
       </div>
 
       {/* Guidelines */}
-      <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
         <div className="flex items-start gap-2">
-          <InformationCircleIcon className="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0" />
-          <div className="text-xs text-amber-800">
+          <InformationCircleIcon className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" />
+          <div className="text-xs text-blue-800">
             <p className="font-medium mb-2">
               {required
                 ? "NIC Photo Guidelines:"
                 : "NIC Photo Guidelines (Optional):"}
             </p>
-            <ul className="space-y-1 text-amber-700">
+            <ul className="space-y-1 text-blue-700">
               <li>• Ensure all text and details are clearly visible</li>
               <li>• Take photos in good lighting without shadows</li>
               <li>• Make sure the entire NIC is within the frame</li>
@@ -542,6 +542,8 @@ export default function GuideRegistrationForm() {
   const [selectedCampingDestinations, setSelectedCampingDestinations] =
     useState([]);
   const [selectedStargazingSpots, setSelectedStargazingSpots] = useState([]);
+  const [showDocumentVerification, setShowDocumentVerification] =
+    useState(false);
 
   // Location state for MapLocationPicker
   const [selectedLocation, setSelectedLocation] = useState("");
@@ -849,556 +851,592 @@ export default function GuideRegistrationForm() {
   };
 
   const renderRegistrationForm = () => (
-    <div className="space-y-8">
-      {/* Registration Form */}
-      <div className="bg-white rounded-2xl p-8 border border-gray-100 shadow-sm">
-        <div className="space-y-6">
-          {/* Name Fields */}
-          <div className="grid sm:grid-cols-2 gap-6">
-            <div>
-              <label
-                htmlFor="firstName"
-                className="block text-sm font-medium text-gray-700 mb-2"
+    <div className="space-y-6">
+      {/* Name Fields */}
+      <div className="grid sm:grid-cols-2 gap-6">
+        <div>
+          <label
+            htmlFor="firstName"
+            className="block text-sm font-medium text-gray-700 mb-2"
+          >
+            First Name <span className="text-red-500">*</span>
+          </label>
+          <Input
+            id="firstName"
+            placeholder="Enter your first name"
+            value={formData.firstName}
+            onChange={handleChange}
+            className={`${
+              errors.firstName
+                ? "border-red-300 focus:border-red-500"
+                : "border-gray-300 focus:border-cyan-500"
+            } rounded-xl h-12`}
+          />
+          {errors.firstName && (
+            <p className="text-sm text-red-600 mt-1 flex items-center gap-1">
+              <ExclamationTriangleIcon className="w-4 h-4" />
+              {errors.firstName}
+            </p>
+          )}
+        </div>
+        <div>
+          <label
+            htmlFor="lastName"
+            className="block text-sm font-medium text-gray-700 mb-2"
+          >
+            Last Name <span className="text-red-500">*</span>
+          </label>
+          <Input
+            id="lastName"
+            placeholder="Enter your last name"
+            value={formData.lastName}
+            onChange={handleChange}
+            className={`${
+              errors.lastName
+                ? "border-red-300 focus:border-red-500"
+                : "border-gray-300 focus:border-cyan-500"
+            } rounded-xl h-12`}
+          />
+          {errors.lastName && (
+            <p className="text-sm text-red-600 mt-1 flex items-center gap-1">
+              <ExclamationTriangleIcon className="w-4 h-4" />
+              {errors.lastName}
+            </p>
+          )}
+        </div>
+      </div>
+
+      {/* Date of Birth and Gender */}
+      <div className="grid sm:grid-cols-2 gap-6">
+        <div>
+          <label
+            htmlFor="dob"
+            className="block text-sm font-medium text-gray-700 mb-2"
+          >
+            Date of Birth <span className="text-red-500">*</span>
+          </label>
+          <Input
+            id="dob"
+            type="date"
+            value={formData.dob}
+            onChange={handleChange}
+            className={`${
+              errors.dob
+                ? "border-red-300 focus:border-red-500"
+                : "border-gray-300 focus:border-cyan-500"
+            } rounded-xl h-12`}
+          />
+          {errors.dob && (
+            <p className="text-sm text-red-600 mt-1 flex items-center gap-1">
+              <ExclamationTriangleIcon className="w-4 h-4" />
+              {errors.dob}
+            </p>
+          )}
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Gender <span className="text-red-500">*</span>
+          </label>
+          <div className="flex gap-3">
+            {["Male", "Female", "Other"].map((option) => (
+              <button
+                key={option}
+                type="button"
+                onClick={() => setGender(option)}
+                className={`flex-1 py-3 px-4 rounded-xl text-sm font-medium transition-all duration-200 ${
+                  gender === option
+                    ? "bg-cyan-600 text-white shadow-md"
+                    : "bg-gray-50 text-gray-700 hover:bg-gray-100 border border-gray-200"
+                }`}
               >
-                First Name <span className="text-red-500">*</span>
-              </label>
-              <Input
-                id="firstName"
-                placeholder="Enter your first name"
-                value={formData.firstName}
-                onChange={handleChange}
-                className={`${
-                  errors.firstName
-                    ? "border-red-300 focus:border-red-500"
-                    : "border-gray-300 focus:border-cyan-500"
-                } rounded-xl h-12`}
-              />
-              {errors.firstName && (
-                <p className="text-sm text-red-600 mt-1 flex items-center gap-1">
-                  <ExclamationTriangleIcon className="w-4 h-4" />
-                  {errors.firstName}
-                </p>
-              )}
-            </div>
-            <div>
-              <label
-                htmlFor="lastName"
-                className="block text-sm font-medium text-gray-700 mb-2"
-              >
-                Last Name <span className="text-red-500">*</span>
-              </label>
-              <Input
-                id="lastName"
-                placeholder="Enter your last name"
-                value={formData.lastName}
-                onChange={handleChange}
-                className={`${
-                  errors.lastName
-                    ? "border-red-300 focus:border-red-500"
-                    : "border-gray-300 focus:border-cyan-500"
-                } rounded-xl h-12`}
-              />
-              {errors.lastName && (
-                <p className="text-sm text-red-600 mt-1 flex items-center gap-1">
-                  <ExclamationTriangleIcon className="w-4 h-4" />
-                  {errors.lastName}
-                </p>
-              )}
-            </div>
+                {option}
+              </button>
+            ))}
           </div>
+          {errors.gender && (
+            <p className="text-sm text-red-600 mt-1 flex items-center gap-1">
+              <ExclamationTriangleIcon className="w-4 h-4" />
+              {errors.gender}
+            </p>
+          )}
+        </div>
+      </div>
 
-          {/* Date of Birth and Gender */}
-          <div className="grid sm:grid-cols-2 gap-6">
-            <div>
-              <label
-                htmlFor="dob"
-                className="block text-sm font-medium text-gray-700 mb-2"
-              >
-                Date of Birth <span className="text-red-500">*</span>
-              </label>
-              <Input
-                id="dob"
-                type="date"
-                value={formData.dob}
-                onChange={handleChange}
-                className={`${
-                  errors.dob
-                    ? "border-red-300 focus:border-red-500"
-                    : "border-gray-300 focus:border-cyan-500"
-                } rounded-xl h-12`}
-              />
-              {errors.dob && (
-                <p className="text-sm text-red-600 mt-1 flex items-center gap-1">
-                  <ExclamationTriangleIcon className="w-4 h-4" />
-                  {errors.dob}
-                </p>
-              )}
-            </div>
+      {/* Phone Number and NIC Number */}
+      <div className="grid sm:grid-cols-2 gap-6">
+        <div>
+          <label
+            htmlFor="phoneNumber"
+            className="block text-sm font-medium text-gray-700 mb-2"
+          >
+            Phone Number <span className="text-red-500">*</span>
+          </label>
+          <Input
+            id="phoneNumber"
+            placeholder="0771234567"
+            value={formData.phoneNumber}
+            onChange={handleChange}
+            className={`${
+              errors.phoneNumber
+                ? "border-red-300 focus:border-red-500"
+                : "border-gray-300 focus:border-cyan-500"
+            } rounded-xl h-12`}
+          />
+          {errors.phoneNumber && (
+            <p className="text-sm text-red-600 mt-1 flex items-center gap-1">
+              <ExclamationTriangleIcon className="w-4 h-4" />
+              {errors.phoneNumber}
+            </p>
+          )}
+        </div>
+        <div>
+          <label
+            htmlFor="nicNumber"
+            className="block text-sm font-medium text-gray-700 mb-2"
+          >
+            NIC Number <span className="text-red-500">*</span>
+          </label>
+          <Input
+            id="nicNumber"
+            placeholder="123456789V"
+            value={formData.nicNumber}
+            onChange={handleChange}
+            className={`${
+              errors.nicNumber
+                ? "border-red-300 focus:border-red-500"
+                : "border-gray-300 focus:border-cyan-500"
+            } rounded-xl h-12`}
+          />
+          {errors.nicNumber && (
+            <p className="text-sm text-red-600 mt-1 flex items-center gap-1">
+              <ExclamationTriangleIcon className="w-4 h-4" />
+              {errors.nicNumber}
+            </p>
+          )}
+        </div>
+      </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Gender <span className="text-red-500">*</span>
-              </label>
-              <div className="flex gap-3">
-                {["Male", "Female", "Other"].map((option) => (
-                  <button
-                    key={option}
-                    type="button"
-                    onClick={() => setGender(option)}
-                    className={`flex-1 py-3 px-4 rounded-xl text-sm font-medium transition-all duration-200 ${
-                      gender === option
-                        ? "bg-cyan-600 text-white shadow-md"
-                        : "bg-gray-50 text-gray-700 hover:bg-gray-100 border border-gray-200"
-                    }`}
-                  >
-                    {option}
-                  </button>
-                ))}
-              </div>
-              {errors.gender && (
-                <p className="text-sm text-red-600 mt-1 flex items-center gap-1">
-                  <ExclamationTriangleIcon className="w-4 h-4" />
-                  {errors.gender}
-                </p>
-              )}
-            </div>
-          </div>
+      {/* Home Address */}
+      <div>
+        <label
+          htmlFor="homeAddress"
+          className="block text-sm font-medium text-gray-700 mb-2"
+        >
+          Home Address <span className="text-red-500">*</span>
+        </label>
+        <textarea
+          id="homeAddress"
+          placeholder="Enter your complete postal address"
+          className={`w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500 min-h-[100px] resize-none transition-all duration-200 ${
+            errors.homeAddress
+              ? "border-red-300 focus:border-red-500 focus:ring-red-500"
+              : "border-gray-300 focus:border-cyan-500 hover:border-gray-400"
+          }`}
+          value={formData.homeAddress}
+          onChange={handleChange}
+        />
+        {errors.homeAddress && (
+          <p className="text-sm text-red-600 mt-1 flex items-center gap-1">
+            <ExclamationTriangleIcon className="w-4 h-4" />
+            {errors.homeAddress}
+          </p>
+        )}
+      </div>
 
-          {/* Phone Number */}
-          <div>
-            <label
-              htmlFor="phoneNumber"
-              className="block text-sm font-medium text-gray-700 mb-2"
+      {/* District */}
+      <div>
+        <SearchableDropdown
+          label="Operating District"
+          options={districts}
+          value={formData.district}
+          onChange={(e) =>
+            setFormData({ ...formData, district: e.target.value })
+          }
+          placeholder="Search and select your main operating district"
+          required={true}
+          error={errors.district}
+        />
+      </div>
+
+      {/* Location Selection */}
+      <div>
+        <MapLocationPicker
+          location={selectedLocation}
+          setLocation={setSelectedLocation}
+          coordinates={coordinates}
+          setCoordinates={setCoordinates}
+          error={errors.location}
+          label="📍 Your Location"
+          required={true}
+          placeholder="Search for your city or area"
+        />
+      </div>
+
+      {/* Guide Description */}
+      <div>
+        <label
+          htmlFor="description"
+          className="block text-sm font-medium text-gray-700 mb-2"
+        >
+          Guide Description <span className="text-red-500">*</span>
+        </label>
+        <textarea
+          id="description"
+          placeholder="Tell potential customers about your guiding experience, specialties, and what makes you unique as a camping and stargazing guide..."
+          className={`w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500 min-h-[120px] resize-none transition-all duration-200 ${
+            errors.description
+              ? "border-red-300 focus:border-red-500 focus:ring-red-500"
+              : "border-gray-300 focus:border-cyan-500 hover:border-gray-400"
+          }`}
+          value={formData.description}
+          onChange={handleChange}
+          maxLength={500}
+        />
+        <div className="flex justify-between items-center mt-1">
+          {errors.description ? (
+            <p className="text-sm text-red-600 flex items-center gap-1">
+              <ExclamationTriangleIcon className="w-4 h-4" />
+              {errors.description}
+            </p>
+          ) : (
+            <span></span>
+          )}
+          <span className="text-xs text-gray-500">
+            {formData.description.length}/500 characters
+          </span>
+        </div>
+      </div>
+
+      {/* Languages and Price */}
+      <div className="grid sm:grid-cols-2 gap-6">
+        <div>
+          <label
+            htmlFor="languages"
+            className="block text-sm font-medium text-gray-700 mb-2"
+          >
+            Languages Spoken <span className="text-red-500">*</span>
+          </label>
+          <Input
+            id="languages"
+            placeholder="English, Sinhala, Tamil..."
+            value={formData.languages}
+            onChange={handleChange}
+            className={`${
+              errors.languages
+                ? "border-red-300 focus:border-red-500"
+                : "border-gray-300 focus:border-cyan-500"
+            } rounded-xl h-12`}
+          />
+          {errors.languages && (
+            <p className="text-sm text-red-600 mt-1 flex items-center gap-1">
+              <ExclamationTriangleIcon className="w-4 h-4" />
+              {errors.languages}
+            </p>
+          )}
+        </div>
+
+        <div>
+          <label
+            htmlFor="pricePerDay"
+            className="block text-sm font-medium text-gray-700 mb-2"
+          >
+            Price Per Day <span className="text-red-500">*</span>
+          </label>
+          <div className="flex gap-2">
+            <select
+              id="currency"
+              value={formData.currency}
+              onChange={handleChange}
+              className="border border-gray-300 rounded-xl px-3 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 bg-gray-50"
             >
-              Phone Number <span className="text-red-500">*</span>
-            </label>
+              {currencies.map((curr) => (
+                <option key={curr.value} value={curr.value}>
+                  {curr.value}
+                </option>
+              ))}
+            </select>
             <Input
-              id="phoneNumber"
-              placeholder="0771234567"
-              value={formData.phoneNumber}
+              id="pricePerDay"
+              placeholder="2500.00"
+              value={formData.pricePerDay}
               onChange={handleChange}
               className={`${
-                errors.phoneNumber
+                errors.pricePerDay
                   ? "border-red-300 focus:border-red-500"
                   : "border-gray-300 focus:border-cyan-500"
-              } rounded-xl h-12`}
+              } rounded-xl h-12 flex-1`}
             />
-            {errors.phoneNumber && (
-              <p className="text-sm text-red-600 mt-1 flex items-center gap-1">
-                <ExclamationTriangleIcon className="w-4 h-4" />
-                {errors.phoneNumber}
-              </p>
-            )}
           </div>
+          {errors.pricePerDay && (
+            <p className="text-sm text-red-600 mt-1 flex items-center gap-1">
+              <ExclamationTriangleIcon className="w-4 h-4" />
+              {errors.pricePerDay}
+            </p>
+          )}
+        </div>
+      </div>
 
-          {/* Home Address */}
-          <div>
-            <label
-              htmlFor="homeAddress"
-              className="block text-sm font-medium text-gray-700 mb-2"
-            >
-              Home Address <span className="text-red-500">*</span>
-            </label>
-            <textarea
-              id="homeAddress"
-              placeholder="Enter your complete postal address"
-              className={`w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500 min-h-[100px] resize-none transition-all duration-200 ${
-                errors.homeAddress
-                  ? "border-red-300 focus:border-red-500 focus:ring-red-500"
-                  : "border-gray-300 focus:border-cyan-500 hover:border-gray-400"
-              }`}
-              value={formData.homeAddress}
-              onChange={handleChange}
-            />
-            {errors.homeAddress && (
-              <p className="text-sm text-red-600 mt-1 flex items-center gap-1">
-                <ExclamationTriangleIcon className="w-4 h-4" />
-                {errors.homeAddress}
-              </p>
-            )}
+      {/* Special Note */}
+      <div>
+        <label
+          htmlFor="specialNote"
+          className="block text-sm font-medium text-gray-700 mb-2"
+        >
+          Special Note <span className="text-gray-500">(Optional)</span>
+        </label>
+        <textarea
+          id="specialNote"
+          placeholder="Any special requirements, equipment you provide, group size limitations, or additional services..."
+          className="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 hover:border-gray-400 min-h-[80px] resize-none transition-all duration-200"
+          value={formData.specialNote}
+          onChange={handleChange}
+          maxLength={200}
+        />
+        <div className="text-right mt-1">
+          <span className="text-xs text-gray-500">
+            {formData.specialNote.length}/200 characters
+          </span>
+        </div>
+      </div>
+
+      {/* Service Areas */}
+      <div className="bg-gradient-to-r from-cyan-50 to-blue-50 rounded-xl p-6 border border-cyan-100">
+        <div className="mb-4">
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">
+            🗺️ Guide Service Areas
+          </h3>
+          <p className="text-sm text-gray-600">
+            Select the locations where you provide camping and stargazing guide
+            services
+          </p>
+        </div>
+
+        <div className="grid md:grid-cols-2 gap-6">
+          <MultiSelectDropdown
+            label="Camping Destinations"
+            options={campingDestinations}
+            selected={selectedCampingDestinations}
+            setSelected={setSelectedCampingDestinations}
+            placeholder="Choose camping destinations..."
+          />
+          <MultiSelectDropdown
+            label="Stargazing Spots"
+            options={stargazingSpots}
+            selected={selectedStargazingSpots}
+            setSelected={setSelectedStargazingSpots}
+            placeholder="Choose stargazing spots..."
+          />
+        </div>
+
+        {errors.serviceAreas && (
+          <p className="text-sm text-red-600 mt-3 flex items-center gap-1">
+            <ExclamationTriangleIcon className="w-4 h-4" />
+            {errors.serviceAreas}
+          </p>
+        )}
+
+        <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+          <div className="flex items-start gap-2">
+            <InformationCircleIcon className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" />
+            <div className="text-xs text-blue-700">
+              <p className="font-medium mb-1">Guide Service Tips:</p>
+              <ul className="space-y-0.5 text-blue-600">
+                <li>
+                  • Select areas where you have local knowledge and experience
+                </li>
+                <li>• Consider accessibility and safety of the locations</li>
+                <li>
+                  • You can update your service areas later in your profile
+                </li>
+              </ul>
+            </div>
           </div>
+        </div>
+      </div>
 
-          {/* NIC Number and District */}
-          <div className="grid sm:grid-cols-2 gap-6">
-            <div>
-              <label
-                htmlFor="nicNumber"
-                className="block text-sm font-medium text-gray-700 mb-2"
+      {/* Document Verification */}
+      <div className="bg-gradient-to-r from-cyan-50 to-blue-50 rounded-xl p-6 border border-cyan-100">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            <div className="w-8 h-8 bg-cyan-100 rounded-full flex items-center justify-center">
+              <svg
+                className="w-4 h-4 text-cyan-600"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
               >
-                NIC Number <span className="text-red-500">*</span>
-              </label>
-              <Input
-                id="nicNumber"
-                placeholder="123456789V"
-                value={formData.nicNumber}
-                onChange={handleChange}
-                className={`${
-                  errors.nicNumber
-                    ? "border-red-300 focus:border-red-500"
-                    : "border-gray-300 focus:border-cyan-500"
-                } rounded-xl h-12`}
-              />
-              {errors.nicNumber && (
-                <p className="text-sm text-red-600 mt-1 flex items-center gap-1">
-                  <ExclamationTriangleIcon className="w-4 h-4" />
-                  {errors.nicNumber}
-                </p>
-              )}
-            </div>
-
-            <div>
-              <SearchableDropdown
-                label="Operating District"
-                options={districts}
-                value={formData.district}
-                onChange={(e) =>
-                  setFormData({ ...formData, district: e.target.value })
-                }
-                placeholder="Search and select your main operating district"
-                required={true}
-                error={errors.district}
-              />
-            </div>
-          </div>
-
-          {/* Location Selection */}
-          <div>
-            <MapLocationPicker
-              location={selectedLocation}
-              setLocation={setSelectedLocation}
-              coordinates={coordinates}
-              setCoordinates={setCoordinates}
-              error={errors.location}
-              label="📍 Your Location"
-              required={true}
-              placeholder="Search for your city or area"
-            />
-          </div>
-
-          {/* Guide Description */}
-          <div>
-            <label
-              htmlFor="description"
-              className="block text-sm font-medium text-gray-700 mb-2"
-            >
-              Guide Description <span className="text-red-500">*</span>
-            </label>
-            <textarea
-              id="description"
-              placeholder="Tell potential customers about your guiding experience, specialties, and what makes you unique as a camping and stargazing guide..."
-              className={`w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500 min-h-[120px] resize-none transition-all duration-200 ${
-                errors.description
-                  ? "border-red-300 focus:border-red-500 focus:ring-red-500"
-                  : "border-gray-300 focus:border-cyan-500 hover:border-gray-400"
-              }`}
-              value={formData.description}
-              onChange={handleChange}
-              maxLength={500}
-            />
-            <div className="flex justify-between items-center mt-1">
-              {errors.description ? (
-                <p className="text-sm text-red-600 flex items-center gap-1">
-                  <ExclamationTriangleIcon className="w-4 h-4" />
-                  {errors.description}
-                </p>
-              ) : (
-                <span></span>
-              )}
-              <span className="text-xs text-gray-500">
-                {formData.description.length}/500 characters
-              </span>
-            </div>
-          </div>
-
-          {/* Languages and Price */}
-          <div className="grid sm:grid-cols-2 gap-6">
-            <div>
-              <label
-                htmlFor="languages"
-                className="block text-sm font-medium text-gray-700 mb-2"
-              >
-                Languages Spoken <span className="text-red-500">*</span>
-              </label>
-              <Input
-                id="languages"
-                placeholder="English, Sinhala, Tamil..."
-                value={formData.languages}
-                onChange={handleChange}
-                className={`${
-                  errors.languages
-                    ? "border-red-300 focus:border-red-500"
-                    : "border-gray-300 focus:border-cyan-500"
-                } rounded-xl h-12`}
-              />
-              {errors.languages && (
-                <p className="text-sm text-red-600 mt-1 flex items-center gap-1">
-                  <ExclamationTriangleIcon className="w-4 h-4" />
-                  {errors.languages}
-                </p>
-              )}
-            </div>
-
-            <div>
-              <label
-                htmlFor="pricePerDay"
-                className="block text-sm font-medium text-gray-700 mb-2"
-              >
-                Price Per Day <span className="text-red-500">*</span>
-              </label>
-              <div className="flex gap-2">
-                <select
-                  id="currency"
-                  value={formData.currency}
-                  onChange={handleChange}
-                  className="border border-gray-300 rounded-xl px-3 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 bg-gray-50"
-                >
-                  {currencies.map((curr) => (
-                    <option key={curr.value} value={curr.value}>
-                      {curr.value}
-                    </option>
-                  ))}
-                </select>
-                <Input
-                  id="pricePerDay"
-                  placeholder="2500.00"
-                  value={formData.pricePerDay}
-                  onChange={handleChange}
-                  className={`${
-                    errors.pricePerDay
-                      ? "border-red-300 focus:border-red-500"
-                      : "border-gray-300 focus:border-cyan-500"
-                  } rounded-xl h-12 flex-1`}
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
                 />
-              </div>
-              {errors.pricePerDay && (
-                <p className="text-sm text-red-600 mt-1 flex items-center gap-1">
-                  <ExclamationTriangleIcon className="w-4 h-4" />
-                  {errors.pricePerDay}
-                </p>
-              )}
+              </svg>
             </div>
-          </div>
-
-          {/* Special Note */}
-          <div>
-            <label
-              htmlFor="specialNote"
-              className="block text-sm font-medium text-gray-700 mb-2"
-            >
-              Special Note <span className="text-gray-500">(Optional)</span>
-            </label>
-            <textarea
-              id="specialNote"
-              placeholder="Any special requirements, equipment you provide, group size limitations, or additional services..."
-              className="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 hover:border-gray-400 min-h-[80px] resize-none transition-all duration-200"
-              value={formData.specialNote}
-              onChange={handleChange}
-              maxLength={200}
-            />
-            <div className="text-right mt-1">
-              <span className="text-xs text-gray-500">
-                {formData.specialNote.length}/200 characters
-              </span>
-            </div>
-          </div>
-
-          {/* Service Areas */}
-          <div className="bg-gradient-to-r from-cyan-50 to-blue-50 rounded-xl p-6 border border-cyan-100">
-            <div className="mb-4">
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                🗺️ Guide Service Areas
-              </h3>
-              <p className="text-sm text-gray-600">
-                Select the locations where you provide camping and stargazing
-                guide services
-              </p>
-            </div>
-
-            <div className="grid md:grid-cols-2 gap-6">
-              <MultiSelectDropdown
-                label="Camping Destinations"
-                options={campingDestinations}
-                selected={selectedCampingDestinations}
-                setSelected={setSelectedCampingDestinations}
-                placeholder="Choose camping destinations..."
-              />
-              <MultiSelectDropdown
-                label="Stargazing Spots"
-                options={stargazingSpots}
-                selected={selectedStargazingSpots}
-                setSelected={setSelectedStargazingSpots}
-                placeholder="Choose stargazing spots..."
-              />
-            </div>
-
-            {errors.serviceAreas && (
-              <p className="text-sm text-red-600 mt-3 flex items-center gap-1">
-                <ExclamationTriangleIcon className="w-4 h-4" />
-                {errors.serviceAreas}
-              </p>
-            )}
-
-            <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-              <div className="flex items-start gap-2">
-                <InformationCircleIcon className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" />
-                <div className="text-xs text-blue-700">
-                  <p className="font-medium mb-1">Guide Service Tips:</p>
-                  <ul className="space-y-0.5 text-blue-600">
-                    <li>
-                      • Select areas where you have local knowledge and
-                      experience
-                    </li>
-                    <li>
-                      • Consider accessibility and safety of the locations
-                    </li>
-                    <li>
-                      • You can update your service areas later in your profile
-                    </li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Optional Image Uploads */}
-          <div className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-xl p-6 border border-purple-100">
-            <div className="mb-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                📸 Optional Verification Documents
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900">
+                Document Verification
               </h3>
               <p className="text-sm text-gray-600">
                 Upload photos to speed up your verification process (you can
                 skip this and add later)
               </p>
             </div>
-
-            <div className="space-y-8">
-              {/* Profile Picture */}
-              <ProfilePictureUpload
-                id="profilePicture"
-                label="Profile Picture"
-                preview={profilePreview}
-                setPreview={setProfilePreview}
-                uploadRef={profileUploadRef}
-                required={false}
-                error={errors.profilePicture}
-                onFileSelected={setProfileFile}
-              />
-
-              {/* NIC Images */}
-              <NICUpload
-                frontId="nicFrontUpload"
-                backId="nicBackUpload"
-                frontPreview={nicFrontPreview}
-                backPreview={nicBackPreview}
-                setFrontPreview={setNicFrontPreview}
-                setBackPreview={setNicBackPreview}
-                frontUploadRef={nicFrontUploadRef}
-                backUploadRef={nicBackUploadRef}
-                required={false}
-                frontError={errors.nicFrontImage}
-                backError={errors.nicBackImage}
-                onFrontFile={setNicFrontFile}
-                onBackFile={setNicBackFile}
-              />
-            </div>
           </div>
-
-          {/* Email */}
-          <div>
-            <label
-              htmlFor="email"
-              className="block text-sm font-medium text-gray-700 mb-2"
+          <div className="flex items-center space-x-3">
+            <button
+              type="button"
+              onClick={() =>
+                setShowDocumentVerification(!showDocumentVerification)
+              }
+              className="text-cyan-600 hover:text-cyan-700 text-sm font-medium flex items-center gap-1 transition-colors"
             >
-              Email Address <span className="text-red-500">*</span>
-            </label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="Enter your email address"
-              value={formData.email}
-              onChange={handleChange}
-              className={`${
-                errors.email
-                  ? "border-red-300 focus:border-red-500"
-                  : "border-gray-300 focus:border-cyan-500"
-              } rounded-xl h-12`}
-            />
-            {errors.email && (
-              <p className="text-sm text-red-600 mt-1 flex items-center gap-1">
-                <ExclamationTriangleIcon className="w-4 h-4" />
-                {errors.email}
-              </p>
-            )}
-          </div>
-
-          {/* Password Fields */}
-          <div className="grid sm:grid-cols-2 gap-6">
-            <div>
-              <label
-                htmlFor="password"
-                className="block text-sm font-medium text-gray-700 mb-2"
+              {showDocumentVerification ? "Hide" : "Show Documents"}
+              <svg
+                className={`w-4 h-4 transform transition-transform ${
+                  showDocumentVerification ? "rotate-180" : ""
+                }`}
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
               >
-                Password <span className="text-red-500">*</span>
-              </label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="Create a strong password"
-                value={formData.password}
-                onChange={handleChange}
-                className={`${
-                  errors.password
-                    ? "border-red-300 focus:border-red-500"
-                    : "border-gray-300 focus:border-cyan-500"
-                } rounded-xl h-12`}
-              />
-
-              {errors.password && (
-                <p className="text-sm text-red-600 mt-1 flex items-center gap-1">
-                  <ExclamationTriangleIcon className="w-4 h-4" />
-                  {errors.password}
-                </p>
-              )}
-            </div>
-            <div>
-              <label
-                htmlFor="confirmPassword"
-                className="block text-sm font-medium text-gray-700 mb-2"
-              >
-                Confirm Password <span className="text-red-500">*</span>
-              </label>
-              <Input
-                id="confirmPassword"
-                type="password"
-                placeholder="Confirm your password"
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                className={`${
-                  errors.confirmPassword
-                    ? "border-red-300 focus:border-red-500"
-                    : "border-gray-300 focus:border-cyan-500"
-                } rounded-xl h-12`}
-              />
-              {errors.confirmPassword && (
-                <p className="text-sm text-red-600 mt-1 flex items-center gap-1">
-                  <ExclamationTriangleIcon className="w-4 h-4" />
-                  {errors.confirmPassword}
-                </p>
-              )}
-            </div>
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M19 9l-7 7-7-7"
+                />
+              </svg>
+            </button>
           </div>
+        </div>
 
-          {/* Password Requirements */}
-          <div className="text-xs text-gray-500 bg-gray-50 rounded-lg p-3">
-            Password must be at least 8 characters with uppercase, lowercase,
-            and number
-          </div>
+        <div className="space-y-8">
+          {/* Profile Picture */}
+          <ProfilePictureUpload
+            id="profilePicture"
+            label="Profile Picture"
+            preview={profilePreview}
+            setPreview={setProfilePreview}
+            uploadRef={profileUploadRef}
+            required={false}
+            error={errors.profilePicture}
+            onFileSelected={setProfileFile}
+          />
+
+          {/* NIC Images */}
+          <NICUpload
+            frontId="nicFrontUpload"
+            backId="nicBackUpload"
+            frontPreview={nicFrontPreview}
+            backPreview={nicBackPreview}
+            setFrontPreview={setNicFrontPreview}
+            setBackPreview={setNicBackPreview}
+            frontUploadRef={nicFrontUploadRef}
+            backUploadRef={nicBackUploadRef}
+            required={false}
+            frontError={errors.nicFrontImage}
+            backError={errors.nicBackImage}
+            onFrontFile={setNicFrontFile}
+            onBackFile={setNicBackFile}
+          />
         </div>
       </div>
 
+      {/* Email */}
+      <div>
+        <label
+          htmlFor="email"
+          className="block text-sm font-medium text-gray-700 mb-2"
+        >
+          Email Address <span className="text-red-500">*</span>
+        </label>
+        <Input
+          id="email"
+          type="email"
+          placeholder="Enter your email address"
+          value={formData.email}
+          onChange={handleChange}
+          className={`${
+            errors.email
+              ? "border-red-300 focus:border-red-500"
+              : "border-gray-300 focus:border-cyan-500"
+          } rounded-xl h-12`}
+        />
+        {errors.email && (
+          <p className="text-sm text-red-600 mt-1 flex items-center gap-1">
+            <ExclamationTriangleIcon className="w-4 h-4" />
+            {errors.email}
+          </p>
+        )}
+      </div>
+
+      {/* Password Fields */}
+      <div className="grid sm:grid-cols-2 gap-6">
+        <div>
+          <label
+            htmlFor="password"
+            className="block text-sm font-medium text-gray-700 mb-2"
+          >
+            Password <span className="text-red-500">*</span>
+          </label>
+          <Input
+            id="password"
+            type="password"
+            placeholder="Create a strong password"
+            value={formData.password}
+            onChange={handleChange}
+            className={`${
+              errors.password
+                ? "border-red-300 focus:border-red-500"
+                : "border-gray-300 focus:border-cyan-500"
+            } rounded-xl h-12`}
+          />
+
+          {errors.password && (
+            <p className="text-sm text-red-600 mt-1 flex items-center gap-1">
+              <ExclamationTriangleIcon className="w-4 h-4" />
+              {errors.password}
+            </p>
+          )}
+        </div>
+        <div>
+          <label
+            htmlFor="confirmPassword"
+            className="block text-sm font-medium text-gray-700 mb-2"
+          >
+            Confirm Password <span className="text-red-500">*</span>
+          </label>
+          <Input
+            id="confirmPassword"
+            type="password"
+            placeholder="Confirm your password"
+            value={formData.confirmPassword}
+            onChange={handleChange}
+            className={`${
+              errors.confirmPassword
+                ? "border-red-300 focus:border-red-500"
+                : "border-gray-300 focus:border-cyan-500"
+            } rounded-xl h-12`}
+          />
+          {errors.confirmPassword && (
+            <p className="text-sm text-red-600 mt-1 flex items-center gap-1">
+              <ExclamationTriangleIcon className="w-4 h-4" />
+              {errors.confirmPassword}
+            </p>
+          )}
+        </div>
+      </div>
+
+      {/* Password Requirements */}
+      <div className="text-xs text-gray-500 bg-gray-50 rounded-lg p-3">
+        Password must be at least 8 characters with uppercase, lowercase, and
+        number
+      </div>
+
       {/* Terms and Conditions */}
-      <div className="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-2xl p-6 border border-blue-200">
+      <div className="bg-gradient-to-r from-cyan-50 to-blue-50 rounded-2xl p-6 border border-cyan-200">
         <div className="flex items-start gap-4">
           <input
             type="checkbox"
@@ -1445,12 +1483,40 @@ export default function GuideRegistrationForm() {
       </div>
 
       {/* Next Steps Notice */}
-      <div className="text-center bg-gradient-to-r from-emerald-50 to-green-50 rounded-lg p-4 border border-emerald-200">
+      <div className="text-center bg-gradient-to-r from-cyan-50 to-blue-50 rounded-lg p-4 border border-cyan-200">
         <div className="text-sm text-gray-700">
           <span className="font-medium">Next:</span> After registration, you'll
           access your dashboard to manage your availability, view bookings, and
           build your guide profile
         </div>
+      </div>
+
+      {/* Submit Button */}
+      <div className="text-center">
+        <Button
+          type="submit"
+          disabled={isSubmitting}
+          className="px-12 py-4 bg-cyan-600 hover:bg-cyan-700 text-white font-semibold rounded-2xl shadow-lg text-lg"
+        >
+          {isSubmitting ? (
+            <div className="flex items-center gap-3">
+              <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+              Creating Your Guide Account...
+            </div>
+          ) : (
+            "Create My Guide Account"
+          )}
+        </Button>
+
+        <p className="text-sm text-gray-500 mt-4">
+          Already have an account?{" "}
+          <Link
+            to="/login"
+            className="text-cyan-600 hover:text-cyan-700 font-medium"
+          >
+            Sign in here
+          </Link>
+        </p>
       </div>
     </div>
   );
@@ -1481,36 +1547,11 @@ export default function GuideRegistrationForm() {
           </p>
         </div>
 
-        <form onSubmit={handleSubmit}>
+        <form
+          onSubmit={handleSubmit}
+          className="bg-white rounded-2xl p-8 border border-gray-100 shadow-sm"
+        >
           {renderRegistrationForm()}
-
-          {/* Submit Button */}
-          <div className="mt-8 text-center">
-            <Button
-              type="submit"
-              disabled={isSubmitting}
-              className="px-12 py-4 bg-cyan-600 hover:bg-cyan-700 text-white font-semibold rounded-2xl shadow-lg text-lg"
-            >
-              {isSubmitting ? (
-                <div className="flex items-center gap-3">
-                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  Creating Your Guide Account...
-                </div>
-              ) : (
-                "Start My Guiding Career"
-              )}
-            </Button>
-
-            <p className="text-sm text-gray-500 mt-4">
-              Already have an account?{" "}
-              <Link
-                to="/login"
-                className="text-cyan-600 hover:text-cyan-700 font-medium"
-              >
-                Sign in here
-              </Link>
-            </p>
-          </div>
         </form>
       </div>
     </div>
