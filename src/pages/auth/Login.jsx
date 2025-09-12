@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
 import LoginImage from "../../assets/login/login.png";
 import { Link } from "react-router-dom";
 import {
@@ -10,7 +9,7 @@ import {
 
 import Button from "../../components/atoms/Button";
 import { Input } from "../../components/molecules/Input";
-import { API_ENDPOINTS } from "../../api";
+import { API } from "../../api";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -27,32 +26,36 @@ export default function LoginPage() {
     setErrors({});
 
     try {
-      const response = await axios.post(
-        API_ENDPOINTS.LOGIN,
-        { email, password },
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-          withCredentials: true,
-        }
-      );
+      const result = await API.auth.login({ email, password });
 
-      console.log("Login Response:", response.data);
+      console.log("Login Response:", result);
 
-      const result = response.data;
       if (result.success) {
-        // Store user data in localStorage for session management
+        // Store user data in localStorage for session management (normalized)
         if (result.user) {
-          localStorage.setItem("user", JSON.stringify(result.user));
+          const u = result.user || {};
+          const normalized = {
+            ...u,
+            user_role:
+              u.user_role ||
+              u.userRole ||
+              (u.role === "Customer"
+                ? "customer"
+                : u.role === "Renter" || u.role === "Guide"
+                ? "service_provider"
+                : u.role || null),
+            provider_type: u.provider_type || u.providerType || null,
+          };
+          localStorage.setItem("user", JSON.stringify(normalized));
         }
 
         // Show success message briefly
         setError("");
 
-        // Redirect to the appropriate page
-        const redirectUrl = result.data?.redirect_url || "/";
-        window.location.href = redirectUrl;
+        // Redirect using backend URL
+        const redirectUrl = result.redirect_url || "/";
+        // Force a full reload so session cookie is applied immediately
+        window.location.replace(redirectUrl);
       } else {
         setError(result.message || "Login failed");
         setErrors(result.errors || {});
@@ -61,11 +64,11 @@ export default function LoginPage() {
     } catch (err) {
       console.error("Login error:", err);
 
-      if (err.response?.data) {
-        setError(err.response.data.message || "Login failed");
-        setErrors(err.response.data.errors || {});
+      if (err.errors) {
+        setError(err.message || "Login failed");
+        setErrors(err.errors || {});
       } else {
-        setError("An error occurred. Please try again.");
+        setError(err.message || "An error occurred. Please try again.");
       }
       localStorage.removeItem("user");
     } finally {

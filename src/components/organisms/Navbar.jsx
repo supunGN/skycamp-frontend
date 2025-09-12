@@ -14,35 +14,51 @@ import {
 } from "@heroicons/react/24/outline";
 import Button from "../atoms/Button";
 import React from "react";
+import { API } from "../../api";
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [user, setUser] = useState(null);
+  const [admin, setAdmin] = useState(null);
   const [profileDropdown, setProfileDropdown] = useState(false);
 
-  // Read user from localStorage on mount
+  // Read user and admin from localStorage on mount
   React.useEffect(() => {
-    const stored = localStorage.getItem("user");
-    if (stored) {
+    const storedUser = localStorage.getItem("user");
+    const storedAdmin = localStorage.getItem("admin");
+
+    if (storedUser) {
       try {
-        setUser(JSON.parse(stored));
+        setUser(JSON.parse(storedUser));
       } catch {
         setUser(null);
       }
     } else {
       setUser(null);
     }
+
+    if (storedAdmin) {
+      try {
+        setAdmin(JSON.parse(storedAdmin));
+      } catch {
+        setAdmin(null);
+      }
+    } else {
+      setAdmin(null);
+    }
   }, []);
 
   // Logout handler
-  const handleLogout = () => {
-    const user = JSON.parse(localStorage.getItem("user"));
-    localStorage.removeItem("user");
-    if (user?.user_role === "service_provider") {
-      window.location.href = "/login";
-    } else {
-      window.location.href = "/";
+  const handleLogout = async () => {
+    try {
+      await API.auth.logout();
+    } catch (error) {
+      console.error("Logout error:", error);
+    } finally {
+      localStorage.removeItem("user");
+      // Force full reload to clear any in-memory state
+      window.location.replace("/login");
     }
   };
 
@@ -133,7 +149,18 @@ export default function Navbar() {
             <Link to="/wishlist">
               <HeartIcon className="w-6 h-6 text-gray-600 hover:text-cyan-600 cursor-pointer" />
             </Link>
-            {/* Conditional rendering for user/profile */}
+
+            {/* Admin Dashboard Switch Button */}
+            {admin && (
+              <button
+                onClick={() => (window.location.href = "/admin")}
+                className="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors text-sm font-medium"
+              >
+                Switch to Admin Dashboard
+              </button>
+            )}
+
+            {/* Conditional rendering for user/profile/admin */}
             {user ? (
               <div className="relative">
                 <button
@@ -162,6 +189,41 @@ export default function Navbar() {
                     <button
                       className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
                       onClick={handleLogout}
+                    >
+                      Log out
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : admin ? (
+              <div className="relative">
+                <button
+                  className="flex items-center focus:outline-none"
+                  onClick={() => setProfileDropdown((v) => !v)}
+                >
+                  <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                    <span className="text-blue-600 font-semibold text-sm">
+                      A
+                    </span>
+                  </div>
+                </button>
+                {profileDropdown && (
+                  <div className="absolute right-0 mt-2 w-40 bg-white border rounded shadow-lg z-50">
+                    <div className="px-4 py-2 text-gray-500 text-sm border-b">
+                      Admin User
+                    </div>
+                    <button
+                      className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
+                      onClick={async () => {
+                        try {
+                          await API.admin.logout();
+                        } catch (error) {
+                          console.error("Admin logout error:", error);
+                        } finally {
+                          localStorage.removeItem("admin");
+                          window.location.replace("/");
+                        }
+                      }}
                     >
                       Log out
                     </button>
@@ -334,6 +396,19 @@ export default function Navbar() {
               <HeartIcon className="w-6 h-6 text-gray-600" />
               <span>Wishlist</span>
             </Link>
+
+            {/* Admin Dashboard Switch Button - Mobile */}
+            {admin && (
+              <button
+                onClick={() => {
+                  setMenuOpen(false);
+                  window.location.href = "/admin";
+                }}
+                className="flex items-center justify-center w-full px-4 py-3 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors text-sm font-medium"
+              >
+                Switch to Admin Dashboard
+              </button>
+            )}
           </div>
 
           {/* Login/Profile Button */}
@@ -374,6 +449,43 @@ export default function Navbar() {
                       onClick={() => {
                         handleLogout();
                         setMenuOpen(false);
+                      }}
+                    >
+                      Log out
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : admin ? (
+              <div className="relative">
+                <button
+                  className="flex items-center w-full justify-start gap-2 px-4 py-2 bg-gray-100 rounded-lg focus:outline-none"
+                  onClick={() => setProfileDropdown((v) => !v)}
+                >
+                  <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                    <span className="text-blue-600 font-semibold text-sm">
+                      A
+                    </span>
+                  </div>
+                  <span className="text-gray-900 font-medium">Admin User</span>
+                </button>
+                {profileDropdown && (
+                  <div className="absolute left-0 mt-2 w-40 bg-white border rounded shadow-lg z-50">
+                    <div className="px-4 py-2 text-gray-500 text-sm border-b">
+                      Admin User
+                    </div>
+                    <button
+                      className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
+                      onClick={async () => {
+                        try {
+                          await API.admin.logout();
+                        } catch (error) {
+                          console.error("Admin logout error:", error);
+                        } finally {
+                          localStorage.removeItem("admin");
+                          setMenuOpen(false);
+                          window.location.replace("/");
+                        }
                       }}
                     >
                       Log out

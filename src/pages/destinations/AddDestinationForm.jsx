@@ -9,7 +9,7 @@ import Button from "../../components/atoms/Button";
 import { Input } from "../../components/molecules/Input";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import axios from "axios";
+import { API } from "../../api";
 
 export default function AddDestinationForm() {
   const [formData, setFormData] = useState({
@@ -89,14 +89,7 @@ export default function AddDestinationForm() {
     }
 
     try {
-      const response = await axios.post(
-        "http://localhost/skycamp-backend/api/add_destination.php",
-        data,
-        {
-          headers: { "Content-Type": "multipart/form-data" },
-        }
-      );
-      const result = response.data;
+      const result = await API.destinations.create(data);
       if (result.success) {
         alert("Destination added successfully!");
       } else {

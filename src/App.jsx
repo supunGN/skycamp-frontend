@@ -1,4 +1,6 @@
 import { Routes, Route, Navigate } from "react-router-dom";
+import { useEffect } from "react";
+import { API } from "./api";
 import ScrollToTop from "./components/ScrollToTop";
 import Home from "./pages/Home";
 import Rentals from "./pages/Rentals";
@@ -31,10 +33,11 @@ import SelectedIndividualRenter from "./pages/selected_individualrenter";
 import FullRenter from "./pages/FullRenter";
 import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
-import ProtectedRoute from "./components/ProtectedRoute";
 import Dashboard from "./pages/Dashboard";
 import GuideDashboard from "./pages/dashboard/guide/GuideDashboard";
 import RenterDashboard from "./pages/dashboard/renter/RenterDashboard";
+import AdminLogin from "./pages/admin/AdminLogin";
+import AdminDashboard from "./pages/admin/AdminDashboard";
 
 // Helper function to determine dashboard path
 const getDashboardPath = (user) => {
@@ -48,9 +51,64 @@ const getDashboardPath = (user) => {
   return "/";
 };
 
+// Helper function to get user from localStorage
+const getUser = () => {
+  try {
+    return JSON.parse(localStorage.getItem("user"));
+  } catch {
+    return null;
+  }
+};
+
+// Helper function to get admin from localStorage
+const getAdmin = () => {
+  try {
+    return JSON.parse(localStorage.getItem("admin"));
+  } catch {
+    return null;
+  }
+};
+
+// Helper function to check auth flow state
+const checkAuthFlowState = (pathname) => {
+  switch (pathname) {
+    case "/check-email":
+      return (
+        sessionStorage.getItem("resetEmail") ||
+        localStorage.getItem("resetEmail")
+      );
+    case "/verify-otp":
+      return (
+        sessionStorage.getItem("resetEmail") &&
+        sessionStorage.getItem("resetToken")
+      );
+    case "/set-new-password":
+      return (
+        sessionStorage.getItem("resetToken") &&
+        sessionStorage.getItem("otpVerified")
+      );
+    case "/password-reset-success":
+      return localStorage.getItem("user");
+    default:
+      return false;
+  }
+};
+
 function App() {
-  // Always fetch the latest user data from localStorage
-  const user = JSON.parse(localStorage.getItem("user"));
+  // Session restore on app mount
+  useEffect(() => {
+    // Always try to refresh session, but don't aggressively clear localStorage
+    API.auth
+      .me()
+      .then((res) => {
+        if (res?.authenticated && res?.user) {
+          localStorage.setItem("user", JSON.stringify(res.user));
+        }
+      })
+      .catch(() => {
+        // Do not clear localStorage here to avoid race after login
+      });
+  }, []);
 
   return (
     <>
@@ -63,77 +121,189 @@ function App() {
         <Route path="/destinations" element={<Destinations />} />
         <Route path="/stargazing-spots" element={<StargazingSpots />} />
         <Route path="/guides" element={<Guides />} />
-        <Route path="/login" element={<Login />} />
+        <Route
+          path="/login"
+          element={
+            getUser() ? (
+              <Navigate to={getDashboardPath(getUser())} replace />
+            ) : getAdmin() ? (
+              <Navigate to="/admin" replace />
+            ) : (
+              <Login />
+            )
+          }
+        />
         <Route path="/about" element={<AboutUs />} />
         <Route path="/terms" element={<TermsAndConditions />} />
         <Route path="/privacy" element={<PrivacyPolicy />} />
         <Route path="/faq" element={<FAQ />} />
-        <Route path="/signup" element={<SignUp />} />
-        <Route path="/signup-role-selection" element={<SignUp />} />
-        <Route path="/customer-details" element={<CustomerDetails />} />
+        <Route
+          path="/signup"
+          element={
+            getUser() ? (
+              <Navigate to={getDashboardPath(getUser())} replace />
+            ) : getAdmin() ? (
+              <Navigate to="/admin" replace />
+            ) : (
+              <SignUp />
+            )
+          }
+        />
+        <Route
+          path="/signup-role-selection"
+          element={
+            getUser() ? (
+              <Navigate to={getDashboardPath(getUser())} replace />
+            ) : getAdmin() ? (
+              <Navigate to="/admin" replace />
+            ) : (
+              <SignUp />
+            )
+          }
+        />
+        <Route
+          path="/customer-details"
+          element={
+            getUser() ? (
+              <Navigate to={getDashboardPath(getUser())} replace />
+            ) : getAdmin() ? (
+              <Navigate to="/admin" replace />
+            ) : (
+              <CustomerDetails />
+            )
+          }
+        />
         <Route
           path="/customer-registration"
-          element={<CustomerRegistration />}
-        />
-        <Route path="/renter-registration" element={<RenterRegistration />} />
-        <Route path="/guide-registration" element={<GuideRegistration />} />
-        <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route
-          path="/check-email"
           element={
-            <ProtectedRoute requireAuth={false} redirectTo="/forgot-password">
-              <CheckEmail />
-            </ProtectedRoute>
+            getUser() ? (
+              <Navigate to={getDashboardPath(getUser())} replace />
+            ) : getAdmin() ? (
+              <Navigate to="/admin" replace />
+            ) : (
+              <CustomerRegistration />
+            )
           }
         />
         <Route
-          path="/verify-otp"
+          path="/renter-registration"
           element={
-            <ProtectedRoute requireAuth={false} redirectTo="/forgot-password">
-              <OTPVerification />
-            </ProtectedRoute>
+            getUser() ? (
+              <Navigate to={getDashboardPath(getUser())} replace />
+            ) : getAdmin() ? (
+              <Navigate to="/admin" replace />
+            ) : (
+              <RenterRegistration />
+            )
           }
         />
         <Route
-          path="/set-new-password"
+          path="/guide-registration"
           element={
-            <ProtectedRoute requireAuth={false} redirectTo="/forgot-password">
-              <SetNewPassword />
-            </ProtectedRoute>
+            getUser() ? (
+              <Navigate to={getDashboardPath(getUser())} replace />
+            ) : getAdmin() ? (
+              <Navigate to="/admin" replace />
+            ) : (
+              <GuideRegistration />
+            )
           }
         />
         <Route
-          path="/password-reset-success"
+          path="/forgot-password"
           element={
-            <ProtectedRoute requireAuth={false} redirectTo="/login">
-              <PasswordResetSuccess />
-            </ProtectedRoute>
+            getUser() ? (
+              <Navigate to={getDashboardPath(getUser())} replace />
+            ) : getAdmin() ? (
+              <Navigate to="/admin" replace />
+            ) : (
+              <ForgotPassword />
+            )
           }
         />
         <Route path="/contact-us" element={<ContactUs />} />
-        <Route path="/cart" element={<Cart />} />
-        <Route
-          path="/individual-destination"
-          element={<IndividualDestination />}
-        />
-        <Route path="/wishlist" element={<Wishlist />} />
         <Route
           path="/selected_individualrenter"
           element={<SelectedIndividualRenter />}
         />
         <Route path="/fullrenter" element={<FullRenter />} />
+        <Route path="/guide/:id" element={<Guide />} />
+
+        {/* Admin Routes */}
         <Route
-          path="/individual-destination"
-          element={<IndividualDestination />}
+          path="/admin/login"
+          element={
+            getAdmin() ? (
+              <Navigate to="/admin" replace />
+            ) : getUser() ? (
+              <Navigate to={getDashboardPath(getUser())} replace />
+            ) : (
+              <AdminLogin />
+            )
+          }
+        />
+        <Route
+          path="/admin"
+          element={
+            getAdmin() ? (
+              <AdminDashboard />
+            ) : (
+              <Navigate to="/admin/login" replace />
+            )
+          }
+        />
+
+        {/* Auth Flow Routes */}
+        <Route
+          path="/check-email"
+          element={
+            checkAuthFlowState("/check-email") ? (
+              <CheckEmail />
+            ) : (
+              <Navigate to="/forgot-password" replace />
+            )
+          }
+        />
+        <Route
+          path="/verify-otp"
+          element={
+            checkAuthFlowState("/verify-otp") ? (
+              <OTPVerification />
+            ) : (
+              <Navigate to="/forgot-password" replace />
+            )
+          }
+        />
+        <Route
+          path="/set-new-password"
+          element={
+            checkAuthFlowState("/set-new-password") ? (
+              <SetNewPassword />
+            ) : (
+              <Navigate to="/forgot-password" replace />
+            )
+          }
+        />
+        <Route
+          path="/password-reset-success"
+          element={
+            checkAuthFlowState("/password-reset-success") ? (
+              <PasswordResetSuccess />
+            ) : (
+              <Navigate to="/login" replace />
+            )
+          }
         />
 
         {/* Protected Routes - Customer Only */}
         <Route
           path="/profile"
           element={
-            <ProtectedRoute allowedRoles={["customer"]}>
+            getUser()?.user_role === "customer" ? (
               <Profile />
-            </ProtectedRoute>
+            ) : (
+              <Navigate to="/login" replace />
+            )
           }
         />
 
@@ -141,46 +311,49 @@ function App() {
         <Route
           path="/dashboard/guide/*"
           element={
-            <ProtectedRoute allowedRoles={["service_provider"]}>
+            getUser()?.provider_type === "Local Guide" ? (
               <GuideDashboard />
-            </ProtectedRoute>
+            ) : (
+              <Navigate to="/login" replace />
+            )
           }
         />
 
         <Route
           path="/dashboard/renter/*"
           element={
-            <ProtectedRoute allowedRoles={["service_provider"]}>
+            getUser()?.provider_type === "Equipment Renter" ? (
               <RenterDashboard />
-            </ProtectedRoute>
+            ) : (
+              <Navigate to="/login" replace />
+            )
           }
         />
 
         {/* Protected Routes - All Authenticated Users */}
         <Route
           path="/settings"
-          element={
-            <ProtectedRoute>
-              <Settings />
-            </ProtectedRoute>
-          }
+          element={getUser() ? <Settings /> : <Navigate to="/login" replace />}
         />
 
         <Route
           path="/cart"
-          element={
-            <ProtectedRoute>
-              <Cart />
-            </ProtectedRoute>
-          }
+          element={getUser() ? <Cart /> : <Navigate to="/login" replace />}
         />
 
         <Route
           path="/wishlist"
+          element={getUser() ? <Wishlist /> : <Navigate to="/login" replace />}
+        />
+
+        <Route
+          path="/individual-destination"
           element={
-            <ProtectedRoute>
-              <Wishlist />
-            </ProtectedRoute>
+            getUser() ? (
+              <IndividualDestination />
+            ) : (
+              <Navigate to="/login" replace />
+            )
           }
         />
 
@@ -188,22 +361,21 @@ function App() {
         <Route
           path="/dashboard"
           element={
-            <ProtectedRoute>
-              <Navigate to={getDashboardPath(user)} replace />
-            </ProtectedRoute>
+            getUser() ? (
+              <Navigate to={getDashboardPath(getUser())} replace />
+            ) : (
+              <Navigate to="/login" replace />
+            )
           }
         />
 
         <Route
           path="/dashboard/*"
-          element={
-            <ProtectedRoute>
-              <Dashboard />
-            </ProtectedRoute>
-          }
+          element={getUser() ? <Dashboard /> : <Navigate to="/login" replace />}
         />
+
+        {/* 404 Route */}
         <Route path="*" element={<NotFound />} />
-        <Route path="/guide/:id" element={<Guide />} />
       </Routes>
     </>
   );

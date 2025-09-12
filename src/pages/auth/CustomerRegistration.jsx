@@ -1,5 +1,4 @@
 import React, { useState, useRef, useEffect } from "react";
-import axios from "axios";
 import {
   ArrowLeftIcon,
   CloudArrowUpIcon,
@@ -17,7 +16,7 @@ import Button from "../../components/atoms/Button";
 import { Input } from "../../components/molecules/Input";
 import MapLocationPicker from "../../components/molecules/MapLocationPicker";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { API_ENDPOINTS } from "../../api";
+import { API } from "../../api";
 
 // ---------------------------
 // ProfilePictureUpload Component - Modern UX
@@ -30,6 +29,7 @@ function ProfilePictureUpload({
   uploadRef,
   required = false,
   error = null,
+  onFileSelected,
 }) {
   const [isDragOver, setIsDragOver] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -59,6 +59,9 @@ function ProfilePictureUpload({
     }
 
     setIsLoading(true);
+
+    // Notify parent about selected file (covers click and drag-drop)
+    onFileSelected?.(file);
 
     // Simulate loading for better UX
     setTimeout(() => {
@@ -271,6 +274,8 @@ function NICUpload({
   required = false,
   frontError = null,
   backError = null,
+  onFrontFile,
+  onBackFile,
 }) {
   const [frontLoading, setFrontLoading] = useState(false);
   const [backLoading, setBackLoading] = useState(false);
@@ -300,12 +305,14 @@ function NICUpload({
     }
 
     if (side === "front") {
+      onFrontFile?.(file);
       setFrontLoading(true);
       setTimeout(() => {
         setFrontPreview(URL.createObjectURL(file));
         setFrontLoading(false);
       }, 300);
     } else {
+      onBackFile?.(file);
       setBackLoading(true);
       setTimeout(() => {
         setBackPreview(URL.createObjectURL(file));
@@ -628,7 +635,8 @@ export default function CustomerRegistrationForm() {
   const [agreeTerms, setAgreeTerms] = useState(false);
   const [travelBuddyEnabled, setTravelBuddyEnabled] = useState(false);
   const [showTravelBuddyInfo, setShowTravelBuddyInfo] = useState(false);
-  const [showDocumentVerification, setShowDocumentVerification] = useState(false);
+  const [showDocumentVerification, setShowDocumentVerification] =
+    useState(false);
 
   // Location state for MapLocationPicker
   const [selectedLocation, setSelectedLocation] = useState("");
@@ -638,6 +646,10 @@ export default function CustomerRegistrationForm() {
   const [profilePreview, setProfilePreview] = useState(null);
   const [nicFrontPreview, setNicFrontPreview] = useState(null);
   const [nicBackPreview, setNicBackPreview] = useState(null);
+  // Track actual File objects from click or drag-and-drop
+  const [profileFile, setProfileFile] = useState(null);
+  const [nicFrontFile, setNicFrontFile] = useState(null);
+  const [nicBackFile, setNicBackFile] = useState(null);
   const profileUploadRef = useRef();
   const nicFrontUploadRef = useRef();
   const nicBackUploadRef = useRef();
@@ -768,16 +780,26 @@ export default function CustomerRegistrationForm() {
       data.append("longitude", coordinates.lng);
     }
 
-    // Add image files if uploaded
-    if (profileUploadRef.current?.files[0]) {
+    // Add image files (prefer state to cover DnD; fallback to refs)
+    if (profileFile) data.append("profilePicture", profileFile);
+    else if (profileUploadRef.current?.files[0]) {
       data.append("profilePicture", profileUploadRef.current.files[0]);
     }
-    if (nicFrontUploadRef.current?.files[0]) {
+    if (nicFrontFile) data.append("nicFrontImage", nicFrontFile);
+    else if (nicFrontUploadRef.current?.files[0]) {
       data.append("nicFrontImage", nicFrontUploadRef.current.files[0]);
     }
-    if (nicBackUploadRef.current?.files[0]) {
+    if (nicBackFile) data.append("nicBackImage", nicBackFile);
+    else if (nicBackUploadRef.current?.files[0]) {
       data.append("nicBackImage", nicBackUploadRef.current.files[0]);
     }
+
+    // OPTIONAL: debug log
+    console.log("Files in FormData:", {
+      profile: profileFile?.name || profileUploadRef.current?.files[0]?.name,
+      nicFront: nicFrontFile?.name || nicFrontUploadRef.current?.files[0]?.name,
+      nicBack: nicBackFile?.name || nicBackUploadRef.current?.files[0]?.name,
+    });
 
     console.log("Submitting complete registration data:");
     for (let [key, value] of data.entries()) {
@@ -785,34 +807,41 @@ export default function CustomerRegistrationForm() {
     }
 
     try {
-      const response = await axios.post(API_ENDPOINTS.REGISTER, data, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-        withCredentials: true,
-      });
+      const result = await API.auth.register(data);
 
-      console.log("Response from backend:", response.data);
+      console.log("🔥 FULL backend response:", result);
 
-      const result = response.data;
+      console.log("Response from backend:", result);
+      console.log("Result success:", result.success);
+      console.log("Result data:", result.data);
+
       if (result.success) {
+        console.log(result.success);
         if (result.user) {
           localStorage.setItem("user", JSON.stringify(result.user));
         }
 
         // Show success message and redirect using backend URL
         alert("Welcome to SkyCamp! Your registration is complete.");
-        const redirectUrl = result.data?.redirect_url || "/profile";
-        navigate(redirectUrl);
+        const redirectUrl = result.redirect_url || "/";
+        window.location.replace(redirectUrl);
       } else {
+        console.log("Registration failed - result:", result);
         alert(result.message || "Registration failed.");
       }
     } catch (error) {
-      console.error("Registration error:", error.response?.data || error);
-      alert(
-        error.response?.data?.message ||
-          "An error occurred during registration. Please try again."
-      );
+      console.error("Registration error:", error);
+
+      // Handle validation errors
+      if (error.errors) {
+        setErrors(error.errors);
+        alert("Please fix the validation errors and try again.");
+      } else {
+        alert(
+          error.message ||
+            "An error occurred during registration. Please try again."
+        );
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -821,602 +850,597 @@ export default function CustomerRegistrationForm() {
   // Simple registration form
   const renderRegistrationForm = () => (
     <div className="space-y-6">
-          {/* Name Fields */}
-          <div className="grid sm:grid-cols-2 gap-6">
-            <div>
-              <label
-                htmlFor="firstName"
-                className="block text-sm font-medium text-gray-700 mb-2"
+      {/* Name Fields */}
+      <div className="grid sm:grid-cols-2 gap-6">
+        <div>
+          <label
+            htmlFor="firstName"
+            className="block text-sm font-medium text-gray-700 mb-2"
+          >
+            First Name <span className="text-red-500">*</span>
+          </label>
+          <Input
+            id="firstName"
+            placeholder="Enter your first name"
+            value={formData.firstName}
+            onChange={handleChange}
+            className={`${
+              errors.firstName
+                ? "border-red-300 focus:border-red-500"
+                : "border-gray-300 focus:border-cyan-500"
+            } rounded-xl h-12`}
+          />
+          {errors.firstName && (
+            <p className="text-sm text-red-600 mt-1 flex items-center gap-1">
+              <ExclamationTriangleIcon className="w-4 h-4" />
+              {errors.firstName}
+            </p>
+          )}
+        </div>
+        <div>
+          <label
+            htmlFor="lastName"
+            className="block text-sm font-medium text-gray-700 mb-2"
+          >
+            Last Name <span className="text-red-500">*</span>
+          </label>
+          <Input
+            id="lastName"
+            placeholder="Enter your last name"
+            value={formData.lastName}
+            onChange={handleChange}
+            className={`${
+              errors.lastName
+                ? "border-red-300 focus:border-red-500"
+                : "border-gray-300 focus:border-cyan-500"
+            } rounded-xl h-12`}
+          />
+          {errors.lastName && (
+            <p className="text-sm text-red-600 mt-1 flex items-center gap-1">
+              <ExclamationTriangleIcon className="w-4 h-4" />
+              {errors.lastName}
+            </p>
+          )}
+        </div>
+      </div>
+
+      {/* Date of Birth and Gender */}
+      <div className="grid sm:grid-cols-2 gap-6">
+        <div>
+          <label
+            htmlFor="dob"
+            className="block text-sm font-medium text-gray-700 mb-2"
+          >
+            Date of Birth <span className="text-red-500">*</span>
+          </label>
+          <Input
+            id="dob"
+            type="date"
+            value={formData.dob}
+            onChange={handleChange}
+            className={`${
+              errors.dob
+                ? "border-red-300 focus:border-red-500"
+                : "border-gray-300 focus:border-cyan-500"
+            } rounded-xl h-12`}
+          />
+          {errors.dob && (
+            <p className="text-sm text-red-600 mt-1 flex items-center gap-1">
+              <ExclamationTriangleIcon className="w-4 h-4" />
+              {errors.dob}
+            </p>
+          )}
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Gender <span className="text-red-500">*</span>
+          </label>
+          <div className="flex gap-3">
+            {["Male", "Female", "Other"].map((option) => (
+              <button
+                key={option}
+                type="button"
+                onClick={() => setGender(option)}
+                className={`flex-1 py-3 px-4 rounded-xl text-sm font-medium transition-all duration-200 ${
+                  gender === option
+                    ? "bg-cyan-600 text-white shadow-md"
+                    : "bg-gray-50 text-gray-700 hover:bg-gray-100 border border-gray-200"
+                }`}
               >
-                First Name <span className="text-red-500">*</span>
-              </label>
-              <Input
-                id="firstName"
-                placeholder="Enter your first name"
-                value={formData.firstName}
-                onChange={handleChange}
-                className={`${
-                  errors.firstName
-                    ? "border-red-300 focus:border-red-500"
-                    : "border-gray-300 focus:border-cyan-500"
-                } rounded-xl h-12`}
-              />
-              {errors.firstName && (
-                <p className="text-sm text-red-600 mt-1 flex items-center gap-1">
-                  <ExclamationTriangleIcon className="w-4 h-4" />
-                  {errors.firstName}
-                </p>
-              )}
-            </div>
-            <div>
-              <label
-                htmlFor="lastName"
-                className="block text-sm font-medium text-gray-700 mb-2"
-              >
-                Last Name <span className="text-red-500">*</span>
-              </label>
-              <Input
-                id="lastName"
-                placeholder="Enter your last name"
-                value={formData.lastName}
-                onChange={handleChange}
-                className={`${
-                  errors.lastName
-                    ? "border-red-300 focus:border-red-500"
-                    : "border-gray-300 focus:border-cyan-500"
-                } rounded-xl h-12`}
-              />
-              {errors.lastName && (
-                <p className="text-sm text-red-600 mt-1 flex items-center gap-1">
-                  <ExclamationTriangleIcon className="w-4 h-4" />
-                  {errors.lastName}
-                </p>
-              )}
-            </div>
+                {option}
+              </button>
+            ))}
           </div>
+          {errors.gender && (
+            <p className="text-sm text-red-600 mt-1 flex items-center gap-1">
+              <ExclamationTriangleIcon className="w-4 h-4" />
+              {errors.gender}
+            </p>
+          )}
+        </div>
+      </div>
 
-          {/* Date of Birth and Gender */}
-          <div className="grid sm:grid-cols-2 gap-6">
-            <div>
-              <label
-                htmlFor="dob"
-                className="block text-sm font-medium text-gray-700 mb-2"
+      {/* Phone Number and NIC Number */}
+      <div className="grid sm:grid-cols-2 gap-6">
+        <div>
+          <label
+            htmlFor="phoneNumber"
+            className="block text-sm font-medium text-gray-700 mb-2"
+          >
+            Phone Number <span className="text-red-500">*</span>
+          </label>
+          <Input
+            id="phoneNumber"
+            placeholder="0771234567"
+            value={formData.phoneNumber}
+            onChange={handleChange}
+            className={`${
+              errors.phoneNumber
+                ? "border-red-300 focus:border-red-500"
+                : "border-gray-300 focus:border-cyan-500"
+            } rounded-xl h-12`}
+          />
+          {errors.phoneNumber && (
+            <p className="text-sm text-red-600 mt-1 flex items-center gap-1">
+              <ExclamationTriangleIcon className="w-4 h-4" />
+              {errors.phoneNumber}
+            </p>
+          )}
+        </div>
+        <div>
+          <label
+            htmlFor="nicNumber"
+            className="block text-sm font-medium text-gray-700 mb-2"
+          >
+            NIC Number <span className="text-red-500">*</span>
+          </label>
+          <Input
+            id="nicNumber"
+            placeholder="123456789V"
+            value={formData.nicNumber}
+            onChange={handleChange}
+            className={`${
+              errors.nicNumber
+                ? "border-red-300 focus:border-red-500"
+                : "border-gray-300 focus:border-cyan-500"
+            } rounded-xl h-12`}
+          />
+          {errors.nicNumber && (
+            <p className="text-sm text-red-600 mt-1 flex items-center gap-1">
+              <ExclamationTriangleIcon className="w-4 h-4" />
+              {errors.nicNumber}
+            </p>
+          )}
+        </div>
+      </div>
+
+      {/* Home Address */}
+      <div>
+        <label
+          htmlFor="homeAddress"
+          className="block text-sm font-medium text-gray-700 mb-2"
+        >
+          Home Address <span className="text-red-500">*</span>
+        </label>
+        <textarea
+          id="homeAddress"
+          placeholder="Enter your complete postal address"
+          className={`w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500 min-h-[100px] resize-none transition-all duration-200 ${
+            errors.homeAddress
+              ? "border-red-300 focus:border-red-500 focus:ring-red-500"
+              : "border-gray-300 focus:border-cyan-500 hover:border-gray-400"
+          }`}
+          value={formData.homeAddress}
+          onChange={handleChange}
+        />
+        {errors.homeAddress && (
+          <p className="text-sm text-red-600 mt-1 flex items-center gap-1">
+            <ExclamationTriangleIcon className="w-4 h-4" />
+            {errors.homeAddress}
+          </p>
+        )}
+      </div>
+
+      {/* Location Selection */}
+      <div>
+        <MapLocationPicker
+          location={selectedLocation}
+          setLocation={setSelectedLocation}
+          coordinates={coordinates}
+          setCoordinates={setCoordinates}
+          error={errors.location}
+          label="📍 Your Location"
+          required={true}
+          placeholder="Search for your city or area"
+        />
+      </div>
+
+      {/* Travel Buddy Section */}
+      <div className="bg-gradient-to-r from-cyan-50 to-blue-50 rounded-xl p-6 border border-cyan-100">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            <div className="w-8 h-8 bg-cyan-100 rounded-full flex items-center justify-center">
+              <svg
+                className="w-4 h-4 text-cyan-600"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
               >
-                Date of Birth <span className="text-red-500">*</span>
-              </label>
-              <Input
-                id="dob"
-                type="date"
-                value={formData.dob}
-                onChange={handleChange}
-                className={`${
-                  errors.dob
-                    ? "border-red-300 focus:border-red-500"
-                    : "border-gray-300 focus:border-cyan-500"
-                } rounded-xl h-12`}
-              />
-              {errors.dob && (
-                <p className="text-sm text-red-600 mt-1 flex items-center gap-1">
-                  <ExclamationTriangleIcon className="w-4 h-4" />
-                  {errors.dob}
-                </p>
-              )}
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Gender <span className="text-red-500">*</span>
-              </label>
-              <div className="flex gap-3">
-                {["Male", "Female", "Other"].map((option) => (
-                  <button
-                    key={option}
-                    type="button"
-                    onClick={() => setGender(option)}
-                    className={`flex-1 py-3 px-4 rounded-xl text-sm font-medium transition-all duration-200 ${
-                      gender === option
-                        ? "bg-cyan-600 text-white shadow-md"
-                        : "bg-gray-50 text-gray-700 hover:bg-gray-100 border border-gray-200"
-                    }`}
-                  >
-                    {option}
-                  </button>
-                ))}
-              </div>
-              {errors.gender && (
-                <p className="text-sm text-red-600 mt-1 flex items-center gap-1">
-                  <ExclamationTriangleIcon className="w-4 h-4" />
-                  {errors.gender}
-                </p>
-              )}
-            </div>
-          </div>
-
-          {/* Phone Number and NIC Number */}
-          <div className="grid sm:grid-cols-2 gap-6">
-            <div>
-              <label
-                htmlFor="phoneNumber"
-                className="block text-sm font-medium text-gray-700 mb-2"
-              >
-                Phone Number <span className="text-red-500">*</span>
-              </label>
-              <Input
-                id="phoneNumber"
-                placeholder="0771234567"
-                value={formData.phoneNumber}
-                onChange={handleChange}
-                className={`${
-                  errors.phoneNumber
-                    ? "border-red-300 focus:border-red-500"
-                    : "border-gray-300 focus:border-cyan-500"
-                } rounded-xl h-12`}
-              />
-              {errors.phoneNumber && (
-                <p className="text-sm text-red-600 mt-1 flex items-center gap-1">
-                  <ExclamationTriangleIcon className="w-4 h-4" />
-                  {errors.phoneNumber}
-                </p>
-              )}
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"
+                />
+              </svg>
             </div>
             <div>
-              <label
-                htmlFor="nicNumber"
-                className="block text-sm font-medium text-gray-700 mb-2"
-              >
-                NIC Number <span className="text-red-500">*</span>
-              </label>
-              <Input
-                id="nicNumber"
-                placeholder="123456789V"
-                value={formData.nicNumber}
-                onChange={handleChange}
-                className={`${
-                  errors.nicNumber
-                    ? "border-red-300 focus:border-red-500"
-                    : "border-gray-300 focus:border-cyan-500"
-                } rounded-xl h-12`}
-              />
-              {errors.nicNumber && (
-                <p className="text-sm text-red-600 mt-1 flex items-center gap-1">
-                  <ExclamationTriangleIcon className="w-4 h-4" />
-                  {errors.nicNumber}
-                </p>
-              )}
-            </div>
-          </div>
-
-          {/* Home Address */}
-          <div>
-            <label
-              htmlFor="homeAddress"
-              className="block text-sm font-medium text-gray-700 mb-2"
-            >
-              Home Address <span className="text-red-500">*</span>
-            </label>
-            <textarea
-              id="homeAddress"
-              placeholder="Enter your complete postal address"
-              className={`w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500 min-h-[100px] resize-none transition-all duration-200 ${
-                errors.homeAddress
-                  ? "border-red-300 focus:border-red-500 focus:ring-red-500"
-                  : "border-gray-300 focus:border-cyan-500 hover:border-gray-400"
-              }`}
-              value={formData.homeAddress}
-              onChange={handleChange}
-            />
-            {errors.homeAddress && (
-              <p className="text-sm text-red-600 mt-1 flex items-center gap-1">
-                <ExclamationTriangleIcon className="w-4 h-4" />
-                {errors.homeAddress}
+              <h3 className="text-lg font-semibold text-gray-900">
+                Travel Buddy
+              </h3>
+              <p className="text-sm text-gray-600">
+                Connect with fellow campers
               </p>
-            )}
-          </div>
-
-          {/* Location Selection */}
-          <div>
-            <MapLocationPicker
-              location={selectedLocation}
-              setLocation={setSelectedLocation}
-              coordinates={coordinates}
-              setCoordinates={setCoordinates}
-              error={errors.location}
-              label="📍 Your Location"
-              required={true}
-              placeholder="Search for your city or area"
-            />
-          </div>
-
-          {/* Travel Buddy Section */}
-          <div className="bg-gradient-to-r from-cyan-50 to-blue-50 rounded-xl p-6 border border-cyan-100">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 bg-cyan-100 rounded-full flex items-center justify-center">
-                  <svg
-                    className="w-4 h-4 text-cyan-600"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"
-                    />
-                  </svg>
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900">
-                    Travel Buddy
-                  </h3>
-                  <p className="text-sm text-gray-600">
-                    Connect with fellow campers
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-center space-x-3">
-                <button
-                  type="button"
-                  onClick={() => setShowTravelBuddyInfo(!showTravelBuddyInfo)}
-                  className="text-cyan-600 hover:text-cyan-700 text-sm font-medium flex items-center gap-1 transition-colors"
-                >
-                  {showTravelBuddyInfo ? "Hide" : "Learn More"}
-                  <svg
-                    className={`w-4 h-4 transform transition-transform ${
-                      showTravelBuddyInfo ? "rotate-180" : ""
-                    }`}
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M19 9l-7 7-7-7"
-                    />
-                  </svg>
-                </button>
-                <label className="relative inline-flex items-center cursor-pointer">
-                  <input
-                    type="checkbox"
-                    className="sr-only peer"
-                    checked={travelBuddyEnabled}
-                    onChange={(e) => setTravelBuddyEnabled(e.target.checked)}
-                  />
-                  <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-cyan-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-cyan-600"></div>
-                </label>
-              </div>
             </div>
-
-            {/* Expandable Information */}
-            {showTravelBuddyInfo && (
-              <div className="mt-4 pt-4 border-t border-cyan-200 animate-in slide-in-from-top duration-200">
-                <div className="bg-white rounded-lg p-4 shadow-sm">
-                  <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                    <svg
-                      className="w-5 h-5 text-cyan-600"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                      />
-                    </svg>
-                    Travel Buddy – How It Works
-                  </h4>
-                  <div className="space-y-3 text-sm text-gray-700">
-                    <p className="leading-relaxed">
-                      Any registered customer can enable the Travel Buddy
-                      option. To use it, you must be a verified customer by
-                      uploading your NIC images within 3 days. Once verified,
-                      you can:
-                    </p>
-                    <ul className="space-y-2 ml-4">
-                      <li className="flex items-start gap-3">
-                        <div className="w-1.5 h-1.5 bg-cyan-500 rounded-full mt-2 flex-shrink-0"></div>
-                        <span>
-                          Share your upcoming travel plans with the community
-                        </span>
-                      </li>
-                      <li className="flex items-start gap-3">
-                        <div className="w-1.5 h-1.5 bg-cyan-500 rounded-full mt-2 flex-shrink-0"></div>
-                        <span>
-                          Set the amount needed for the trip and budget details
-                        </span>
-                      </li>
-                      <li className="flex items-start gap-3">
-                        <div className="w-1.5 h-1.5 bg-cyan-500 rounded-full mt-2 flex-shrink-0"></div>
-                        <span>
-                          Allow interested campers to join your adventure
-                        </span>
-                      </li>
-                      <li className="flex items-start gap-3">
-                        <div className="w-1.5 h-1.5 bg-cyan-500 rounded-full mt-2 flex-shrink-0"></div>
-                        <span>
-                          Chat together in a group to plan your journey
-                        </span>
-                      </li>
-                    </ul>
-                    <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                      <p className="text-blue-800 text-xs">
-                        <strong>Note:</strong> You can enable or disable Travel
-                        Buddy anytime from your profile settings. Verification
-                        is required to access full features.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
           </div>
-
-          {/* Document Verification */}
-          <div className="bg-gradient-to-r from-cyan-50 to-blue-50 rounded-xl p-6 border border-cyan-100">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 bg-cyan-100 rounded-full flex items-center justify-center">
-                  <svg
-                    className="w-4 h-4 text-cyan-600"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                    />
-                  </svg>
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900">
-                    Document Verification
-                  </h3>
-                  <p className="text-sm text-gray-600">
-                    Upload photos to speed up your verification process (you can
-                    skip this and add later)
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-center space-x-3">
-                <button
-                  type="button"
-                  onClick={() => setShowDocumentVerification(!showDocumentVerification)}
-                  className="text-cyan-600 hover:text-cyan-700 text-sm font-medium flex items-center gap-1 transition-colors"
-                >
-                  {showDocumentVerification ? "Hide" : "Show Documents"}
-                  <svg
-                    className={`w-4 h-4 transform transition-transform ${
-                      showDocumentVerification ? "rotate-180" : ""
-                    }`}
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M19 9l-7 7-7-7"
-                    />
-                  </svg>
-                </button>
-              </div>
-            </div>
-
-            {/* Expandable Document Upload */}
-            {showDocumentVerification && (
-              <div className="mt-6 pt-6 border-t border-cyan-200 animate-in slide-in-from-top duration-200">
-                <div className="space-y-8">
-                  {/* Profile Picture */}
-                  <ProfilePictureUpload
-                    id="profileUpload"
-                    label="Profile Picture"
-                    preview={profilePreview}
-                    setPreview={setProfilePreview}
-                    uploadRef={profileUploadRef}
-                    required={false}
-                    error={errors.profilePicture}
-                  />
-
-                  {/* NIC Images */}
-                  <NICUpload
-                    frontId="nicFrontUpload"
-                    backId="nicBackUpload"
-                    frontPreview={nicFrontPreview}
-                    backPreview={nicBackPreview}
-                    setFrontPreview={setNicFrontPreview}
-                    setBackPreview={setNicBackPreview}
-                    frontUploadRef={nicFrontUploadRef}
-                    backUploadRef={nicBackUploadRef}
-                    required={false}
-                    frontError={errors.nicFrontImage}
-                    backError={errors.nicBackImage}
-                  />
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Email */}
-          <div>
-            <label
-              htmlFor="email"
-              className="block text-sm font-medium text-gray-700 mb-2"
+          <div className="flex items-center space-x-3">
+            <button
+              type="button"
+              onClick={() => setShowTravelBuddyInfo(!showTravelBuddyInfo)}
+              className="text-cyan-600 hover:text-cyan-700 text-sm font-medium flex items-center gap-1 transition-colors"
             >
-              Email Address <span className="text-red-500">*</span>
-            </label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="Enter your email address"
-              value={formData.email}
-              onChange={handleChange}
-              className={`${
-                errors.email
-                  ? "border-red-300 focus:border-red-500"
-                  : "border-gray-300 focus:border-cyan-500"
-              } rounded-xl h-12`}
-            />
-            {errors.email && (
-              <p className="text-sm text-red-600 mt-1 flex items-center gap-1">
-                <ExclamationTriangleIcon className="w-4 h-4" />
-                {errors.email}
-              </p>
-            )}
-          </div>
-
-          {/* Password Fields */}
-          <div className="grid sm:grid-cols-2 gap-6">
-            <div>
-              <label
-                htmlFor="password"
-                className="block text-sm font-medium text-gray-700 mb-2"
+              {showTravelBuddyInfo ? "Hide" : "Learn More"}
+              <svg
+                className={`w-4 h-4 transform transition-transform ${
+                  showTravelBuddyInfo ? "rotate-180" : ""
+                }`}
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
               >
-                Password <span className="text-red-500">*</span>
-              </label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="Create a strong password"
-                value={formData.password}
-                onChange={handleChange}
-                className={`${
-                  errors.password
-                    ? "border-red-300 focus:border-red-500"
-                    : "border-gray-300 focus:border-cyan-500"
-                } rounded-xl h-12`}
-              />
-
-              {errors.password && (
-                <p className="text-sm text-red-600 mt-1 flex items-center gap-1">
-                  <ExclamationTriangleIcon className="w-4 h-4" />
-                  {errors.password}
-                </p>
-              )}
-            </div>
-            <div>
-              <label
-                htmlFor="confirmPassword"
-                className="block text-sm font-medium text-gray-700 mb-2"
-              >
-                Confirm Password <span className="text-red-500">*</span>
-              </label>
-              <Input
-                id="confirmPassword"
-                type="password"
-                placeholder="Confirm your password"
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                className={`${
-                  errors.confirmPassword
-                    ? "border-red-300 focus:border-red-500"
-                    : "border-gray-300 focus:border-cyan-500"
-                } rounded-xl h-12`}
-              />
-              {errors.confirmPassword && (
-                <p className="text-sm text-red-600 mt-1 flex items-center gap-1">
-                  <ExclamationTriangleIcon className="w-4 h-4" />
-                  {errors.confirmPassword}
-                </p>
-              )}
-            </div>
-          </div>
-
-          {/* Password Requirements */}
-          <div className="text-xs text-gray-500 bg-gray-50 rounded-lg p-3">
-            Password must be at least 8 characters with uppercase, lowercase,
-            and number
-          </div>
-
-          {/* Terms and Conditions */}
-          <div className="bg-gradient-to-r from-cyan-50 to-blue-50 rounded-2xl p-6 border border-cyan-200">
-            <div className="flex items-start gap-4">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M19 9l-7 7-7-7"
+                />
+              </svg>
+            </button>
+            <label className="relative inline-flex items-center cursor-pointer">
               <input
                 type="checkbox"
-                id="terms"
-                checked={agreeTerms}
-                onChange={(e) => setAgreeTerms(e.target.checked)}
-                className="w-5 h-5 text-cyan-600 border-gray-300 rounded-lg focus:ring-cyan-500 mt-1 flex-shrink-0"
+                className="sr-only peer"
+                checked={travelBuddyEnabled}
+                onChange={(e) => setTravelBuddyEnabled(e.target.checked)}
               />
-              <div className="flex-1">
-                <label
-                  htmlFor="terms"
-                  className="text-sm text-gray-800 leading-relaxed"
+              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-cyan-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-cyan-600"></div>
+            </label>
+          </div>
+        </div>
+
+        {/* Expandable Information */}
+        {showTravelBuddyInfo && (
+          <div className="mt-4 pt-4 border-t border-cyan-200 animate-in slide-in-from-top duration-200">
+            <div className="bg-white rounded-lg p-4 shadow-sm">
+              <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                <svg
+                  className="w-5 h-5 text-cyan-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
                 >
-                  I agree to SkyCamp's{" "}
-                  <a
-                    href="/terms"
-                    className="text-cyan-600 hover:text-cyan-700 underline font-medium"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    Terms and Conditions
-                  </a>{" "}
-                  and{" "}
-                  <a
-                    href="/privacy"
-                    className="text-cyan-600 hover:text-cyan-700 underline font-medium"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    Privacy Policy
-                  </a>
-                  . I understand that my information will be securely stored and
-                  used to enhance my SkyCamp experience.
-                </label>
-                {errors.terms && (
-                  <p className="text-sm text-red-600 mt-2 flex items-center gap-2">
-                    <ExclamationTriangleIcon className="w-4 h-4" />
-                    {errors.terms}
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+                Travel Buddy – How It Works
+              </h4>
+              <div className="space-y-3 text-sm text-gray-700">
+                <p className="leading-relaxed">
+                  Any registered customer can enable the Travel Buddy option. To
+                  use it, you must be a verified customer by uploading your NIC
+                  images within 3 days. Once verified, you can:
+                </p>
+                <ul className="space-y-2 ml-4">
+                  <li className="flex items-start gap-3">
+                    <div className="w-1.5 h-1.5 bg-cyan-500 rounded-full mt-2 flex-shrink-0"></div>
+                    <span>
+                      Share your upcoming travel plans with the community
+                    </span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <div className="w-1.5 h-1.5 bg-cyan-500 rounded-full mt-2 flex-shrink-0"></div>
+                    <span>
+                      Set the amount needed for the trip and budget details
+                    </span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <div className="w-1.5 h-1.5 bg-cyan-500 rounded-full mt-2 flex-shrink-0"></div>
+                    <span>Allow interested campers to join your adventure</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <div className="w-1.5 h-1.5 bg-cyan-500 rounded-full mt-2 flex-shrink-0"></div>
+                    <span>Chat together in a group to plan your journey</span>
+                  </li>
+                </ul>
+                <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                  <p className="text-blue-800 text-xs">
+                    <strong>Note:</strong> You can enable or disable Travel
+                    Buddy anytime from your profile settings. Verification is
+                    required to access full features.
                   </p>
-                )}
+                </div>
               </div>
             </div>
           </div>
+        )}
+      </div>
 
-          {/* Next Steps Notice */}
-          <div className="text-center bg-gradient-to-r from-cyan-50 to-blue-50 rounded-lg p-4 border border-cyan-200">
-            <div className="text-sm text-gray-700">
-              <span className="font-medium">Next:</span> After registration, you'll
-              complete your profile with contact details and preferences
+      {/* Document Verification */}
+      <div className="bg-gradient-to-r from-cyan-50 to-blue-50 rounded-xl p-6 border border-cyan-100">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            <div className="w-8 h-8 bg-cyan-100 rounded-full flex items-center justify-center">
+              <svg
+                className="w-4 h-4 text-cyan-600"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                />
+              </svg>
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900">
+                Document Verification
+              </h3>
+              <p className="text-sm text-gray-600">
+                Upload photos to speed up your verification process (you can
+                skip this and add later)
+              </p>
             </div>
           </div>
-
-          {/* Submit Button */}
-          <div className="text-center">
-            <Button
-              type="submit"
-              disabled={isSubmitting}
-              className="px-12 py-4 bg-cyan-600 hover:bg-cyan-700 text-white font-semibold rounded-2xl shadow-lg text-lg"
+          <div className="flex items-center space-x-3">
+            <button
+              type="button"
+              onClick={() =>
+                setShowDocumentVerification(!showDocumentVerification)
+              }
+              className="text-cyan-600 hover:text-cyan-700 text-sm font-medium flex items-center gap-1 transition-colors"
             >
-              {isSubmitting ? (
-                <div className="flex items-center gap-3">
-                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  Creating Your Account...
-                </div>
-              ) : (
-                "Create My SkyCamp Account"
-              )}
-            </Button>
-
-            <p className="text-sm text-gray-500 mt-4">
-              Already have an account?{" "}
-              <Link
-                to="/login"
-                className="text-cyan-600 hover:text-cyan-700 font-medium"
+              {showDocumentVerification ? "Hide" : "Show Documents"}
+              <svg
+                className={`w-4 h-4 transform transition-transform ${
+                  showDocumentVerification ? "rotate-180" : ""
+                }`}
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
               >
-                Sign in here
-              </Link>
-            </p>
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M19 9l-7 7-7-7"
+                />
+              </svg>
+            </button>
           </div>
+        </div>
+
+        <div className="space-y-8">
+          {/* Profile Picture */}
+          <ProfilePictureUpload
+            id="profilePicture"
+            label="Profile Picture"
+            preview={profilePreview}
+            setPreview={setProfilePreview}
+            uploadRef={profileUploadRef}
+            required={false}
+            error={errors.profilePicture}
+            onFileSelected={setProfileFile}
+          />
+
+          {/* NIC Images */}
+          <NICUpload
+            frontId="nicFrontUpload"
+            backId="nicBackUpload"
+            frontPreview={nicFrontPreview}
+            backPreview={nicBackPreview}
+            setFrontPreview={setNicFrontPreview}
+            setBackPreview={setNicBackPreview}
+            frontUploadRef={nicFrontUploadRef}
+            backUploadRef={nicBackUploadRef}
+            required={false}
+            frontError={errors.nicFrontImage}
+            backError={errors.nicBackImage}
+            onFrontFile={setNicFrontFile}
+            onBackFile={setNicBackFile}
+          />
+        </div>
+      </div>
+
+      {/* Email */}
+      <div>
+        <label
+          htmlFor="email"
+          className="block text-sm font-medium text-gray-700 mb-2"
+        >
+          Email Address <span className="text-red-500">*</span>
+        </label>
+        <Input
+          id="email"
+          type="email"
+          placeholder="Enter your email address"
+          value={formData.email}
+          onChange={handleChange}
+          className={`${
+            errors.email
+              ? "border-red-300 focus:border-red-500"
+              : "border-gray-300 focus:border-cyan-500"
+          } rounded-xl h-12`}
+        />
+        {errors.email && (
+          <p className="text-sm text-red-600 mt-1 flex items-center gap-1">
+            <ExclamationTriangleIcon className="w-4 h-4" />
+            {errors.email}
+          </p>
+        )}
+      </div>
+
+      {/* Password Fields */}
+      <div className="grid sm:grid-cols-2 gap-6">
+        <div>
+          <label
+            htmlFor="password"
+            className="block text-sm font-medium text-gray-700 mb-2"
+          >
+            Password <span className="text-red-500">*</span>
+          </label>
+          <Input
+            id="password"
+            type="password"
+            placeholder="Create a strong password"
+            value={formData.password}
+            onChange={handleChange}
+            className={`${
+              errors.password
+                ? "border-red-300 focus:border-red-500"
+                : "border-gray-300 focus:border-cyan-500"
+            } rounded-xl h-12`}
+          />
+
+          {errors.password && (
+            <p className="text-sm text-red-600 mt-1 flex items-center gap-1">
+              <ExclamationTriangleIcon className="w-4 h-4" />
+              {errors.password}
+            </p>
+          )}
+        </div>
+        <div>
+          <label
+            htmlFor="confirmPassword"
+            className="block text-sm font-medium text-gray-700 mb-2"
+          >
+            Confirm Password <span className="text-red-500">*</span>
+          </label>
+          <Input
+            id="confirmPassword"
+            type="password"
+            placeholder="Confirm your password"
+            value={formData.confirmPassword}
+            onChange={handleChange}
+            className={`${
+              errors.confirmPassword
+                ? "border-red-300 focus:border-red-500"
+                : "border-gray-300 focus:border-cyan-500"
+            } rounded-xl h-12`}
+          />
+          {errors.confirmPassword && (
+            <p className="text-sm text-red-600 mt-1 flex items-center gap-1">
+              <ExclamationTriangleIcon className="w-4 h-4" />
+              {errors.confirmPassword}
+            </p>
+          )}
+        </div>
+      </div>
+
+      {/* Password Requirements */}
+      <div className="text-xs text-gray-500 bg-gray-50 rounded-lg p-3">
+        Password must be at least 8 characters with uppercase, lowercase, and
+        number
+      </div>
+
+      {/* Terms and Conditions */}
+      <div className="bg-gradient-to-r from-cyan-50 to-blue-50 rounded-2xl p-6 border border-cyan-200">
+        <div className="flex items-start gap-4">
+          <input
+            type="checkbox"
+            id="terms"
+            checked={agreeTerms}
+            onChange={(e) => setAgreeTerms(e.target.checked)}
+            className="w-5 h-5 text-cyan-600 border-gray-300 rounded-lg focus:ring-cyan-500 mt-1 flex-shrink-0"
+          />
+          <div className="flex-1">
+            <label
+              htmlFor="terms"
+              className="text-sm text-gray-800 leading-relaxed"
+            >
+              I agree to SkyCamp's{" "}
+              <a
+                href="/terms"
+                className="text-cyan-600 hover:text-cyan-700 underline font-medium"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Terms and Conditions
+              </a>{" "}
+              and{" "}
+              <a
+                href="/privacy"
+                className="text-cyan-600 hover:text-cyan-700 underline font-medium"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Privacy Policy
+              </a>
+              . I understand that my information will be securely stored and
+              used to enhance my SkyCamp experience.
+            </label>
+            {errors.terms && (
+              <p className="text-sm text-red-600 mt-2 flex items-center gap-2">
+                <ExclamationTriangleIcon className="w-4 h-4" />
+                {errors.terms}
+              </p>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Next Steps Notice */}
+      <div className="text-center bg-gradient-to-r from-cyan-50 to-blue-50 rounded-lg p-4 border border-cyan-200">
+        <div className="text-sm text-gray-700">
+          <span className="font-medium">Next:</span> After registration, you'll
+          complete your profile with contact details and preferences
+        </div>
+      </div>
+
+      {/* Submit Button */}
+      <div className="text-center">
+        <Button
+          type="submit"
+          disabled={isSubmitting}
+          className="px-12 py-4 bg-cyan-600 hover:bg-cyan-700 text-white font-semibold rounded-2xl shadow-lg text-lg"
+        >
+          {isSubmitting ? (
+            <div className="flex items-center gap-3">
+              <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+              Creating Your Account...
+            </div>
+          ) : (
+            "Create My SkyCamp Account"
+          )}
+        </Button>
+
+        <p className="text-sm text-gray-500 mt-4">
+          Already have an account?{" "}
+          <Link
+            to="/login"
+            className="text-cyan-600 hover:text-cyan-700 font-medium"
+          >
+            Sign in here
+          </Link>
+        </p>
+      </div>
     </div>
   );
 
@@ -2211,7 +2235,10 @@ export default function CustomerRegistrationForm() {
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="bg-white rounded-2xl p-8 border border-gray-100 shadow-sm">
+        <form
+          onSubmit={handleSubmit}
+          className="bg-white rounded-2xl p-8 border border-gray-100 shadow-sm"
+        >
           {renderRegistrationForm()}
         </form>
       </div>

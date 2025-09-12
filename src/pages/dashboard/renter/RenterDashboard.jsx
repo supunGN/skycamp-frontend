@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import {
   Routes,
   Route,
@@ -71,23 +71,7 @@ export default function RenterDashboard() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const {
-    name: userName,
-    email: userEmail,
-    user_role,
-    provider_type,
-  } = getUserInfo();
-
-  // Protect dashboard access
-  useEffect(() => {
-    if (
-      !user_role ||
-      user_role !== "service_provider" ||
-      provider_type !== "Equipment Renter"
-    ) {
-      navigate("/login", { replace: true });
-    }
-  }, [navigate, user_role, provider_type]);
+  const { name: userName, email: userEmail } = getUserInfo();
 
   const activeMenu =
     menuItems.find((item) => location.pathname.startsWith(item.path))?.name ||

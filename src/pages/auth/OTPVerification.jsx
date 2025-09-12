@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { ArrowLeftIcon, ShieldCheckIcon } from "@heroicons/react/24/outline";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import Button from "../../components/atoms/Button";
+import { API } from "../../api";
 
 export default function OTPVerification() {
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
@@ -93,21 +94,7 @@ export default function OTPVerification() {
     setError("");
 
     try {
-      const response = await fetch(
-        "http://localhost/skycamp/skycamp-backend/api/auth/password/verify-otp.php",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/x-www-form-urlencoded",
-          },
-          body: new URLSearchParams({
-            token: token,
-            otp: otpCode,
-          }),
-        }
-      );
-
-      const data = await response.json();
+      const data = await API.auth.verifyOtp({ token, otp: otpCode });
 
       if (data.success) {
         // Store token and verification status
@@ -143,20 +130,7 @@ export default function OTPVerification() {
     setError("");
 
     try {
-      const response = await fetch(
-        "http://localhost/skycamp/skycamp-backend/api/auth/password/forgot.php",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/x-www-form-urlencoded",
-          },
-          body: new URLSearchParams({
-            email: email,
-          }),
-        }
-      );
-
-      const data = await response.json();
+      const data = await API.auth.forgotPassword(email);
 
       if (data.success) {
         // Reset timer and OTP

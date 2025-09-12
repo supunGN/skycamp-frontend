@@ -3,7 +3,7 @@ import { ArrowLeftIcon } from "@heroicons/react/24/outline";
 import { Link } from "react-router-dom";
 import Button from "../../components/atoms/Button";
 import { Input } from "../../components/molecules/Input";
-import axios from "axios";
+import { API } from "../../api";
 
 export default function AddDestinationReview() {
   const [formData, setFormData] = useState({
@@ -19,10 +19,8 @@ export default function AddDestinationReview() {
   useEffect(() => {
     async function fetchDestinations() {
       try {
-        const res = await axios.get(
-          "http://localhost/skycamp-backend/api/destinations.php"
-        );
-        setDestinations(res.data.destinations || []);
+        const res = await API.destinations.list();
+        setDestinations(res.destinations || []);
       } catch (err) {
         console.error("Error fetching destinations", err);
       }
@@ -46,15 +44,12 @@ export default function AddDestinationReview() {
       return;
     }
     try {
-      const response = await axios.post(
-        "http://localhost/skycamp-backend/api/add_destination_review.php",
-        formData
-      );
-      if (response.data.success) {
+      const response = await API.reviews.addDestinationReview(formData);
+      if (response.success) {
         alert("Review added successfully!");
         setFormData({ ...formData, rating: 5, reviewText: "" });
       } else {
-        alert(response.data.message || "Failed to add review.");
+        alert(response.message || "Failed to add review.");
       }
     } catch (error) {
       console.error(error);

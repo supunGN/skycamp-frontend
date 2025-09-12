@@ -12,6 +12,7 @@ import {
 } from "@heroicons/react/24/outline";
 import Modal from "../../molecules/Modal";
 import { useNavigate } from "react-router-dom";
+import { API } from "../../../api";
 
 export default function DashboardSidebar({
   user: _user, // ignore this prop for user info card
@@ -60,14 +61,21 @@ export default function DashboardSidebar({
       <Modal
         isOpen={logoutModalOpen}
         onClose={() => setLogoutModalOpen(false)}
-        onConfirm={() => {
+        onConfirm={async () => {
           setLogoutModalOpen(false);
 
-          // Clear user session
-          localStorage.removeItem("user");
-
-          if (onLogout) onLogout();
-          navigate("/login", { replace: true });
+          try {
+            // Call logout API
+            await API.auth.logout();
+          } catch (error) {
+            console.error("Logout error:", error);
+          } finally {
+            // Clear user session regardless of API call result
+            localStorage.removeItem("user");
+            if (onLogout) onLogout();
+            // Force a full reload to clear any in-memory app state
+            window.location.replace("/login");
+          }
         }}
         title="Log out"
         message="Are you sure you want to log out?"

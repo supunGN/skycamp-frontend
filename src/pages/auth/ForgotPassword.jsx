@@ -1,3 +1,4 @@
+import { API } from "../../api";
 import React, { useState } from "react";
 import { ArrowLeftIcon, KeyIcon } from "@heroicons/react/24/outline";
 import { Link, useNavigate } from "react-router-dom";
@@ -27,22 +28,9 @@ export default function ForgotPassword() {
     setError("");
 
     try {
-      const response = await fetch(
-        "http://localhost/skycamp/skycamp-backend/api/auth/password/forgot.php",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/x-www-form-urlencoded",
-          },
-          body: new URLSearchParams({
-            email: email,
-          }),
-        }
-      );
+      const data = await API.auth.forgotPassword(email);
 
-      const data = await response.json();
-
-      if (data.success) {
+      if (data?.success) {
         // Store email for the auth flow
         sessionStorage.setItem("resetEmail", email);
 
@@ -55,7 +43,7 @@ export default function ForgotPassword() {
         });
       } else {
         // Handle specific error cases
-        if (data.message) {
+        if (data?.message) {
           setError(data.message);
         } else {
           setError("Failed to send reset code. Please try again.");
@@ -63,16 +51,7 @@ export default function ForgotPassword() {
       }
     } catch (error) {
       console.error("Reset request error:", error);
-      if (
-        error.name === "TypeError" &&
-        error.message.includes("Failed to fetch")
-      ) {
-        setError(
-          "Unable to connect to server. Please check your internet connection and try again."
-        );
-      } else {
-        setError("Network error. Please check your connection and try again.");
-      }
+      setError(error?.message || "Network error. Please try again.");
     } finally {
       setIsLoading(false);
     }
