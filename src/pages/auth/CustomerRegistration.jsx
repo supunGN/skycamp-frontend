@@ -1,5 +1,4 @@
 import React, { useState, useRef, useEffect } from "react";
-import axios from "axios";
 import {
   ArrowLeftIcon,
   CloudArrowUpIcon,
@@ -17,7 +16,7 @@ import Button from "../../components/atoms/Button";
 import { Input } from "../../components/molecules/Input";
 import MapLocationPicker from "../../components/molecules/MapLocationPicker";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { API_ENDPOINTS } from "../../api";
+import { API } from "../../api";
 
 // ---------------------------
 // ProfilePictureUpload Component - Modern UX
@@ -30,6 +29,7 @@ function ProfilePictureUpload({
   uploadRef,
   required = false,
   error = null,
+  onFileSelected,
 }) {
   const [isDragOver, setIsDragOver] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -59,6 +59,9 @@ function ProfilePictureUpload({
     }
 
     setIsLoading(true);
+
+    // Notify parent about selected file (covers click and drag-drop)
+    onFileSelected?.(file);
 
     // Simulate loading for better UX
     setTimeout(() => {
@@ -271,6 +274,8 @@ function NICUpload({
   required = false,
   frontError = null,
   backError = null,
+  onFrontFile,
+  onBackFile,
 }) {
   const [frontLoading, setFrontLoading] = useState(false);
   const [backLoading, setBackLoading] = useState(false);
@@ -300,12 +305,14 @@ function NICUpload({
     }
 
     if (side === "front") {
+      onFrontFile?.(file);
       setFrontLoading(true);
       setTimeout(() => {
         setFrontPreview(URL.createObjectURL(file));
         setFrontLoading(false);
       }, 300);
     } else {
+      onBackFile?.(file);
       setBackLoading(true);
       setTimeout(() => {
         setBackPreview(URL.createObjectURL(file));
@@ -637,6 +644,10 @@ export default function CustomerRegistrationForm() {
   const [profilePreview, setProfilePreview] = useState(null);
   const [nicFrontPreview, setNicFrontPreview] = useState(null);
   const [nicBackPreview, setNicBackPreview] = useState(null);
+  // Track actual File objects from click or drag-and-drop
+  const [profileFile, setProfileFile] = useState(null);
+  const [nicFrontFile, setNicFrontFile] = useState(null);
+  const [nicBackFile, setNicBackFile] = useState(null);
   const profileUploadRef = useRef();
   const nicFrontUploadRef = useRef();
   const nicBackUploadRef = useRef();
@@ -767,16 +778,26 @@ export default function CustomerRegistrationForm() {
       data.append("longitude", coordinates.lng);
     }
 
-    // Add image files if uploaded
-    if (profileUploadRef.current?.files[0]) {
+    // Add image files (prefer state to cover DnD; fallback to refs)
+    if (profileFile) data.append("profilePicture", profileFile);
+    else if (profileUploadRef.current?.files[0]) {
       data.append("profilePicture", profileUploadRef.current.files[0]);
     }
-    if (nicFrontUploadRef.current?.files[0]) {
+    if (nicFrontFile) data.append("nicFrontImage", nicFrontFile);
+    else if (nicFrontUploadRef.current?.files[0]) {
       data.append("nicFrontImage", nicFrontUploadRef.current.files[0]);
     }
-    if (nicBackUploadRef.current?.files[0]) {
+    if (nicBackFile) data.append("nicBackImage", nicBackFile);
+    else if (nicBackUploadRef.current?.files[0]) {
       data.append("nicBackImage", nicBackUploadRef.current.files[0]);
     }
+
+    // OPTIONAL: debug log
+    console.log("Files in FormData:", {
+      profile: profileFile?.name || profileUploadRef.current?.files[0]?.name,
+      nicFront: nicFrontFile?.name || nicFrontUploadRef.current?.files[0]?.name,
+      nicBack: nicBackFile?.name || nicBackUploadRef.current?.files[0]?.name,
+    });
 
     console.log("Submitting complete registration data:");
     for (let [key, value] of data.entries()) {
@@ -784,34 +805,41 @@ export default function CustomerRegistrationForm() {
     }
 
     try {
-      const response = await axios.post(API_ENDPOINTS.REGISTER, data, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-        withCredentials: true,
-      });
+      const result = await API.auth.register(data);
 
-      console.log("Response from backend:", response.data);
+      console.log("🔥 FULL backend response:", result);
 
-      const result = response.data;
+      console.log("Response from backend:", result);
+      console.log("Result success:", result.success);
+      console.log("Result data:", result.data);
+
       if (result.success) {
+        console.log(result.success);
         if (result.user) {
           localStorage.setItem("user", JSON.stringify(result.user));
         }
 
         // Show success message and redirect using backend URL
         alert("Welcome to SkyCamp! Your registration is complete.");
-        const redirectUrl = result.data?.redirect_url || "/profile";
-        navigate(redirectUrl);
+        const redirectUrl = result.redirect_url || "/";
+        window.location.replace(redirectUrl);
       } else {
+        console.log("Registration failed - result:", result);
         alert(result.message || "Registration failed.");
       }
     } catch (error) {
-      console.error("Registration error:", error.response?.data || error);
-      alert(
-        error.response?.data?.message ||
-          "An error occurred during registration. Please try again."
-      );
+      console.error("Registration error:", error);
+
+      // Handle validation errors
+      if (error.errors) {
+        setErrors(error.errors);
+        alert("Please fix the validation errors and try again.");
+      } else {
+        alert(
+          error.message ||
+            "An error occurred during registration. Please try again."
+        );
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -1173,13 +1201,14 @@ export default function CustomerRegistrationForm() {
             <div className="space-y-8">
               {/* Profile Picture */}
               <ProfilePictureUpload
-                id="profileUpload"
+                id="profilePicture"
                 label="Profile Picture"
                 preview={profilePreview}
                 setPreview={setProfilePreview}
                 uploadRef={profileUploadRef}
                 required={false}
                 error={errors.profilePicture}
+                onFileSelected={setProfileFile}
               />
 
               {/* NIC Images */}
@@ -1195,6 +1224,8 @@ export default function CustomerRegistrationForm() {
                 required={false}
                 frontError={errors.nicFrontImage}
                 backError={errors.nicBackImage}
+                onFrontFile={setNicFrontFile}
+                onBackFile={setNicBackFile}
               />
             </div>
           </div>

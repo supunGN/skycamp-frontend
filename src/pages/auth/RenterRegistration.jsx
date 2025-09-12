@@ -1,5 +1,4 @@
 import React, { useState, useRef } from "react";
-import axios from "axios";
 import {
   ArrowLeftIcon,
   ExclamationTriangleIcon,
@@ -14,7 +13,7 @@ import MapLocationPicker from "../../components/molecules/MapLocationPicker";
 import MultiSelectDropdown from "../../components/molecules/MultiSelectDropdown";
 import SearchableDropdown from "../../components/molecules/SearchableDropdown";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { API_ENDPOINTS } from "../../api";
+import { API } from "../../api";
 
 // ---------------------------
 // ProfilePictureUpload Component - Modern UX
@@ -27,6 +26,7 @@ function ProfilePictureUpload({
   uploadRef,
   required = false,
   error = null,
+  onFileSelected,
 }) {
   const [isDragOver, setIsDragOver] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -56,6 +56,8 @@ function ProfilePictureUpload({
     }
 
     setIsLoading(true);
+
+    onFileSelected?.(file);
 
     // Simulate loading for better UX
     setTimeout(() => {
@@ -268,6 +270,8 @@ function NICUpload({
   required = false,
   frontError = null,
   backError = null,
+  onFrontFile,
+  onBackFile,
 }) {
   const [frontLoading, setFrontLoading] = useState(false);
   const [backLoading, setBackLoading] = useState(false);
@@ -297,12 +301,14 @@ function NICUpload({
     }
 
     if (side === "front") {
+      onFrontFile?.(file);
       setFrontLoading(true);
       setTimeout(() => {
         setFrontPreview(URL.createObjectURL(file));
         setFrontLoading(false);
       }, 300);
     } else {
+      onBackFile?.(file);
       setBackLoading(true);
       setTimeout(() => {
         setBackPreview(URL.createObjectURL(file));
@@ -540,6 +546,9 @@ export default function RenterRegistrationForm() {
   const [profilePreview, setProfilePreview] = useState(null);
   const [nicFrontPreview, setNicFrontPreview] = useState(null);
   const [nicBackPreview, setNicBackPreview] = useState(null);
+  const [profileFile, setProfileFile] = useState(null);
+  const [nicFrontFile, setNicFrontFile] = useState(null);
+  const [nicBackFile, setNicBackFile] = useState(null);
   const profileUploadRef = useRef();
   const nicFrontUploadRef = useRef();
   const nicBackUploadRef = useRef();
@@ -735,16 +744,26 @@ export default function RenterRegistrationForm() {
       data.append("longitude", coordinates.lng);
     }
 
-    // Add image files if uploaded
-    if (profileUploadRef.current?.files[0]) {
+    // Add image files (prefer state, fallback to refs)
+    if (profileFile) data.append("profilePicture", profileFile);
+    else if (profileUploadRef.current?.files[0]) {
       data.append("profilePicture", profileUploadRef.current.files[0]);
     }
-    if (nicFrontUploadRef.current?.files[0]) {
+    if (nicFrontFile) data.append("nicFrontImage", nicFrontFile);
+    else if (nicFrontUploadRef.current?.files[0]) {
       data.append("nicFrontImage", nicFrontUploadRef.current.files[0]);
     }
-    if (nicBackUploadRef.current?.files[0]) {
+    if (nicBackFile) data.append("nicBackImage", nicBackFile);
+    else if (nicBackUploadRef.current?.files[0]) {
       data.append("nicBackImage", nicBackUploadRef.current.files[0]);
     }
+
+    // OPTIONAL: debug log
+    console.log("Files in FormData:", {
+      profilePicture: profileUploadRef.current?.files[0]?.name,
+      nicFrontImage: nicFrontUploadRef.current?.files[0]?.name,
+      nicBackImage: nicBackUploadRef.current?.files[0]?.name,
+    });
 
     console.log("Submitting renter registration data:");
     for (let [key, value] of data.entries()) {
@@ -752,16 +771,10 @@ export default function RenterRegistrationForm() {
     }
 
     try {
-      const response = await axios.post(API_ENDPOINTS.REGISTER, data, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-        withCredentials: true,
-      });
+      const result = await API.auth.register(data);
 
-      console.log("Response from backend:", response.data);
+      console.log("Response from backend:", result);
 
-      const result = response.data;
       if (result.success) {
         if (result.user) {
           localStorage.setItem("user", JSON.stringify(result.user));
@@ -769,18 +782,24 @@ export default function RenterRegistrationForm() {
 
         // Show success message and redirect using backend URL
         alert("Welcome to SkyCamp! Your renter registration is complete.");
-        const redirectUrl =
-          result.data?.redirect_url || "/dashboard/renter/overview";
-        navigate(redirectUrl);
+        const redirectUrl = result.redirect_url || "/";
+        window.location.replace(redirectUrl);
       } else {
         alert(result.message || "Registration failed.");
       }
     } catch (error) {
-      console.error("Registration error:", error.response?.data || error);
-      alert(
-        error.response?.data?.message ||
-          "An error occurred during registration. Please try again."
-      );
+      console.error("Registration error:", error);
+
+      // Handle validation errors
+      if (error.errors) {
+        setErrors(error.errors);
+        alert("Please fix the validation errors and try again.");
+      } else {
+        alert(
+          error.message ||
+            "An error occurred during registration. Please try again."
+        );
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -1085,13 +1104,14 @@ export default function RenterRegistrationForm() {
             <div className="space-y-8">
               {/* Profile Picture */}
               <ProfilePictureUpload
-                id="profileUpload"
+                id="profilePicture"
                 label="Profile Picture"
                 preview={profilePreview}
                 setPreview={setProfilePreview}
                 uploadRef={profileUploadRef}
                 required={false}
                 error={errors.profilePicture}
+                onFileSelected={setProfileFile}
               />
 
               {/* NIC Images */}
@@ -1107,6 +1127,8 @@ export default function RenterRegistrationForm() {
                 required={false}
                 frontError={errors.nicFrontImage}
                 backError={errors.nicBackImage}
+                onFrontFile={setNicFrontFile}
+                onBackFile={setNicBackFile}
               />
             </div>
           </div>

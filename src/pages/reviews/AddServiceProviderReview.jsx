@@ -3,7 +3,7 @@ import { ArrowLeftIcon } from "@heroicons/react/24/outline";
 import { Link } from "react-router-dom";
 import Button from "../../components/atoms/Button";
 import { Input } from "../../components/molecules/Input";
-import axios from "axios";
+import { API } from "../../api";
 
 export default function AddServiceProviderReview() {
   const [formData, setFormData] = useState({
@@ -19,10 +19,8 @@ export default function AddServiceProviderReview() {
   useEffect(() => {
     async function fetchServiceProviders() {
       try {
-        const res = await axios.get(
-          "http://localhost/skycamp-backend/api/service_providers.php"
-        );
-        setServiceProviders(res.data.providers || []);
+        const res = await API.serviceProviders.list();
+        setServiceProviders(res.providers || []);
       } catch (err) {
         console.error("Error fetching service providers", err);
       }
@@ -46,15 +44,12 @@ export default function AddServiceProviderReview() {
       return;
     }
     try {
-      const response = await axios.post(
-        "http://localhost/skycamp-backend/api/add_service_provider_review.php",
-        formData
-      );
-      if (response.data.success) {
+      const response = await API.reviews.addServiceProviderReview(formData);
+      if (response.success) {
         alert("Review added successfully!");
         setFormData({ ...formData, rating: 5, reviewText: "" });
       } else {
-        alert(response.data.message || "Failed to add review.");
+        alert(response.message || "Failed to add review.");
       }
     } catch (error) {
       console.error(error);

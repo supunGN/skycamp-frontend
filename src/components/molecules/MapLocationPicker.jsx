@@ -6,6 +6,8 @@ import {
   XMarkIcon,
 } from "@heroicons/react/24/outline";
 import Button from "../atoms/Button";
+import axios from "axios";
+import { API } from "../../api";
 import { Input } from "./Input";
 
 // ---------------------------
@@ -334,21 +336,7 @@ export default function MapLocationPicker({
 
   const reverseGeocode = async (lat, lng) => {
     try {
-      const response = await fetch(
-        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=14&addressdetails=1`,
-        {
-          headers: {
-            Accept: "application/json",
-            "User-Agent": "MapLocationPicker/1.0",
-          },
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
+      const data = await API.locations.reverse({ lat, lon: lng });
 
       if (data && data.display_name) {
         const addressParts = data.display_name.split(",");
@@ -379,23 +367,7 @@ export default function MapLocationPicker({
     setHasSearched(true);
 
     try {
-      const response = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
-          query
-        )}&countrycodes=lk&limit=8&addressdetails=1&bounded=1&viewbox=79.652,9.835,81.881,5.916`,
-        {
-          headers: {
-            Accept: "application/json",
-            "User-Agent": "MapLocationPicker/1.0",
-          },
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
+      const data = await API.locations.search({ q: query });
 
       if (data && data.length > 0) {
         const results = data.map((item) => {

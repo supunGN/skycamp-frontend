@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import {
   Routes,
   Route,
@@ -64,18 +64,6 @@ function getUserInfo() {
 export default function GuideDashboard() {
   const location = useLocation();
   const navigate = useNavigate();
-
-  // Redirect if not a valid guide user
-  useEffect(() => {
-    const user = JSON.parse(localStorage.getItem("user"));
-    if (
-      !user ||
-      user.user_role !== "service_provider" ||
-      user.provider_type !== "Local Guide"
-    ) {
-      navigate("/login", { replace: true });
-    }
-  }, [navigate]);
 
   const { name: userName, email: userEmail } = getUserInfo();
 

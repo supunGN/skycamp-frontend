@@ -3,6 +3,7 @@ import { ArrowLeftIcon, LockClosedIcon } from "@heroicons/react/24/outline";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import Button from "../../components/atoms/Button";
 import { Input } from "../../components/molecules/Input";
+import { API } from "../../api";
 
 export default function SetNewPassword() {
   const [password, setPassword] = useState("");
@@ -51,21 +52,10 @@ export default function SetNewPassword() {
     setError("");
 
     try {
-      const response = await fetch(
-        "http://localhost/skycamp/skycamp-backend/api/auth/password/reset.php",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/x-www-form-urlencoded",
-          },
-          body: new URLSearchParams({
-            token: token,
-            new_password: password,
-          }),
-        }
-      );
-
-      const data = await response.json();
+      const data = await API.auth.resetPassword({
+        token,
+        new_password: password,
+      });
 
       if (data.success) {
         // Clear auth flow data

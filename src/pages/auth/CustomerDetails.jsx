@@ -11,7 +11,7 @@ import Button from "../../components/atoms/Button";
 import { Input } from "../../components/molecules/Input";
 import MapLocationPicker from "../../components/molecules/MapLocationPicker";
 import { Link, useNavigate } from "react-router-dom";
-import { API_BASE_URL } from "../../api";
+import { http } from "../../api";
 
 // FileUpload Component
 function FileUpload({
@@ -350,8 +350,8 @@ export default function CustomerDetails() {
     }
 
     try {
-      const response = await axios.post(
-        `${API_BASE_URL}api/complete-customer-registration.php`,
+      const response = await http.post(
+        "/complete-customer-registration.php",
         data,
         {
           headers: {

@@ -3,6 +3,7 @@ import Button from "../atoms/Button";
 import { Input } from "./Input";
 import Modal from "./Modal";
 import Notification from "./Notification";
+import { API } from "../../api";
 
 const defaultUser = {
   id: "",
@@ -16,10 +17,8 @@ const defaultUser = {
   profilePic: null,
 };
 
-const API_URL =
-  "http://localhost/skycamp/skycamp-backend/api/customer/update-profile.php";
-const FETCH_URL =
-  "http://localhost/skycamp/skycamp-backend/api/customer/profile.php";
+const API_URL = "/customer/update-profile.php";
+const FETCH_URL = "/customer/profile.php";
 
 export default function PersonalInfoForm() {
   const [userData, setUserData] = useState(defaultUser); // Displayed data
@@ -41,8 +40,8 @@ export default function PersonalInfoForm() {
         const parsed = JSON.parse(stored);
         const userId = parsed.id || parsed.user_id;
         if (userId) {
-          fetch(`${FETCH_URL}?id=${userId}`)
-            .then((res) => res.json())
+          API.profile
+            .getCustomer({ id: userId })
             .then((data) => {
               if (data.success && data.user) {
                 const loaded = {
@@ -125,16 +124,11 @@ export default function PersonalInfoForm() {
         date_of_birth: formData.dob,
         gender: formData.gender,
       };
-      const res = await fetch(API_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-      const data = await res.json();
+      const data = await API.profile.updateCustomer(payload);
       if (data.success && data.user) {
         // Re-fetch the latest data from backend to ensure sync
-        fetch(`${FETCH_URL}?id=${formData.id}`)
-          .then((res) => res.json())
+        API.profile
+          .getCustomer({ id: formData.id })
           .then((data) => {
             if (data.success && data.user) {
               const loaded = {
