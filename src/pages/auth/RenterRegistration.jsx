@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   ArrowLeftIcon,
   ExclamationTriangleIcon,
@@ -558,35 +558,69 @@ export default function RenterRegistrationForm() {
   // Form validation state
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [campingDestinations, setCampingDestinations] = useState([]);
+  const [stargazingSpots, setStargazingSpots] = useState([]);
+  const [isLoadingLocations, setIsLoadingLocations] = useState(true);
 
-  // Options for multi-select dropdowns
-  const campingDestinations = [
-    "Namunukula Range",
-    "Ritigala Reserve",
-    "Gal Oya Vicinity",
-    "Mahiyanganaya Fields",
-    "Kallady Beach",
-    "Koggala Lake",
-    "Udugampola Forest",
-    "Yala Buffer Zone",
-    "Horton Plains",
-    "Knuckles Mountains",
-    "Ella Rock",
-    "Sigiriya",
-  ];
+  // Load locations from API on component mount
+  useEffect(() => {
+    const loadLocations = async () => {
+      try {
+        setIsLoadingLocations(true);
 
-  const stargazingSpots = [
-    "Nilgala Reserve",
-    "Knuckles Peak",
-    "Anuradhapura Plains",
-    "Nuwara Eliya Hills",
-    "Ella Rock",
-    "Sigiriya View Point",
-    "Horton Plains",
-    "Ritigala Reserve",
-    "Yala Buffer Zone",
-    "Minneriya Area",
-  ];
+        // Fetch camping destinations and stargazing spots in parallel
+        const [campingResponse, stargazingResponse] = await Promise.all([
+          API.locations.getCampingDestinations(),
+          API.locations.getStargazingSpots(),
+        ]);
+
+        if (campingResponse.success) {
+          setCampingDestinations(
+            campingResponse.data.map((location) => location.name)
+          );
+        }
+
+        if (stargazingResponse.success) {
+          setStargazingSpots(
+            stargazingResponse.data.map((location) => location.name)
+          );
+        }
+      } catch (error) {
+        console.error("Error loading locations:", error);
+        // Fallback to static data if API fails
+        setCampingDestinations([
+          "Namunukula Range",
+          "Ritigala Reserve",
+          "Gal Oya Vicinity",
+          "Mahiyanganaya Fields",
+          "Kallady Beach",
+          "Koggala Lake",
+          "Udugampola Forest",
+          "Yala Buffer Zone",
+          "Horton Plains",
+          "Knuckles Mountains",
+          "Ella Rock",
+          "Sigiriya",
+        ]);
+        setStargazingSpots([
+          "Nilgala Reserve",
+          "Knuckles Peak",
+          "Anuradhapura Plains",
+          "Nuwara Eliya Hills",
+          "Ella Rock",
+          "Sigiriya View Point",
+          "Horton Plains",
+          "Ritigala Reserve",
+          "Yala Buffer Zone",
+          "Minneriya Area",
+        ]);
+      } finally {
+        setIsLoadingLocations(false);
+      }
+    };
+
+    loadLocations();
+  }, []);
 
   const districts = [
     "Colombo",
@@ -1048,14 +1082,24 @@ export default function RenterRegistrationForm() {
             options={campingDestinations}
             selected={selectedCampingDestinations}
             setSelected={setSelectedCampingDestinations}
-            placeholder="Choose camping destinations..."
+            placeholder={
+              isLoadingLocations
+                ? "Loading camping destinations..."
+                : "Choose camping destinations..."
+            }
+            disabled={isLoadingLocations}
           />
           <MultiSelectDropdown
             label="Stargazing Spots"
             options={stargazingSpots}
             selected={selectedStargazingSpots}
             setSelected={setSelectedStargazingSpots}
-            placeholder="Choose stargazing spots..."
+            placeholder={
+              isLoadingLocations
+                ? "Loading stargazing spots..."
+                : "Choose stargazing spots..."
+            }
+            disabled={isLoadingLocations}
           />
         </div>
 

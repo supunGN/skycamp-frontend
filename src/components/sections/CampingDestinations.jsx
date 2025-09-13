@@ -3,77 +3,63 @@
 import DestinationCard from "../molecules/destination/DestinationCard";
 import Button from "../atoms/Button"; // Import your custom Button component
 import { useNavigate } from "react-router-dom";
-import wewathennaMountainImg from "../../assets/camping_destinations/Wewathenna Mountain.png";
-import hortonPlainsImg from "../../assets/camping_destinations/Horton Plains.png";
-import riverstonPeakImg from "../../assets/camping_destinations/Riverston Peak.png";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { API } from "../../api";
 
 const CampingDestinations = () => {
-  // Sample data - using all your provided images
-  const topDestinations = [
-    {
-      id: 1,
-      name: "Wewathenna Mountain",
-      description:
-        "Wake up to clouds rolling below your highland campsite with panoramic views.",
-      image: wewathennaMountainImg,
-      rating: 5.0,
-      reviewCount: 22,
-    },
-    {
-      id: 2,
-      name: "Horton Plains",
-      description:
-        "Pitch your tent in cool grasslands and explore cloud forests and waterfalls.",
-      image: hortonPlainsImg,
-      rating: 5.0,
-      reviewCount: 22,
-    },
-    {
-      id: 3,
-      name: "Riverston Peak",
-      description:
-        "Sleep above the clouds near misty cliffs and sweeping mountain plains.",
-      image: riverstonPeakImg,
-      rating: 3.5,
-      reviewCount: 122,
-    },
-  ];
-
-  // Simulate a longer list for demonstration (replace with real data as needed)
-  const allDestinations = [
-    ...topDestinations,
-    // Example extra destinations (remove or replace with real data)
-    {
-      id: 4,
-      name: "Knuckles Range",
-      description: "Camp in the heart of Sri Lanka's misty mountains.",
-      image: wewathennaMountainImg,
-      rating: 4.5,
-      reviewCount: 10,
-    },
-    {
-      id: 5,
-      name: "Sinharaja Forest",
-      description: "Experience the rainforest wilderness overnight.",
-      image: hortonPlainsImg,
-      rating: 4.8,
-      reviewCount: 15,
-    },
-  ];
-
-  // Show only 3 by default, or all if showAll is true
-  const destinationsToShow = allDestinations.slice(0, 3);
-
   const navigate = useNavigate();
+  const [destinations, setDestinations] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // Load top 3 camping destinations from API
+  useEffect(() => {
+    const loadDestinations = async () => {
+      try {
+        setIsLoading(true);
+        const response =
+          await API.locations.getTopCampingDestinationsWithImages(3);
+
+        if (response.success) {
+          // Transform API data to match DestinationCard component expectations
+          const transformedDestinations = response.data.map((destination) => ({
+            id: destination.location_id,
+            name: destination.name,
+            description: destination.description,
+            image: destination.image_url || "/placeholder-image.jpg", // Fallback image
+            rating: 4.5, // Default rating since not in database yet
+            reviewCount: Math.floor(Math.random() * 100) + 10, // Random review count
+            locationId: destination.location_id,
+            district: destination.district,
+          }));
+          setDestinations(transformedDestinations);
+        } else {
+          setError("Failed to load destinations");
+        }
+      } catch (err) {
+        console.error("Error loading destinations:", err);
+        setError("Failed to load destinations");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadDestinations();
+  }, []);
 
   const handleCardClick = (destinationName) => {
-    if (destinationName === "Horton Plains") {
-      navigate("/individual-destination");
+    const destination = destinations.find(
+      (dest) => dest.name === destinationName
+    );
+    if (destination) {
+      const urlFriendlyName = destination.name
+        .toLowerCase()
+        .replace(/[^a-z0-9\s-]/g, "")
+        .replace(/\s+/g, "-")
+        .trim();
+      navigate(`/destination/${destination.locationId}/${urlFriendlyName}`);
     } else {
       console.log(`Clicked on ${destinationName}`);
-      // Add navigation logic here
-      // For example: navigate(`/destinations/${destinationName.toLowerCase().replace(/\s+/g, '-')}`);
     }
   };
 
@@ -84,10 +70,31 @@ const CampingDestinations = () => {
     // Add wishlist logic here
   };
 
-  // Remove navigation from show all button
-  // const handleShowAllClick = () => {
-  //   setShowAll(true);
-  // };
+  if (isLoading) {
+    return (
+      <section className="py-8 xs:py-12 sm:py-16 px-3 xs:px-4 sm:px-6 lg:px-8 bg-gray-50">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex justify-center items-center h-64">
+            <div className="text-lg text-gray-600">
+              Loading camping destinations...
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (error) {
+    return (
+      <section className="py-8 xs:py-12 sm:py-16 px-3 xs:px-4 sm:px-6 lg:px-8 bg-gray-50">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex justify-center items-center h-64">
+            <div className="text-lg text-red-600">{error}</div>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="py-8 xs:py-12 sm:py-16 px-3 xs:px-4 sm:px-6 lg:px-8 bg-gray-50">
@@ -110,7 +117,7 @@ const CampingDestinations = () => {
 
         {/* Destinations Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 xs:gap-6 sm:gap-8">
-          {destinationsToShow.map((destination) => (
+          {destinations.map((destination) => (
             <DestinationCard
               key={destination.id}
               image={destination.image}
@@ -124,8 +131,8 @@ const CampingDestinations = () => {
           ))}
         </div>
 
-        {/* Show All Button - Only show if there are more than 3 */}
-        {allDestinations.length > 3 && (
+        {/* Show All Button - Only show if there are destinations */}
+        {destinations.length > 0 && (
           <div className="flex justify-left mt-8 xs:mt-10 sm:mt-12">
             <Button
               onClick={() => navigate("/destinations")}

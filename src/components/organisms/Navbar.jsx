@@ -169,7 +169,7 @@ export default function Navbar() {
                 >
                   {user.profile_picture ? (
                     <img
-                      src={`http://localhost/skycamp/skycamp-backend/uploads/profile_pictures/${user.profile_picture}`}
+                      src={`http://localhost/skycamp/skycamp-backend/storage/uploads/${user.profile_picture}`}
                       alt="Profile"
                       className="w-8 h-8 rounded-full object-cover border border-gray-300"
                     />
@@ -421,7 +421,7 @@ export default function Navbar() {
                 >
                   {user.profile_picture ? (
                     <img
-                      src={`http://localhost/skycamp-backend/uploads/profile_pictures/${user.profile_picture}`}
+                      src={`http://localhost/skycamp/skycamp-backend/storage/uploads/${user.profile_picture}`}
                       alt="Profile"
                       className="w-8 h-8 rounded-full object-cover border border-gray-300"
                     />
