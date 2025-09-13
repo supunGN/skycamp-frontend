@@ -47,26 +47,36 @@ export default function TravelBuddyNavbar({ onChatToggle, onRefresh }) {
         <div className="max-w-7xl mx-auto px-6 flex justify-between items-center w-full py-4">
           {/* Logo + Title */}
           <div className="flex items-center">
-            <button 
+            <button
               onClick={onRefresh}
               className="flex items-center text-xl font-bold text-cyan-600 hover:text-cyan-700 transition-colors"
             >
-              <img src="/src/assets/travelbuddy/TravelBuddy Logo.svg" alt="Travel Buddy" className="h-8" />
+              <img
+                src="/src/assets/travelbuddy/TravelBuddy Logo.svg"
+                alt="Travel Buddy"
+                className="h-8"
+              />
             </button>
           </div>
 
           {/* Center Links */}
           <nav className="flex items-center space-x-8">
-            <Link to="/travel-buddy/feed" className="text-gray-700 hover:text-cyan-600 font-medium">
+            <Link
+              to="/travel-buddy/feed"
+              className="text-gray-700 hover:text-cyan-600 font-medium"
+            >
               Feed
             </Link>
-            <button 
+            <button
               onClick={onChatToggle}
               className="text-gray-700 hover:text-cyan-600 font-medium"
             >
               Messages
             </button>
-            <Link to="/travel-buddy/requests" className="text-gray-700 hover:text-cyan-600 font-medium">
+            <Link
+              to="/travel-buddy/requests"
+              className="text-gray-700 hover:text-cyan-600 font-medium"
+            >
               Travel Requests
             </Link>
           </nav>
@@ -74,7 +84,11 @@ export default function TravelBuddyNavbar({ onChatToggle, onRefresh }) {
           {/* Right Side Controls */}
           <div className="flex items-center space-x-4">
             <Link to="/">
-              <Button variant="outline" size="md" className="hidden xl:inline-flex">
+              <Button
+                variant="outline"
+                size="md"
+                className="hidden xl:inline-flex"
+              >
                 Switch to Home Site
               </Button>
             </Link>
@@ -88,7 +102,7 @@ export default function TravelBuddyNavbar({ onChatToggle, onRefresh }) {
                 >
                   {user.profile_picture ? (
                     <img
-                      src={`http://localhost/skycamp/skycamp-backend/uploads/profile_pictures/${user.profile_picture}`}
+                      src={`http://localhost/skycamp/skycamp-backend/storage/uploads/${user.profile_picture}`}
                       alt="Profile"
                       className="w-8 h-8 rounded-full object-cover border border-gray-300"
                     />
@@ -126,44 +140,69 @@ export default function TravelBuddyNavbar({ onChatToggle, onRefresh }) {
       {/* Mobile Navigation */}
       <header className="lg:hidden fixed top-0 left-0 w-full z-50 bg-white shadow-lg">
         <div className="flex items-center justify-between px-4 py-4">
-          <button 
+          <button
             onClick={onRefresh}
             className="flex items-center text-xl font-bold text-cyan-600 hover:text-cyan-700 transition-colors"
           >
-            <img src="/src/assets/travelbuddy/TravelBuddy Logo.svg" alt="Travel Buddy" className="h-8" />
+            <img
+              src="/src/assets/travelbuddy/TravelBuddy Logo.svg"
+              alt="Travel Buddy"
+              className="h-8"
+            />
           </button>
-          <button onClick={() => setMenuOpen(!menuOpen)} className="p-2 text-gray-600 hover:text-cyan-600">
+          <button
+            onClick={() => setMenuOpen(!menuOpen)}
+            className="p-2 text-gray-600 hover:text-cyan-600"
+          >
             <Bars3Icon className="w-6 h-6" />
           </button>
         </div>
       </header>
 
       {/* Mobile Slide-out Menu */}
-      <div className={`fixed inset-0 z-50 lg:hidden ${menuOpen ? "block" : "hidden"}`}>
-        <div className="fixed inset-0 bg-black bg-opacity-50" onClick={() => setMenuOpen(false)}></div>
+      <div
+        className={`fixed inset-0 z-50 lg:hidden ${
+          menuOpen ? "block" : "hidden"
+        }`}
+      >
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50"
+          onClick={() => setMenuOpen(false)}
+        ></div>
         <div className="fixed left-0 top-0 h-full w-80 bg-white shadow-xl">
           {/* Menu Header */}
           <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
-            <button 
+            <button
               onClick={() => {
                 onRefresh();
                 setMenuOpen(false);
               }}
               className="flex items-center text-xl font-bold text-cyan-600 hover:text-cyan-700 transition-colors"
             >
-              <img src="/src/assets/travelbuddy/TravelBuddy Logo.svg" alt="Travel Buddy" className="h-8" />
+              <img
+                src="/src/assets/travelbuddy/TravelBuddy Logo.svg"
+                alt="Travel Buddy"
+                className="h-8"
+              />
             </button>
-            <button onClick={() => setMenuOpen(false)} className="p-2 text-gray-600 hover:text-cyan-600">
+            <button
+              onClick={() => setMenuOpen(false)}
+              className="p-2 text-gray-600 hover:text-cyan-600"
+            >
               <XMarkIcon className="w-6 h-6" />
             </button>
           </div>
 
           {/* Menu Items */}
           <div className="px-6 py-6 space-y-6">
-            <Link to="/travel-buddy/feed" onClick={() => setMenuOpen(false)} className="block text-lg font-medium text-gray-900 hover:text-cyan-600">
+            <Link
+              to="/travel-buddy/feed"
+              onClick={() => setMenuOpen(false)}
+              className="block text-lg font-medium text-gray-900 hover:text-cyan-600"
+            >
               Feed
             </Link>
-            <button 
+            <button
               onClick={() => {
                 onChatToggle();
                 setMenuOpen(false);
@@ -172,7 +211,11 @@ export default function TravelBuddyNavbar({ onChatToggle, onRefresh }) {
             >
               Messages
             </button>
-            <Link to="/travel-buddy/requests" onClick={() => setMenuOpen(false)} className="block text-lg font-medium text-gray-900 hover:text-cyan-600">
+            <Link
+              to="/travel-buddy/requests"
+              onClick={() => setMenuOpen(false)}
+              className="block text-lg font-medium text-gray-900 hover:text-cyan-600"
+            >
               Travel Requests
             </Link>
           </div>
@@ -180,7 +223,9 @@ export default function TravelBuddyNavbar({ onChatToggle, onRefresh }) {
           {/* Mobile Controls */}
           <div className="absolute bottom-6 left-6 right-6 space-y-4">
             <Link to="/" onClick={() => setMenuOpen(false)}>
-              <Button variant="outline" size="lg" className="w-full">Switch to Home Site</Button>
+              <Button variant="outline" size="lg" className="w-full">
+                Switch to Home Site
+              </Button>
             </Link>
             <div className="flex items-center justify-between px-1">
               <Cog6ToothIcon className="w-6 h-6 text-gray-600" />
@@ -194,14 +239,16 @@ export default function TravelBuddyNavbar({ onChatToggle, onRefresh }) {
                 >
                   {user.profile_picture ? (
                     <img
-                      src={`http://localhost/skycamp-backend/uploads/profile_pictures/${user.profile_picture}`}
+                      src={`http://localhost/skycamp/skycamp-backend/storage/uploads/${user.profile_picture}`}
                       alt="Profile"
                       className="w-8 h-8 rounded-full object-cover border border-gray-300"
                     />
                   ) : (
                     <UserCircleIcon className="w-8 h-8 text-gray-400" />
                   )}
-                  <span className="text-gray-900 font-medium">{user.first_name || "Profile"}</span>
+                  <span className="text-gray-900 font-medium">
+                    {user.first_name || "Profile"}
+                  </span>
                 </button>
                 {profileDropdown && (
                   <div className="absolute left-0 mt-2 w-44 bg-white border rounded shadow-lg z-50">
@@ -229,7 +276,9 @@ export default function TravelBuddyNavbar({ onChatToggle, onRefresh }) {
               </div>
             ) : (
               <Link to="/login" onClick={() => setMenuOpen(false)}>
-                <Button size="lg" className="w-full">Log in</Button>
+                <Button size="lg" className="w-full">
+                  Log in
+                </Button>
               </Link>
             )}
           </div>
@@ -238,5 +287,3 @@ export default function TravelBuddyNavbar({ onChatToggle, onRefresh }) {
     </>
   );
 }
-
-

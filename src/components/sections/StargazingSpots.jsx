@@ -2,77 +2,61 @@
 
 import DestinationCard from "../molecules/destination/DestinationCard";
 import Button from "../atoms/Button"; // Import your custom Button component
-import hortonPlainsImg from "../../assets/stargazing_spots/horton_plains.png";
-import namunukulaRangeImg from "../../assets/stargazing_spots/namunukula_range.png";
-import ritigalaReserveImg from "../../assets/stargazing_spots/ritigala_reserve.png";
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { API } from "../../api";
 
 const StargazingSpots = () => {
   const navigate = useNavigate();
-  // Sample data - stargazing locations with real images
-  const topStargazingSpots = [
-    {
-      id: 1,
-      name: "Horton Plains",
-      description:
-        "Clear, high-altitude skies perfect for deep-sky views above cloud forests.",
-      image: hortonPlainsImg,
-      rating: 5.0,
-      reviewCount: 22,
-    },
-    {
-      id: 2,
-      name: "Namunukula Range",
-      description:
-        "360° dark skies for both sunrise and Milky Way in one night.",
-      image: namunukulaRangeImg,
-      rating: 3.0,
-      reviewCount: 12,
-    },
-    {
-      id: 3,
-      name: "Ritigala Reserve",
-      description:
-        "Starlit skies above ancient ruins for mystical night photography.",
-      image: ritigalaReserveImg,
-      rating: 5.0,
-      reviewCount: 22,
-    },
-  ];
+  const [stargazingSpots, setStargazingSpots] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Simulate a longer list for demonstration (replace with real data as needed)
-  const allStargazingSpots = [
-    ...topStargazingSpots,
-    // Example extra spots (remove or replace with real data)
-    {
-      id: 4,
-      name: "Knuckles Mountains",
-      description: "Remote peaks with crystal-clear night skies.",
-      image: hortonPlainsImg,
-      rating: 4.2,
-      reviewCount: 8,
-    },
-    {
-      id: 5,
-      name: "Yala Buffer Zone",
-      description: "Wildlife and stars in Sri Lanka's southern wilderness.",
-      image: namunukulaRangeImg,
-      rating: 4.7,
-      reviewCount: 14,
-    },
-  ];
+  // Load top 3 stargazing spots from API
+  useEffect(() => {
+    const loadStargazingSpots = async () => {
+      try {
+        setIsLoading(true);
+        const response = await API.locations.getTopStargazingSpotsWithImages(3);
 
-  // Show only 3 by default, or all if showAll is true
-  const spotsToShow = allStargazingSpots.slice(0, 3);
+        if (response.success) {
+          // Transform API data to match DestinationCard component expectations
+          const transformedSpots = response.data.map((spot) => ({
+            id: spot.location_id,
+            name: spot.name,
+            description: spot.description,
+            image: spot.image_url || "/placeholder-image.jpg", // Fallback image
+            rating: 4.5, // Default rating since not in database yet
+            reviewCount: Math.floor(Math.random() * 100) + 10, // Random review count
+            locationId: spot.location_id,
+            district: spot.district,
+          }));
+          setStargazingSpots(transformedSpots);
+        } else {
+          setError("Failed to load stargazing spots");
+        }
+      } catch (err) {
+        console.error("Error loading stargazing spots:", err);
+        setError("Failed to load stargazing spots");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadStargazingSpots();
+  }, []);
 
   const handleCardClick = (spotName) => {
-    if (spotName === "Horton Plains") {
-      navigate("/individual-destination");
+    const spot = stargazingSpots.find((s) => s.name === spotName);
+    if (spot) {
+      const urlFriendlyName = spot.name
+        .toLowerCase()
+        .replace(/[^a-z0-9\s-]/g, "")
+        .replace(/\s+/g, "-")
+        .trim();
+      navigate(`/destination/${spot.locationId}/${urlFriendlyName}`);
     } else {
       console.log(`Clicked on ${spotName}`);
-      // Add navigation logic here
-      // For example: navigate(`/stargazing/${spotName.toLowerCase().replace(/\s+/g, '-')}`);
     }
   };
 
@@ -83,10 +67,31 @@ const StargazingSpots = () => {
     // Add wishlist logic here
   };
 
-  // Remove navigation from show all button
-  // const handleShowAllClick = () => {
-  //   setShowAll(true);
-  // };
+  if (isLoading) {
+    return (
+      <section className="py-8 xs:py-12 sm:py-16 px-3 xs:px-4 sm:px-6 lg:px-8 bg-gray-50">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex justify-center items-center h-64">
+            <div className="text-lg text-gray-600">
+              Loading stargazing spots...
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (error) {
+    return (
+      <section className="py-8 xs:py-12 sm:py-16 px-3 xs:px-4 sm:px-6 lg:px-8 bg-gray-50">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex justify-center items-center h-64">
+            <div className="text-lg text-red-600">{error}</div>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="py-8 xs:py-12 sm:py-16 px-3 xs:px-4 sm:px-6 lg:px-8 bg-gray-50">
@@ -109,7 +114,7 @@ const StargazingSpots = () => {
 
         {/* Stargazing Spots Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 xs:gap-6 sm:gap-8">
-          {spotsToShow.map((spot) => (
+          {stargazingSpots.map((spot) => (
             <DestinationCard
               key={spot.id}
               image={spot.image}
@@ -123,8 +128,8 @@ const StargazingSpots = () => {
           ))}
         </div>
 
-        {/* Show All Button - Only show if there are more than 3 */}
-        {allStargazingSpots.length > 3 && (
+        {/* Show All Button - Only show if there are spots */}
+        {stargazingSpots.length > 0 && (
           <div className="flex justify-left mt-8 xs:mt-10 sm:mt-12">
             <Button
               onClick={() => navigate("/stargazing-spots")}

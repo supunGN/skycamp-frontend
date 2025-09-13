@@ -58,8 +58,24 @@ export default function Profile() {
   };
 
   const handleSave = () => {
-    // TODO: Implement save functionality
-    console.log("Saving profile data:", formData);
+    // Refresh user data from localStorage after profile update
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      const userData = JSON.parse(storedUser);
+      setUser(userData);
+      setFormData({
+        firstName: userData.first_name || "",
+        lastName: userData.last_name || "",
+        email: userData.email || "",
+        phone: userData.phone_number || "",
+        dob: userData.dob || "",
+        gender: userData.gender || "",
+        address: userData.home_address || "",
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: "",
+      });
+    }
   };
 
   const renderContent = () => {

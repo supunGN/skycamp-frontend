@@ -347,14 +347,8 @@ function App() {
         />
 
         <Route
-          path="/individual-destination"
-          element={
-            getUser() ? (
-              <IndividualDestination />
-            ) : (
-              <Navigate to="/login" replace />
-            )
-          }
+          path="/destination/:locationId/:locationName"
+          element={<IndividualDestination />}
         />
 
         {/* Dynamic Dashboard Redirect */}

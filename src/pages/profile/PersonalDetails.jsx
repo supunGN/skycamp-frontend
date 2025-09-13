@@ -1,18 +1,122 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { Input } from "../../components/molecules/Input";
 import Button from "../../components/atoms/Button";
 import {
   UserCircleIcon,
   PhotoIcon,
   PencilIcon,
+  XMarkIcon,
+  CheckIcon,
 } from "@heroicons/react/24/outline";
+import { API } from "../../api";
 
 const PersonalDetails = ({ user, formData, onInputChange, onSave }) => {
   const [isEditing, setIsEditing] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [errors, setErrors] = useState({});
+  const [successMessage, setSuccessMessage] = useState("");
+  const fileInputRef = useRef(null);
+  const [profilePicturePreview, setProfilePicturePreview] = useState(null);
 
-  const handleSave = () => {
-    onSave();
+  const handleSave = async () => {
+    try {
+      setErrors({});
+      setSuccessMessage("");
+      setIsUploading(true);
+
+      // Create FormData for file upload
+      const formDataToSend = new FormData();
+      formDataToSend.append("firstName", formData.firstName);
+      formDataToSend.append("lastName", formData.lastName);
+      formDataToSend.append("phoneNumber", formData.phone);
+      formDataToSend.append("homeAddress", formData.address);
+      formDataToSend.append("gender", formData.gender);
+      formDataToSend.append("dob", formData.dob);
+
+      // Add profile picture if selected
+      if (fileInputRef.current?.files?.[0]) {
+        formDataToSend.append("profilePicture", fileInputRef.current.files[0]);
+      }
+
+      const result = await API.auth.updateProfile(formDataToSend);
+
+      if (result.success) {
+        setSuccessMessage("Profile updated successfully!");
+        setIsEditing(false);
+        setProfilePicturePreview(null);
+
+        // Update localStorage with new user data
+        localStorage.setItem("user", JSON.stringify(result.user));
+
+        // Call the parent's onSave if provided
+        if (onSave) onSave();
+
+        // Clear file input
+        if (fileInputRef.current) {
+          fileInputRef.current.value = "";
+        }
+
+        // Show success message for 3 seconds
+        setTimeout(() => setSuccessMessage(""), 3000);
+      } else {
+        if (result.errors) {
+          setErrors(result.errors);
+        } else {
+          setErrors({ general: result.message || "Failed to update profile" });
+        }
+      }
+    } catch (error) {
+      console.error("Profile update error:", error);
+      setErrors({ general: "Failed to update profile. Please try again." });
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleFileSelect = (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // Validate file type
+      const allowedTypes = [
+        "image/jpeg",
+        "image/jpg",
+        "image/png",
+        "image/webp",
+      ];
+      if (!allowedTypes.includes(file.type)) {
+        setErrors({
+          profilePicture:
+            "Please select a valid image file (JPEG, PNG, or WebP)",
+        });
+        return;
+      }
+
+      // Validate file size (5MB max)
+      if (file.size > 5 * 1024 * 1024) {
+        setErrors({ profilePicture: "File size must be less than 5MB" });
+        return;
+      }
+
+      // Create preview
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setProfilePicturePreview(e.target.result);
+      };
+      reader.readAsDataURL(file);
+
+      // Clear any previous errors
+      setErrors((prev) => ({ ...prev, profilePicture: undefined }));
+    }
+  };
+
+  const handleCancel = () => {
     setIsEditing(false);
+    setErrors({});
+    setSuccessMessage("");
+    setProfilePicturePreview(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
   };
 
   return (
@@ -22,9 +126,15 @@ const PersonalDetails = ({ user, formData, onInputChange, onSave }) => {
         <div className="flex flex-col lg:flex-row items-center gap-6">
           <div className="relative">
             <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-white shadow-lg bg-gray-100">
-              {user?.profile_picture ? (
+              {profilePicturePreview ? (
                 <img
-                  src={`http://localhost/skycamp/skycamp-backend/uploads/profile_pictures/${user.profile_picture}`}
+                  src={profilePicturePreview}
+                  alt="Profile Preview"
+                  className="w-full h-full object-cover"
+                />
+              ) : user?.profile_picture ? (
+                <img
+                  src={`http://localhost/skycamp/skycamp-backend/storage/uploads/${user.profile_picture}`}
                   alt="Profile"
                   className="w-full h-full object-cover"
                 />
@@ -33,11 +143,41 @@ const PersonalDetails = ({ user, formData, onInputChange, onSave }) => {
                   <UserCircleIcon className="w-20 h-20 text-gray-400" />
                 </div>
               )}
+
+              {/* Upload overlay when editing */}
+              {isEditing && (
+                <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
+                  <PhotoIcon className="w-8 h-8 text-white" />
+                </div>
+              )}
             </div>
-            <button className="absolute -bottom-2 -right-2 p-2 bg-cyan-600 text-white rounded-full hover:bg-cyan-700 transition-colors shadow-lg">
-              <PhotoIcon className="w-4 h-4" />
-            </button>
+
+            {isEditing && (
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                className="absolute -bottom-2 -right-2 p-2 bg-cyan-600 text-white rounded-full hover:bg-cyan-700 transition-colors shadow-lg"
+                title="Change profile picture"
+              >
+                <PhotoIcon className="w-4 h-4" />
+              </button>
+            )}
+
+            {/* Hidden file input */}
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/jpeg,image/jpg,image/png,image/webp"
+              onChange={handleFileSelect}
+              className="hidden"
+            />
           </div>
+
+          {/* Profile picture error message */}
+          {errors.profilePicture && (
+            <div className="text-red-500 text-sm mt-2 text-center">
+              {errors.profilePicture}
+            </div>
+          )}
 
           <div className="text-center lg:text-left flex-1">
             <h1 className="text-2xl font-bold text-gray-900 mb-2">
@@ -72,17 +212,60 @@ const PersonalDetails = ({ user, formData, onInputChange, onSave }) => {
             </div>
           </div>
 
-          <div>
-            <button
-              onClick={() => setIsEditing(!isEditing)}
-              className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-            >
-              <PencilIcon className="w-4 h-4" />
-              {isEditing ? "Cancel Edit" : "Edit Profile"}
-            </button>
+          <div className="flex flex-col gap-2">
+            {!isEditing ? (
+              <button
+                onClick={() => setIsEditing(true)}
+                className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                <PencilIcon className="w-4 h-4" />
+                Edit Profile
+              </button>
+            ) : (
+              <div className="flex gap-2">
+                <button
+                  onClick={handleCancel}
+                  className="flex items-center gap-2 px-4 py-2 bg-gray-100 border border-gray-300 rounded-lg hover:bg-gray-200 transition-colors"
+                >
+                  <XMarkIcon className="w-4 h-4" />
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSave}
+                  disabled={isUploading}
+                  className="flex items-center gap-2 px-4 py-2 bg-cyan-600 text-white rounded-lg hover:bg-cyan-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isUploading ? (
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  ) : (
+                    <CheckIcon className="w-4 h-4" />
+                  )}
+                  {isUploading ? "Saving..." : "Save Changes"}
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>
+
+      {/* Success/Error Messages */}
+      {successMessage && (
+        <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+          <div className="flex items-center">
+            <CheckIcon className="w-5 h-5 text-green-600 mr-2" />
+            <p className="text-green-800 font-medium">{successMessage}</p>
+          </div>
+        </div>
+      )}
+
+      {errors.general && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <div className="flex items-center">
+            <XMarkIcon className="w-5 h-5 text-red-600 mr-2" />
+            <p className="text-red-800 font-medium">{errors.general}</p>
+          </div>
+        </div>
+      )}
 
       {/* Personal Information Form */}
       <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-8">
@@ -113,8 +296,15 @@ const PersonalDetails = ({ user, formData, onInputChange, onSave }) => {
                 value={formData.firstName}
                 onChange={onInputChange}
                 disabled={!isEditing}
-                className={`h-12 ${!isEditing ? "bg-gray-50" : ""}`}
+                className={`h-12 ${!isEditing ? "bg-gray-50" : ""} ${
+                  errors.firstName
+                    ? "border-red-300 focus:border-red-500 focus:ring-red-500"
+                    : ""
+                }`}
               />
+              {errors.firstName && (
+                <p className="mt-1 text-sm text-red-600">{errors.firstName}</p>
+              )}
             </div>
             <div>
               <label
@@ -129,8 +319,15 @@ const PersonalDetails = ({ user, formData, onInputChange, onSave }) => {
                 value={formData.lastName}
                 onChange={onInputChange}
                 disabled={!isEditing}
-                className={`h-12 ${!isEditing ? "bg-gray-50" : ""}`}
+                className={`h-12 ${!isEditing ? "bg-gray-50" : ""} ${
+                  errors.lastName
+                    ? "border-red-300 focus:border-red-500 focus:ring-red-500"
+                    : ""
+                }`}
               />
+              {errors.lastName && (
+                <p className="mt-1 text-sm text-red-600">{errors.lastName}</p>
+              )}
             </div>
           </div>
 
@@ -166,8 +363,17 @@ const PersonalDetails = ({ user, formData, onInputChange, onSave }) => {
                 value={formData.phone}
                 onChange={onInputChange}
                 disabled={!isEditing}
-                className={`h-12 ${!isEditing ? "bg-gray-50" : ""}`}
+                className={`h-12 ${!isEditing ? "bg-gray-50" : ""} ${
+                  errors.phoneNumber
+                    ? "border-red-300 focus:border-red-500 focus:ring-red-500"
+                    : ""
+                }`}
               />
+              {errors.phoneNumber && (
+                <p className="mt-1 text-sm text-red-600">
+                  {errors.phoneNumber}
+                </p>
+              )}
             </div>
           </div>
 
@@ -241,24 +447,6 @@ const PersonalDetails = ({ user, formData, onInputChange, onSave }) => {
               disabled={!isEditing}
             />
           </div>
-
-          {/* Save Button */}
-          {isEditing && (
-            <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
-              <button
-                onClick={() => setIsEditing(false)}
-                className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
-              >
-                Cancel
-              </button>
-              <Button
-                onClick={handleSave}
-                className="px-6 py-2 bg-cyan-600 hover:bg-cyan-700 text-white rounded-lg"
-              >
-                Save Changes
-              </Button>
-            </div>
-          )}
         </div>
       </div>
     </div>

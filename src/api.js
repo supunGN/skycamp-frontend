@@ -62,6 +62,9 @@ export const API = {
     me() {
       return ok(http.get("/auth/me"));
     },
+    updateProfile(data) {
+      return ok(http.post("/auth/profile", data));
+    },
     // Password flows (legacy PHP endpoints)
     forgotPassword(email) {
       const body = new URLSearchParams({ email });
@@ -89,6 +92,51 @@ export const API = {
     },
     reverse(params) {
       return ok(http.get("/location/reverse", { params }));
+    },
+    // New endpoints for registration forms
+    getCampingDestinations() {
+      return ok(http.get("/locations/camping"));
+    },
+    getStargazingSpots() {
+      return ok(http.get("/locations/stargazing"));
+    },
+    getAllLocations() {
+      return ok(http.get("/locations/all"));
+    },
+    getLocationsByType(type) {
+      return ok(http.get("/locations/by-type", { params: { type } }));
+    },
+    // Display endpoints with images
+    getCampingDestinationsWithImages() {
+      return ok(http.get("/locations/camping/display"));
+    },
+    getStargazingSpotsWithImages() {
+      return ok(http.get("/locations/stargazing/display"));
+    },
+    // Home page endpoints (top 3 for each type)
+    getTopCampingDestinationsWithImages(limit = 3) {
+      return ok(http.get("/locations/camping/top", { params: { limit } }));
+    },
+    getTopStargazingSpotsWithImages(limit = 3) {
+      return ok(http.get("/locations/stargazing/top", { params: { limit } }));
+    },
+    // Individual location endpoint
+    getLocationWithImages(locationId) {
+      return ok(http.get(`/locations/${locationId}`));
+    },
+    // District filtering endpoints
+    getCampingDestinationsByDistrict(district) {
+      return ok(
+        http.get("/locations/camping/by-district", { params: { district } })
+      );
+    },
+    getStargazingSpotsByDistrict(district) {
+      return ok(
+        http.get("/locations/stargazing/by-district", { params: { district } })
+      );
+    },
+    getAllDistricts() {
+      return ok(http.get("/locations/districts"));
     },
   },
   // ==== RENTERS / GUIDES ====
