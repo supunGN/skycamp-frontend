@@ -6,6 +6,7 @@ import Home from "./pages/Home";
 import Rentals from "./pages/Rentals";
 import Guides from "./pages/Guides";
 import TravelBuddy from "./pages/TravelBuddy";
+import ChatPage from "./pages/ChatPage";
 import Destinations from "./pages/Destinations";
 import StargazingSpots from "./pages/StargazingSpots";
 import NotFound from "./pages/NotFound";
@@ -118,6 +119,9 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/rentals" element={<Rentals />} />
         <Route path="/travel-buddy" element={<TravelBuddy />} />
+        <Route path="/travel-buddy/feed" element={<TravelBuddy />} />
+        <Route path="/travel-buddy/chat" element={<ChatPage />} />
+        <Route path="/travel-buddy/requests" element={<TravelBuddy />} />
         <Route path="/destinations" element={<Destinations />} />
         <Route path="/stargazing-spots" element={<StargazingSpots />} />
         <Route path="/guides" element={<Guides />} />

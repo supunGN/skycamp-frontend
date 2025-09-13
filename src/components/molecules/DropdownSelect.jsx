@@ -9,9 +9,9 @@ export default function DropdownSelect({ label, options, selected, onSelect }) {
       <button
         type="button"
         onClick={() => setOpen(!open)}
-        className="w-full bg-white border border-gray-300 text-gray-700 rounded-lg px-4 py-2 flex items-center justify-between hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+        className="w-full bg-white border border-gray-300 text-gray-700 rounded-xl px-4 py-3 h-12 flex items-center justify-between hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500 transition-all duration-200"
       >
-        <span className={selected ? "text-gray-900" : "text-gray-500"}>
+        <span className={`text-sm ${selected ? "text-gray-900" : "text-gray-500"}`}>
           {selected || label || "Select"}
         </span>
         <ChevronDownIcon
@@ -30,7 +30,7 @@ export default function DropdownSelect({ label, options, selected, onSelect }) {
                 onSelect(option);
                 setOpen(false);
               }}
-              className="w-full px-4 py-3 text-left hover:bg-gray-100 text-gray-700"
+              className="w-full px-4 py-3 text-left hover:bg-gray-100 text-gray-700 text-sm"
             >
               {option}
             </button>

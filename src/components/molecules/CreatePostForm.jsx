@@ -200,7 +200,7 @@ export default function CreatePostForm({ onClose, onSubmit }) {
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-6">
+        <form onSubmit={handleSubmit} className="p-6 space-y-5">
           {/* Location */}
           <div>
             <label htmlFor="location" className="block text-sm font-medium text-gray-700 mb-2">
@@ -208,7 +208,7 @@ export default function CreatePostForm({ onClose, onSubmit }) {
             </label>
             <Input
               id="location"
-              placeholder="Location"
+              placeholder="Where are you going?"
               value={formData.location}
               onChange={handleChange}
               className={`w-full h-12 rounded-xl border-gray-300 focus:border-cyan-500 ${
@@ -229,7 +229,7 @@ export default function CreatePostForm({ onClose, onSubmit }) {
               Select Adventure Type
             </label>
             <DropdownSelect
-              label="Select Adventure Type"
+              label="Choose your adventure (Camping or Stargazing)"
               options={adventureOptions}
               selected={formData.adventureType}
               onSelect={(value) => handleDropdownChange("adventureType", value)}
@@ -248,7 +248,7 @@ export default function CreatePostForm({ onClose, onSubmit }) {
               No of Companions
             </label>
             <DropdownSelect
-              label="No of Companions"
+              label="How many companions are with you?"
               options={companionOptions}
               selected={formData.companions}
               onSelect={(value) => handleDropdownChange("companions", value)}
@@ -310,13 +310,13 @@ export default function CreatePostForm({ onClose, onSubmit }) {
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Add images
             </label>
-            <div className="space-y-4">
+            <div className="space-y-3">
               {/* Image Upload Area */}
               <div
-                className="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center cursor-pointer hover:border-cyan-400 hover:bg-gray-50 transition-colors"
+                className="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center cursor-pointer hover:border-cyan-400 hover:bg-gray-50 transition-colors"
                 onClick={() => imageUploadRef.current?.click()}
               >
-                <PhotoIcon className="w-12 h-12 text-gray-400 mx-auto mb-3" />
+                <PhotoIcon className="w-10 h-10 text-gray-400 mx-auto mb-2" />
                 <p className="text-sm text-gray-600 mb-1">Click to upload images</p>
                 <p className="text-xs text-gray-500">PNG, JPG, WebP up to 5MB each (max 2 images)</p>
               </div>
@@ -361,7 +361,7 @@ export default function CreatePostForm({ onClose, onSubmit }) {
             </label>
             <textarea
               id="description"
-              placeholder="Describe your upcoming adventure"
+              placeholder="Tell us about your camping or stargazing adventure!"
               value={formData.description}
               onChange={handleChange}
               rows={4}
@@ -380,7 +380,7 @@ export default function CreatePostForm({ onClose, onSubmit }) {
           </div>
 
           {/* Submit Button */}
-          <div className="flex justify-start pt-4">
+          <div className="flex justify-start pt-2">
             <Button
               type="submit"
               disabled={isSubmitting}
