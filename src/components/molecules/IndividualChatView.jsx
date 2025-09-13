@@ -10,7 +10,7 @@ const mockMessages = [
   {
     id: 1,
     sender: "Supun Gunathilake",
-    message: "Hello",
+    message: "Hello everyone! Welcome to our Horton Plains adventure!",
     timestamp: "10:30 AM",
     isCurrentUser: false,
     profilePicture: null
@@ -18,7 +18,7 @@ const mockMessages = [
   {
     id: 2,
     sender: "Isini Sandunika",
-    message: "Hello, Nice to meet ya!",
+    message: "Hello, Nice to meet ya! Looking forward to this trip!",
     timestamp: "10:32 AM",
     isCurrentUser: true,
     profilePicture: null
@@ -26,7 +26,7 @@ const mockMessages = [
   {
     id: 3,
     sender: "Supun Gunathilake",
-    message: "Looking forward to the hike!",
+    message: "Looking forward to the hike! The weather forecast looks perfect for tomorrow.",
     timestamp: "10:35 AM",
     isCurrentUser: false,
     profilePicture: null
@@ -34,7 +34,7 @@ const mockMessages = [
   {
     id: 4,
     sender: "Isini Sandunika",
-    message: "Same here! What time should we meet?",
+    message: "Same here! What time should we meet at the entrance?",
     timestamp: "10:36 AM",
     isCurrentUser: true,
     profilePicture: null
@@ -42,8 +42,88 @@ const mockMessages = [
   {
     id: 5,
     sender: "Supun Gunathilake",
-    message: "Let's meet at 6 AM at the entrance",
+    message: "Let's meet at 6 AM at the entrance. Don't forget to bring warm clothes!",
     timestamp: "10:38 AM",
+    isCurrentUser: false,
+    profilePicture: null
+  },
+  {
+    id: 6,
+    sender: "Kamal Perera",
+    message: "I'll be there! Should I bring my camera equipment?",
+    timestamp: "10:40 AM",
+    isCurrentUser: false,
+    profilePicture: null
+  },
+  {
+    id: 7,
+    sender: "Isini Sandunika",
+    message: "Yes, definitely bring your camera! The sunrise views are supposed to be amazing.",
+    timestamp: "10:42 AM",
+    isCurrentUser: true,
+    profilePicture: null
+  },
+  {
+    id: 8,
+    sender: "Supun Gunathilake",
+    message: "Absolutely! We'll have plenty of photo opportunities. The World's End viewpoint is spectacular.",
+    timestamp: "10:45 AM",
+    isCurrentUser: false,
+    profilePicture: null
+  },
+  {
+    id: 9,
+    sender: "Tharindu Silva",
+    message: "What about food? Should we pack lunch?",
+    timestamp: "10:47 AM",
+    isCurrentUser: false,
+    profilePicture: null
+  },
+  {
+    id: 10,
+    sender: "Isini Sandunika",
+    message: "Good question! I think we should pack some snacks and water. The hike is quite long.",
+    timestamp: "10:50 AM",
+    isCurrentUser: true,
+    profilePicture: null
+  },
+  {
+    id: 11,
+    sender: "Supun Gunathilake",
+    message: "Yes, definitely pack snacks and at least 2 liters of water per person. The trail is challenging.",
+    timestamp: "10:52 AM",
+    isCurrentUser: false,
+    profilePicture: null
+  },
+  {
+    id: 12,
+    sender: "Kamal Perera",
+    message: "I'll bring extra water bottles for everyone. Safety first!",
+    timestamp: "10:55 AM",
+    isCurrentUser: false,
+    profilePicture: null
+  },
+  {
+    id: 13,
+    sender: "Isini Sandunika",
+    message: "That's so thoughtful of you Kamal! Thank you!",
+    timestamp: "10:57 AM",
+    isCurrentUser: true,
+    profilePicture: null
+  },
+  {
+    id: 14,
+    sender: "Supun Gunathilake",
+    message: "Great team spirit! Remember to wear comfortable hiking boots and bring a rain jacket just in case.",
+    timestamp: "11:00 AM",
+    isCurrentUser: false,
+    profilePicture: null
+  },
+  {
+    id: 15,
+    sender: "Tharindu Silva",
+    message: "Got it! I'm so excited for this adventure. It's going to be an amazing experience!",
+    timestamp: "11:05 AM",
     isCurrentUser: false,
     profilePicture: null
   }
@@ -128,19 +208,12 @@ export default function IndividualChatView({ chat, onBack }) {
   };
 
   return (
-    <div className="flex flex-col h-full bg-white">
+    <div className="flex flex-col h-full bg-white min-h-0">
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-white">
+      <div className="relative flex items-center justify-between px-6 py-4 bg-white flex-shrink-0">
+        <div className="absolute bottom-0 left-8 right-8 h-px bg-gray-200"></div>
         <div className="flex items-center gap-3">
-          <button
-            onClick={onBack}
-            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-          >
-            <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-          </button>
-          <div className="w-6 h-6 rounded overflow-hidden bg-gray-100">
+          <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-100">
             {chat?.image ? (
               <img
                 src={chat.image}
@@ -149,7 +222,7 @@ export default function IndividualChatView({ chat, onBack }) {
               />
             ) : (
               <div className="w-full h-full flex items-center justify-center">
-                <PhotoIcon className="w-4 h-4 text-gray-400" />
+                <PhotoIcon className="w-6 h-6 text-gray-400" />
               </div>
             )}
           </div>
@@ -166,13 +239,13 @@ export default function IndividualChatView({ chat, onBack }) {
       </div>
 
       {/* Messages Area */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4 min-h-0">
         {messages.map((message) => (
           <div
             key={message.id}
             className={`flex ${message.isCurrentUser ? 'justify-end' : 'justify-start'}`}
           >
-            <div className={`flex items-start gap-3 max-w-xs ${message.isCurrentUser ? 'flex-row-reverse' : 'flex-row'}`}>
+            <div className={`flex items-start gap-3 max-w-md ${message.isCurrentUser ? 'flex-row-reverse' : 'flex-row'}`}>
               {/* Profile Picture */}
               <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0">
                 {message.profilePicture ? (
@@ -199,22 +272,22 @@ export default function IndividualChatView({ chat, onBack }) {
                       className="rounded-lg max-w-full h-auto"
                     />
                     {message.message && (
-                      <div
-                        className={`px-3 py-2 rounded-lg text-sm mt-2 ${
-                          message.isCurrentUser
-                            ? 'bg-gray-200 text-gray-900'
-                            : 'bg-gray-100 text-gray-900'
-                        }`}
-                      >
+                            <div
+                              className={`px-3 py-2 rounded-lg text-sm mt-2 ${
+                                message.isCurrentUser
+                                  ? 'bg-cyan-500 text-white'
+                                  : 'bg-gray-100 text-gray-900'
+                              }`}
+                            >
                         {message.message}
                       </div>
                     )}
                   </div>
                 ) : (
                   <div
-                    className={`px-3 py-2 rounded-lg text-sm ${
+                    className={`px-4 py-3 rounded-lg text-sm ${
                       message.isCurrentUser
-                        ? 'bg-gray-200 text-gray-900'
+                        ? 'bg-cyan-500 text-white'
                         : 'bg-gray-100 text-gray-900'
                     }`}
                   >
@@ -232,7 +305,8 @@ export default function IndividualChatView({ chat, onBack }) {
       </div>
 
       {/* Message Input */}
-      <div className="p-4 border-t border-gray-200 bg-white">
+      <div className="relative px-6 py-4 bg-white flex-shrink-0">
+        <div className="absolute top-0 left-8 right-8 h-px bg-gray-200"></div>
         <form onSubmit={handleSendMessage} className="flex items-center gap-3">
           <button
             type="button"

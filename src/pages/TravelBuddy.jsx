@@ -2,8 +2,8 @@ import TravelBuddyNavbar from "../components/organisms/TravelBuddyNavbar";
 import Footer from "../components/organisms/Footer";
 import Button from "../components/atoms/Button";
 import CreatePostForm from "../components/molecules/CreatePostForm";
-import ChatSidebar from "../components/molecules/ChatSidebar";
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Plus as PlusIcon,
   Search as MagnifyingGlassIcon,
@@ -153,8 +153,8 @@ const mockPosts = [
 
 export default function TravelBuddy() {
   const [showCreatePostForm, setShowCreatePostForm] = useState(false);
-  const [showChatSidebar, setShowChatSidebar] = useState(false);
   const [posts, setPosts] = useState(mockPosts);
+  const navigate = useNavigate();
 
   const handleCreatePost = async (formData) => {
     // Here you would typically send the data to your backend
@@ -168,7 +168,7 @@ export default function TravelBuddy() {
   };
 
   const handleChatToggle = () => {
-    setShowChatSidebar(!showChatSidebar);
+    navigate('/travel-buddy/chat');
   };
 
   const handleRefreshPosts = () => {
@@ -183,19 +183,6 @@ export default function TravelBuddy() {
     console.log("Posts refreshed!");
   };
 
-  // Prevent body scroll when chat sidebar is open
-  useEffect(() => {
-    if (showChatSidebar) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'unset';
-    }
-
-    // Cleanup on unmount
-    return () => {
-      document.body.style.overflow = 'unset';
-    };
-  }, [showChatSidebar]);
 
   return (
     <>
@@ -330,11 +317,6 @@ export default function TravelBuddy() {
         />
       )}
 
-      {/* Chat Sidebar */}
-      <ChatSidebar
-        isOpen={showChatSidebar}
-        onClose={() => setShowChatSidebar(false)}
-      />
     </>
   );
 }

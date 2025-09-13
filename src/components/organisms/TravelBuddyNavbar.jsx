@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   Bars3Icon,
   XMarkIcon,
@@ -16,6 +16,7 @@ export default function TravelBuddyNavbar({ onChatToggle, onRefresh }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [user, setUser] = useState(null);
   const [profileDropdown, setProfileDropdown] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const stored = localStorage.getItem("user");
@@ -67,8 +68,13 @@ export default function TravelBuddyNavbar({ onChatToggle, onRefresh }) {
             >
               Feed
             </Link>
+
+            <button 
+              onClick={() => navigate('/travel-buddy/chat')}
+
             <button
               onClick={onChatToggle}
+
               className="text-gray-700 hover:text-cyan-600 font-medium"
             >
               Messages
@@ -204,7 +210,7 @@ export default function TravelBuddyNavbar({ onChatToggle, onRefresh }) {
             </Link>
             <button
               onClick={() => {
-                onChatToggle();
+                navigate('/travel-buddy/chat');
                 setMenuOpen(false);
               }}
               className="block text-lg font-medium text-gray-900 hover:text-cyan-600"
