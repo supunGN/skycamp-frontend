@@ -99,7 +99,7 @@ export default function GuidesSection({ selectedDistrict }) {
       <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-8">
         Guide List
       </h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
         {guides.length > 0 ? (
           guides.map((guide) => (
             <Link key={guide.id} to={`/guide/${guide.id}`} className="block">

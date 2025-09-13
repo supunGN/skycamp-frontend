@@ -1,355 +1,116 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Navbar from "../components/organisms/Navbar";
 import Footer from "../components/organisms/Footer";
 import LocationSearchSection from "../components/sections/LocationSearchSection";
 import RentalCard from "../components/molecules/RentalCard";
 import Button from "../components/atoms/Button";
 import { useNavigate } from "react-router-dom";
+import { API } from "../api";
 
-// Import rental images
-import ThiliniImg from "../assets/rentals/Thilini.png";
-import KasunImg from "../assets/rentals/Kasun.png";
-import UpulImg from "../assets/rentals/Upul.png";
-import MenakaImg from "../assets/rentals/Menaka.png";
-import RiznaImg from "../assets/rentals/Rizna.png";
-import NadeeshaImg from "../assets/rentals/Nadeesha.png";
-import DinithiImg from "../assets/rentals/Dinithi.png";
-import AnjanaImg from "../assets/rentals/Anjana.png";
-import ChamindaImg from "../assets/rentals/Chaminda.png";
-import DewmiImg from "../assets/rentals/Dewmi.png";
-import BandaraImg from "../assets/rentals/Bandara.png";
-import NandanaImg from "../assets/rentals/Nandana.png";
-
-const rentalData = [
-  {
-    image: ThiliniImg,
-    location: "Nuwara Eliya",
-    name: "Thilini Abeykoon",
-    phone: "+94 77 235 1198",
-    rating: 5.0,
-    reviewCount: 22,
-  },
-  {
-    image: KasunImg,
-    location: "Ella",
-    name: "Kasun Perera",
-    phone: "+94 77 235 1128",
-    rating: 5.0,
-    reviewCount: 22,
-  },
-  {
-    image: UpulImg,
-    location: "Bandarawela",
-    name: "Upul Fernando",
-    phone: "+94 77 235 0002",
-    rating: 5.0,
-    reviewCount: 22,
-  },
-  {
-    image: MenakaImg,
-    location: "Haputale",
-    name: "Menaka Silva",
-    phone: "+94 77 235 1234",
-    rating: 5.0,
-    reviewCount: 22,
-  },
-  {
-    image: RiznaImg,
-    location: "Badulla",
-    name: "Rizna Nazeer",
-    phone: "+94 77 235 8767",
-    rating: 5.0,
-    reviewCount: 22,
-  },
-  {
-    image: NadeeshaImg,
-    location: "Badulla",
-    name: "Nadeesha Jayasuriya",
-    phone: "+94 77 235 7777",
-    rating: 5.0,
-    reviewCount: 22,
-  },
-  {
-    image: DinithiImg,
-    location: "Ohiya",
-    name: "Dinithi Madushani",
-    phone: "+94 77 235 9809",
-    rating: 5.0,
-    reviewCount: 22,
-  },
-  {
-    image: AnjanaImg,
-    location: "Bandarawela",
-    name: "Anjana Weerasinghe",
-    phone: "+94 77 235 9999",
-    rating: 5.0,
-    reviewCount: 22,
-  },
-  {
-    image: ChamindaImg,
-    location: "Kalapahana",
-    name: "Chaminda Herath",
-    phone: "+94 77 235 2233",
-    rating: 5.0,
-    reviewCount: 22,
-  },
-  {
-    image: DewmiImg,
-    location: "Welimada",
-    name: "Dewmi Seya",
-    phone: "+94 77 235 5656",
-    rating: 5.0,
-    reviewCount: 22,
-  },
-  {
-    image: BandaraImg,
-    location: "Bandarawela",
-    name: "Bandara Dissanayake",
-    phone: "+94 77 235 7777",
-    rating: 5.0,
-    reviewCount: 22,
-  },
-  {
-    image: NandanaImg,
-    location: "Nawalapitiya",
-    name: "Nandana De Silva",
-    phone: "+94 77 235 2345",
-    rating: 5.0,
-    reviewCount: 22,
-  },
-];
-
-// Camping Gear Sidebar Section (static, matches UI)
+// Camping Gear Sidebar Section (dynamic from database)
 const CampingGearSidebar = () => {
   const navigate = useNavigate();
+  const [equipmentCategories, setEquipmentCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchEquipmentCategories = async () => {
+      try {
+        setLoading(true);
+        const response = await API.equipment.getCategoriesWithEquipment();
+        if (response.success) {
+          setEquipmentCategories(response.data);
+        } else {
+          setError("Failed to fetch equipment categories");
+        }
+      } catch (err) {
+        console.error("Error fetching equipment categories:", err);
+        setError("Failed to fetch equipment categories");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchEquipmentCategories();
+  }, []);
+
   const handleSearch = () => {
     navigate("/selected_individualrenter");
     window.scrollTo(0, 0);
   };
+
+  if (loading) {
+    return (
+      <aside className="bg-white rounded-2xl shadow-sm p-4 mb-8 w-full lg:w-72 text-sm">
+        <div className="flex justify-center items-center py-8">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-cyan-600"></div>
+          <span className="ml-3 text-gray-600">Loading equipment...</span>
+        </div>
+      </aside>
+    );
+  }
+
+  if (error) {
+    return (
+      <aside className="bg-white rounded-2xl shadow-sm p-4 mb-8 w-full lg:w-72 text-sm">
+        <div className="text-center py-8">
+          <div className="text-red-600 mb-2">
+            <svg
+              className="mx-auto h-8 w-8"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+          </div>
+          <p className="text-sm text-gray-600">{error}</p>
+        </div>
+      </aside>
+    );
+  }
   return (
     <aside className="bg-white rounded-2xl shadow-sm p-4 mb-8 w-full lg:w-72 text-sm">
-      {/* Increased font size for heading */}
-      <h3 className="font-bold text-cyan-700 mb-4 text-xl">Camping Gears</h3>
-      <div className="mb-6">
-        <div className="font-semibold mb-2">Tents</div>
-        <div className="space-y-1">
-          <label className="flex items-center gap-2">
-            <input type="checkbox" /> 1-person tent
-          </label>
-          <label className="flex items-center gap-2">
-            <input type="checkbox" /> 2-person tent
-          </label>
-          <label className="flex items-center gap-2">
-            <input type="checkbox" /> 3 or more person tent
-          </label>
+      {/* Dynamic Equipment Categories */}
+      {equipmentCategories.map((category, index) => (
+        <div key={category.categoryId}>
+          {/* Show section headers for different types */}
+          {index === 0 && category.type === "Camping" && (
+            <h3 className="font-bold text-cyan-700 mb-4 text-xl">
+              Camping Gears
+            </h3>
+          )}
+          {category.type === "Stargazing" &&
+            equipmentCategories.find((c) => c.type === "Stargazing") ===
+              category && (
+              <h3 className="font-bold text-cyan-700 mb-4 text-xl mt-10">
+                Stargazing Gears
+              </h3>
+            )}
+
+          {/* Category Section */}
+          <div className="mb-6">
+            <div className="font-semibold mb-2">{category.name}</div>
+            <div className="space-y-1">
+              {category.equipment.map((equipment) => (
+                <label
+                  key={equipment.equipmentId}
+                  className="flex items-center gap-2"
+                >
+                  <input type="checkbox" /> {equipment.name}
+                </label>
+              ))}
+            </div>
+          </div>
         </div>
-      </div>
-      <div className="mb-6">
-        <div className="font-semibold mb-2">Sleeping Gear</div>
-        <div className="space-y-1">
-          <label className="flex items-center gap-2">
-            <input type="checkbox" /> Sleeping bags
-          </label>
-          <label className="flex items-center gap-2">
-            <input type="checkbox" /> Air mattress
-          </label>
-          <label className="flex items-center gap-2">
-            <input type="checkbox" /> Camping pillow
-          </label>
-          <label className="flex items-center gap-2">
-            <input type="checkbox" /> Emergency blanket
-          </label>
-        </div>
-      </div>
-      <div className="mb-6">
-        <div className="font-semibold mb-2">Cooking & Kitchen Items</div>
-        <div className="space-y-1">
-          <label className="flex items-center gap-2">
-            <input type="checkbox" /> Single gas stove
-          </label>
-          <label className="flex items-center gap-2">
-            <input type="checkbox" /> Double gas stove
-          </label>
-          <label className="flex items-center gap-2">
-            <input type="checkbox" /> Gas BBQ grill
-          </label>
-          <label className="flex items-center gap-2">
-            <input type="checkbox" /> Cooking pot and pan set
-          </label>
-          <label className="flex items-center gap-2">
-            <input type="checkbox" /> Kettle for boiling water
-          </label>
-          <label className="flex items-center gap-2">
-            <input type="checkbox" /> Fork, spoon, knife set
-          </label>
-          <label className="flex items-center gap-2">
-            <input type="checkbox" /> Chopping board
-          </label>
-          <label className="flex items-center gap-2">
-            <input type="checkbox" /> Reusable plates and bowls
-          </label>
-          <label className="flex items-center gap-2">
-            <input type="checkbox" /> Food storage containers
-          </label>
-          <label className="flex items-center gap-2">
-            <input type="checkbox" /> Cooler box
-          </label>
-        </div>
-      </div>
-      <div className="mb-6">
-        <div className="font-semibold mb-2">Camping Furniture</div>
-        <div className="space-y-1">
-          <label className="flex items-center gap-2">
-            <input type="checkbox" /> Camping chair
-          </label>
-          <label className="flex items-center gap-2">
-            <input type="checkbox" /> Folding table
-          </label>
-          <label className="flex items-center gap-2">
-            <input type="checkbox" /> Hammock
-          </label>
-        </div>
-      </div>
-      <div className="mb-6">
-        <div className="font-semibold mb-2">Lights</div>
-        <div className="space-y-1">
-          <label className="flex items-center gap-2">
-            <input type="checkbox" /> Camping lanterns
-          </label>
-          <label className="flex items-center gap-2">
-            <input type="checkbox" /> torch
-          </label>
-          <label className="flex items-center gap-2">
-            <input type="checkbox" /> Tent hanging light
-          </label>
-        </div>
-      </div>
-      <div className="mb-6">
-        <div className="font-semibold mb-2">Navigation & Safety Tools</div>
-        <div className="space-y-1">
-          <label className="flex items-center gap-2">
-            <input type="checkbox" /> Compass & Map
-          </label>
-          <label className="flex items-center gap-2">
-            <input type="checkbox" /> Emergency whistle
-          </label>
-          <label className="flex items-center gap-2">
-            <input type="checkbox" /> First-aid kit
-          </label>
-          <label className="flex items-center gap-2">
-            <input type="checkbox" /> Walkie-talkies
-          </label>
-        </div>
-      </div>
-      <div className="mb-6">
-        <div className="font-semibold mb-2">Water & Hydration</div>
-        <div className="space-y-1">
-          <label className="flex items-center gap-2">
-            <input type="checkbox" /> Water bottles
-          </label>
-          <label className="flex items-center gap-2">
-            <input type="checkbox" /> Water jugs
-          </label>
-        </div>
-      </div>
-      <div className="mb-6">
-        <div className="font-semibold mb-2">Bags & Storage</div>
-        <div className="space-y-1">
-          <label className="flex items-center gap-2">
-            <input type="checkbox" /> Hiking backpacks
-          </label>
-          <label className="flex items-center gap-2">
-            <input type="checkbox" /> Dry bags
-          </label>
-          <label className="flex items-center gap-2">
-            <input type="checkbox" /> Waterproof pouches
-          </label>
-          <label className="flex items-center gap-2">
-            <input type="checkbox" /> Gear organizer bag
-          </label>
-        </div>
-      </div>
-      <div className="mb-6">
-        <div className="font-semibold mb-2">Clothing</div>
-        <div className="space-y-1">
-          <label className="flex items-center gap-2">
-            <input type="checkbox" /> Raincoat
-          </label>
-          <label className="flex items-center gap-2">
-            <input type="checkbox" /> Warm jacket
-          </label>
-          <label className="flex items-center gap-2">
-            <input type="checkbox" /> Waterproof shoes
-          </label>
-        </div>
-      </div>
-      <div className="mb-6">
-        <div className="font-semibold mb-2">Fun & Extras</div>
-        <div className="space-y-1">
-          <label className="flex items-center gap-2">
-            <input type="checkbox" /> Card games / Board games
-          </label>
-          <label className="flex items-center gap-2">
-            <input type="checkbox" /> Travel guitar
-          </label>
-        </div>
-      </div>
-      <div className="mb-6">
-        <div className="font-semibold mb-2">Power & Charging</div>
-        <div className="space-y-1">
-          <label className="flex items-center gap-2">
-            <input type="checkbox" /> Power bank & Cables
-          </label>
-        </div>
-      </div>
-      {/* Stargazing Gears Section */}
-      <h3 className="font-bold text-cyan-700 mb-4 text-xl mt-10">
-        Stargazing Gears
-      </h3>
-      <div className="mb-6">
-        <div className="font-semibold mb-2">Binoculars</div>
-        <div className="space-y-1">
-          <label className="flex items-center gap-2">
-            <input type="checkbox" /> Small binoculars
-          </label>
-          <label className="flex items-center gap-2">
-            <input type="checkbox" /> Stargazing binoculars
-          </label>
-        </div>
-      </div>
-      <div className="mb-6">
-        <div className="font-semibold mb-2">Telescopes</div>
-        <div className="space-y-1">
-          <label className="flex items-center gap-2">
-            <input type="checkbox" /> Beginner telescope
-          </label>
-          <label className="flex items-center gap-2">
-            <input type="checkbox" /> Big telescope
-          </label>
-        </div>
-      </div>
-      <div className="mb-6">
-        <div className="font-semibold mb-2">Tripods & Mounts</div>
-        <div className="space-y-1">
-          <label className="flex items-center gap-2">
-            <input type="checkbox" /> Tripod stands for telescope or binoculars
-          </label>
-        </div>
-      </div>
-      <div className="mb-6">
-        <div className="font-semibold mb-2">Accessories</div>
-        <div className="space-y-1">
-          <label className="flex items-center gap-2">
-            <input type="checkbox" /> Star maps or books
-          </label>
-          <label className="flex items-center gap-2">
-            <input type="checkbox" /> Power bank for telescope
-          </label>
-          <label className="flex items-center gap-2">
-            <input type="checkbox" /> Laser pointer for pointing at stars
-          </label>
-        </div>
-      </div>
+      ))}
+
       {/* Search Button */}
       <Button
         size="sm"
@@ -365,46 +126,246 @@ const CampingGearSidebar = () => {
 
 const Rentals = () => {
   const navigate = useNavigate();
+  const [renters, setRenters] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [showAll, setShowAll] = useState(false);
+  const [selectedDistrict, setSelectedDistrict] = useState("");
+  const [isFiltered, setIsFiltered] = useState(false);
+
+  useEffect(() => {
+    const fetchRenters = async () => {
+      try {
+        setLoading(true);
+        const response = await API.renters.list();
+        if (response.success) {
+          setRenters(response.data);
+        } else {
+          setError("Failed to fetch renters");
+        }
+      } catch (err) {
+        console.error("Error fetching renters:", err);
+        setError("Failed to fetch renters");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchRenters();
+  }, []);
+
+  const handleRentalClick = (renter) => {
+    // Navigate to individual renter page
+    navigate("/selected_individualrenter", {
+      state: { renterId: renter.id },
+    });
+    window.scrollTo(0, 0);
+  };
+
+  const handleShowAll = () => {
+    setShowAll(true);
+  };
+
+  const handleShowLess = () => {
+    setShowAll(false);
+    // Scroll back to top of rentals section smoothly
+    setTimeout(() => {
+      const rentalsSection = document.querySelector(
+        ".max-w-7xl.mx-auto.px-4.mt-8"
+      );
+      if (rentalsSection) {
+        rentalsSection.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    }, 100);
+  };
+
+  const handleDistrictFilter = async () => {
+    if (!selectedDistrict) return;
+
+    try {
+      setLoading(true);
+      const response = await API.renters.getByDistrict(selectedDistrict);
+
+      if (response.success) {
+        setRenters(response.data);
+        setIsFiltered(true);
+        setShowAll(false);
+      } else {
+        setError("Failed to filter renters");
+      }
+    } catch (err) {
+      console.error("Error filtering renters:", err);
+      setError("Failed to filter renters");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleReset = async () => {
+    try {
+      setLoading(true);
+      const response = await API.renters.list();
+
+      if (response.success) {
+        setRenters(response.data);
+        setIsFiltered(false);
+        setSelectedDistrict("");
+        setShowAll(false);
+      }
+    } catch (err) {
+      console.error("Error resetting renters:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Get renters to display based on showAll state
+  const displayedRenters = showAll ? renters : renters.slice(0, 15);
+
   return (
     <>
       {/* Navbar */}
       <Navbar />
       {/* Location Search Section */}
-      <LocationSearchSection />
+      <LocationSearchSection
+        selectedDistrict={selectedDistrict}
+        onDistrictChange={setSelectedDistrict}
+        onSearch={handleDistrictFilter}
+        onReset={handleReset}
+        isLoading={loading}
+        isFiltered={isFiltered}
+      />
       {/* Add space between search and rental area */}
       <div className="h-10" />
       {/* Main Content: Sidebar + Rental Cards */}
       <div className="max-w-7xl mx-auto px-4 mt-8">
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Camping Gear Sidebar */}
-          <div className="flex-shrink-0 w-full lg:w-72">
+          <div
+            className="flex-shrink-0 w-full lg:w-72 sticky top-28 self-start overflow-y-auto"
+            style={{ maxHeight: "80vh" }}
+          >
             <CampingGearSidebar />
           </div>
           {/* Rental Cards Section */}
-          <div className="flex-1 sticky top-28 self-start">
+          <div className="flex-1">
             <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-6">
               Gear Rentals
             </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {rentalData.map((rental, idx) => {
-                // Link Upul Fernando to /fullrenter
-                if (rental.name === "Upul Fernando") {
-                  return (
+
+            {loading && (
+              <div className="flex justify-center items-center py-12">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-600"></div>
+                <span className="ml-3 text-gray-600">Loading renters...</span>
+              </div>
+            )}
+
+            {error && (
+              <div className="text-center py-12">
+                <div className="text-red-600 mb-4">
+                  <svg
+                    className="mx-auto h-12 w-12"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
+                </div>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">
+                  Error Loading Renters
+                </h3>
+                <p className="text-gray-600 mb-4">{error}</p>
+                <button
+                  onClick={() => window.location.reload()}
+                  className="bg-teal-600 text-white px-4 py-2 rounded-lg hover:bg-teal-700 transition-colors"
+                >
+                  Try Again
+                </button>
+              </div>
+            )}
+
+            {!loading && !error && renters.length === 0 && (
+              <div className="text-center py-12">
+                <div className="text-gray-400 mb-4">
+                  <svg
+                    className="mx-auto h-12 w-12"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+                    />
+                  </svg>
+                </div>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">
+                  No Renters Available
+                </h3>
+                <p className="text-gray-600">
+                  There are currently no registered renters on the platform.
+                </p>
+              </div>
+            )}
+
+            {!loading && !error && renters.length > 0 && (
+              <>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {displayedRenters.map((renter) => (
                     <div
-                      key={idx}
-                      onClick={() => {
-                        navigate("/selected_individualrenter");
-                        window.scrollTo(0, 0);
-                      }}
+                      key={renter.id}
+                      onClick={() => handleRentalClick(renter)}
                       style={{ cursor: "pointer" }}
                     >
-                      <RentalCard {...rental} />
+                      <RentalCard
+                        image={
+                          renter.image ||
+                          "http://localhost/skycamp/skycamp-backend/storage/uploads/users/default-profile.png"
+                        }
+                        location={renter.location}
+                        name={renter.name}
+                        phone={renter.phone}
+                        rating={renter.rating}
+                        reviewCount={renter.reviewCount}
+                      />
                     </div>
-                  );
-                }
-                return <RentalCard key={idx} {...rental} />;
-              })}
-            </div>
+                  ))}
+                </div>
+
+                {/* Pagination Buttons */}
+                {renters.length > 15 && (
+                  <div className="flex justify-center mt-6">
+                    {!showAll ? (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleShowAll}
+                        className="px-4 py-2"
+                      >
+                        Show All
+                      </Button>
+                    ) : (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleShowLess}
+                        className="px-4 py-2"
+                      >
+                        Show Less
+                      </Button>
+                    )}
+                  </div>
+                )}
+              </>
+            )}
           </div>
         </div>
       </div>

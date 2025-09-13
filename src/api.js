@@ -144,10 +144,28 @@ export const API = {
     list(params) {
       return ok(http.get("/renters", { params }));
     },
+    getByDistrict(district) {
+      return ok(http.get("/renters/by-district", { params: { district } }));
+    },
+    show(id) {
+      return ok(http.get(`/renters/${id}`));
+    },
   },
   guides: {
     list(params) {
       return ok(http.get("/guides", { params }));
+    },
+  },
+  // ==== EQUIPMENT ====
+  equipment: {
+    getCategories() {
+      return ok(http.get("/equipment/categories"));
+    },
+    getCategoriesWithEquipment() {
+      return ok(http.get("/equipment/categories-with-equipment"));
+    },
+    getEquipmentByCategory(categoryId) {
+      return ok(http.get("/equipment/by-category", { params: { categoryId } }));
     },
   },
   // ==== CART / CHECKOUT ====

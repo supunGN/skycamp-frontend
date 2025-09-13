@@ -22,7 +22,7 @@ export default function GuideCard({
   };
 
   return (
-    <div className="bg-white rounded-2xl p-4 flex w-full max-w-xl mx-auto items-center">
+    <div className="bg-white rounded-2xl p-5 flex w-full max-w-3xl mx-auto items-center shadow-sm hover:shadow-lg transition-shadow duration-300">
       {/* Profile Image */}
       <div className="flex-shrink-0 mr-6">
         <img
