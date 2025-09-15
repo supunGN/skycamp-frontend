@@ -9,6 +9,7 @@ import MyBookings from "./profile/MyBookings";
 import TravelBuddy from "./profile/TravelBuddy";
 import Settings from "./profile/Settings";
 import { ArrowLeftIcon } from "@heroicons/react/24/outline";
+import { API } from "../api";
 
 export default function Profile() {
   const [activeTab, setActiveTab] = useState("details");
@@ -48,6 +49,33 @@ export default function Profile() {
     }
     setLoading(false);
   }, []);
+
+  // Ensure NIC number is populated for Verification tab
+  useEffect(() => {
+    const maybeLoadNic = async () => {
+      if (!user || user.nic_number) return;
+      try {
+        // Prefer auth/me which should reflect latest session user
+        const me = await API.auth.me();
+        const updatedUser = me?.user || {};
+        if (updatedUser.nic_number) {
+          localStorage.setItem("user", JSON.stringify(updatedUser));
+          setUser(updatedUser);
+          return;
+        }
+        // Fallback to customer profile endpoint if available
+        try {
+          const profile = await API.profile.getCustomer();
+          if (profile?.nic_number) {
+            const merged = { ...user, nic_number: profile.nic_number };
+            localStorage.setItem("user", JSON.stringify(merged));
+            setUser(merged);
+          }
+        } catch {}
+      } catch {}
+    };
+    maybeLoadNic();
+  }, [user]);
 
   const handleInputChange = (e) => {
     const { id, value } = e.target;

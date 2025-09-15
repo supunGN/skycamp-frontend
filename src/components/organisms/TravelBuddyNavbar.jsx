@@ -69,16 +69,12 @@ export default function TravelBuddyNavbar({ onChatToggle, onRefresh }) {
               Feed
             </Link>
 
-            <button 
-              onClick={() => navigate('/travel-buddy/chat')}
-
-            <button
-              onClick={onChatToggle}
-
+            <Link
+              to="/travel-buddy/chat"
               className="text-gray-700 hover:text-cyan-600 font-medium"
             >
               Messages
-            </button>
+            </Link>
             <Link
               to="/travel-buddy/requests"
               className="text-gray-700 hover:text-cyan-600 font-medium"

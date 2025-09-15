@@ -9,12 +9,14 @@ import {
   CheckCircleIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
+import { API } from "../../api";
 
 const TravelBuddy = ({ user }) => {
   const [travelBuddyStatus, setTravelBuddyStatus] = useState(
     user?.travel_buddy_status || "Inactive"
   );
   const [showInfo, setShowInfo] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   // Mock data for travel plans and requests
   const travelPlans = [
@@ -52,10 +54,38 @@ const TravelBuddy = ({ user }) => {
     },
   ];
 
-  const handleStatusToggle = () => {
-    const newStatus = travelBuddyStatus === "Active" ? "Inactive" : "Active";
-    setTravelBuddyStatus(newStatus);
-    // TODO: API call to update status
+  const handleStatusToggle = async () => {
+    if (isSaving) return;
+
+    const nextStatus = travelBuddyStatus === "Active" ? "Inactive" : "Active";
+
+    // Optimistic UI update
+    setTravelBuddyStatus(nextStatus);
+    setIsSaving(true);
+
+    try {
+      await API.auth.toggleTravelBuddy(nextStatus);
+
+      // Persist into localStorage user for consistency across app
+      try {
+        const stored = localStorage.getItem("user");
+        if (stored) {
+          const u = JSON.parse(stored);
+          const updated = { ...u, travel_buddy_status: nextStatus };
+          localStorage.setItem("user", JSON.stringify(updated));
+        }
+      } catch {}
+    } catch (err) {
+      // Revert on failure
+      setTravelBuddyStatus((s) => (s === "Active" ? "Inactive" : "Active"));
+      console.error("Failed to update Travel Buddy status", err);
+      // Optional: add a lightweight inline error indicator
+      alert(
+        err?.message || "Failed to update Travel Buddy status. Please try again."
+      );
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleRequestResponse = (requestId, response) => {
@@ -149,8 +179,9 @@ const TravelBuddy = ({ user }) => {
               className="sr-only peer"
               checked={travelBuddyStatus === "Active"}
               onChange={handleStatusToggle}
+              disabled={isSaving}
             />
-            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+            <div className={`w-11 h-6 ${isSaving ? "opacity-60" : ""} bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600`}></div>
           </label>
         </div>
 

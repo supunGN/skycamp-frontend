@@ -65,6 +65,13 @@ export const API = {
     updateProfile(data) {
       return ok(http.post("/auth/profile", data));
     },
+    toggleTravelBuddy(status) {
+      const body = new URLSearchParams({ status: String(status).trim() });
+      return ok(http.post("/auth/travel-buddy/toggle", body));
+    },
+    submitVerification(formData) {
+      return ok(http.post("/auth/verification/submit", formData));
+    },
     // Password flows (legacy PHP endpoints)
     forgotPassword(email) {
       const body = new URLSearchParams({ email });
@@ -177,63 +184,25 @@ export const API = {
       return ok(http.get(`/bookings/${id}`));
     },
   },
-  payments: {
-    mock(body) {
-      return ok(http.post("/payments/mock", body));
-    },
-  },
-  // ==== REVIEWS ====
-  reviews: {
-    create(body) {
-      return ok(http.post("/reviews", body));
-    },
-    addDestinationReview(body) {
-      return ok(http.post("/add_destination_review.php", body));
-    },
-    addServiceProviderReview(body) {
-      return ok(http.post("/add_service_provider_review.php", body));
-    },
-  },
-  // ==== DESTINATIONS ====
-  destinations: {
-    list() {
-      return ok(http.get("/destinations.php"));
-    },
-    create(body) {
-      return ok(http.post("/add_destination.php", body));
-    },
-  },
-  // ==== SERVICE PROVIDERS ====
-  serviceProviders: {
-    list() {
-      return ok(http.get("/service_providers.php"));
-    },
-  },
   // ==== TRAVEL BUDDY ====
   travelBuddy: {
     listPlans(params) {
       return ok(http.get("/travel-plans", { params }));
     },
-    createPlan(body) {
-      return ok(http.post("/travel-plans", body));
+    createPlan(data) {
+      return ok(http.post("/travel-plans", data));
     },
-    requestJoin(body) {
-      return ok(http.post("/travel-requests", body));
+    requestJoin(data) {
+      return ok(http.post("/travel-requests", data));
     },
     listMessages(params) {
       return ok(http.get("/travel-messages", { params }));
     },
-    sendMessage(body) {
-      return ok(http.post("/travel-messages", body));
+    sendMessage(data) {
+      return ok(http.post("/travel-messages", data));
     },
-  },
-  // ==== PROFILE (customer) ====
-  profile: {
-    getCustomer(params) {
-      return ok(http.get("/customer/profile.php", { params }));
-    },
-    updateCustomer(body) {
-      return ok(http.post("/customer/update-profile.php", body));
+    getStatus() {
+      return ok(http.get("/travel-buddy/status"));
     },
   },
 };

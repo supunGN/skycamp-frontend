@@ -2,6 +2,7 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import { useEffect } from "react";
 import { API } from "./api";
 import ScrollToTop from "./components/ScrollToTop";
+import TravelBuddyProtectedRoute from "./components/TravelBuddyProtectedRoute";
 import Home from "./pages/Home";
 import Rentals from "./pages/Rentals";
 import Guides from "./pages/Guides";
@@ -102,8 +103,11 @@ function App() {
     API.auth
       .me()
       .then((res) => {
-        if (res?.authenticated && res?.user) {
-          localStorage.setItem("user", JSON.stringify(res.user));
+        // /auth/me returns: { success, data: { authenticated, user } }
+        const auth = res?.data?.authenticated;
+        const user = res?.data?.user;
+        if (auth && user) {
+          localStorage.setItem("user", JSON.stringify(user));
         }
       })
       .catch(() => {
@@ -118,10 +122,38 @@ function App() {
         {/* Public Pages */}
         <Route path="/" element={<Home />} />
         <Route path="/rentals" element={<Rentals />} />
-        <Route path="/travel-buddy" element={<TravelBuddy />} />
-        <Route path="/travel-buddy/feed" element={<TravelBuddy />} />
-        <Route path="/travel-buddy/chat" element={<ChatPage />} />
-        <Route path="/travel-buddy/requests" element={<TravelBuddy />} />
+        <Route 
+          path="/travel-buddy" 
+          element={
+            <TravelBuddyProtectedRoute>
+              <TravelBuddy />
+            </TravelBuddyProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/travel-buddy/feed" 
+          element={
+            <TravelBuddyProtectedRoute>
+              <TravelBuddy />
+            </TravelBuddyProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/travel-buddy/chat" 
+          element={
+            <TravelBuddyProtectedRoute>
+              <ChatPage />
+            </TravelBuddyProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/travel-buddy/requests" 
+          element={
+            <TravelBuddyProtectedRoute>
+              <TravelBuddy />
+            </TravelBuddyProtectedRoute>
+          } 
+        />
         <Route path="/destinations" element={<Destinations />} />
         <Route path="/stargazing-spots" element={<StargazingSpots />} />
         <Route path="/guides" element={<Guides />} />

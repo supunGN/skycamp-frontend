@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import Button from "../../components/atoms/Button";
+import { API } from "../../api";
 import {
   PhotoIcon,
   CheckCircleIcon,
@@ -10,19 +11,81 @@ import {
 const Verification = ({ user }) => {
   const [nicFrontFile, setNicFrontFile] = useState(null);
   const [nicBackFile, setNicBackFile] = useState(null);
+  const [nicFrontFileObj, setNicFrontFileObj] = useState(null);
+  const [nicBackFileObj, setNicBackFileObj] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [message, setMessage] = useState(null);
 
   const handleFileUpload = (event, side) => {
     const file = event.target.files[0];
     if (file) {
+      // Validate file type
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+      if (!allowedTypes.includes(file.type)) {
+        setMessage({ type: 'error', text: 'Only JPG, PNG, and WebP images are allowed' });
+        return;
+      }
+
+      // Validate file size (5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        setMessage({ type: 'error', text: 'File size must be less than 5MB' });
+        return;
+      }
+
       const reader = new FileReader();
       reader.onload = (e) => {
         if (side === "front") {
           setNicFrontFile(e.target.result);
+          setNicFrontFileObj(file);
         } else {
           setNicBackFile(e.target.result);
+          setNicBackFileObj(file);
         }
+        setMessage(null); // Clear any previous messages
       };
       reader.readAsDataURL(file);
+    }
+  };
+
+  const handleSubmitVerification = async () => {
+    if (!nicFrontFileObj || !nicBackFileObj) {
+      setMessage({ type: 'error', text: 'Both NIC front and back images are required' });
+      return;
+    }
+
+    setSubmitting(true);
+    setMessage(null);
+
+    try {
+      const formData = new FormData();
+      formData.append('nic_front_image', nicFrontFileObj);
+      formData.append('nic_back_image', nicBackFileObj);
+
+      const response = await API.auth.submitVerification(formData);
+      
+      if (response.success) {
+        setMessage({ type: 'success', text: response.message });
+        // Clear the files after successful submission
+        setNicFrontFile(null);
+        setNicBackFile(null);
+        setNicFrontFileObj(null);
+        setNicBackFileObj(null);
+        
+        // Update user object in localStorage
+        const updatedUser = { ...user, verification_status: 'Pending' };
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+        
+        // Trigger a page refresh to show updated status
+        setTimeout(() => {
+          window.location.reload();
+        }, 2000);
+      } else {
+        setMessage({ type: 'error', text: response.message || 'Failed to submit verification documents' });
+      }
+    } catch (error) {
+      setMessage({ type: 'error', text: error.message || 'Failed to submit verification documents' });
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -218,11 +281,30 @@ const Verification = ({ user }) => {
                 </div>
               </div>
 
+              {/* Message Display */}
+              {message && (
+                <div className={`p-4 rounded-lg ${
+                  message.type === 'success' 
+                    ? 'bg-green-50 border border-green-200 text-green-800' 
+                    : 'bg-red-50 border border-red-200 text-red-800'
+                }`}>
+                  {message.text}
+                </div>
+              )}
+
               {/* Upload Button */}
-              {(nicFrontFile || nicBackFile) && (
+              {nicFrontFile && nicBackFile && (
                 <div className="flex justify-end">
-                  <Button className="px-6 py-2 bg-cyan-600 hover:bg-cyan-700 text-white rounded-lg">
-                    Submit for Verification
+                  <Button 
+                    onClick={handleSubmitVerification}
+                    disabled={submitting}
+                    className={`px-6 py-2 rounded-lg ${
+                      submitting 
+                        ? 'bg-gray-400 cursor-not-allowed' 
+                        : 'bg-cyan-600 hover:bg-cyan-700'
+                    } text-white`}
+                  >
+                    {submitting ? 'Submitting...' : 'Submit for Verification'}
                   </Button>
                 </div>
               )}

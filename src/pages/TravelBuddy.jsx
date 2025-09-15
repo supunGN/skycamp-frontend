@@ -2,8 +2,9 @@ import TravelBuddyNavbar from "../components/organisms/TravelBuddyNavbar";
 import Footer from "../components/organisms/Footer";
 import Button from "../components/atoms/Button";
 import CreatePostForm from "../components/molecules/CreatePostForm";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { API } from "../api";
 import {
   Plus as PlusIcon,
   Search as MagnifyingGlassIcon,
@@ -153,18 +154,43 @@ const mockPosts = [
 
 export default function TravelBuddy() {
   const [showCreatePostForm, setShowCreatePostForm] = useState(false);
-  const [posts, setPosts] = useState(mockPosts);
+  const [posts, setPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const navigate = useNavigate();
 
+  // Load travel plans on component mount
+  useEffect(() => {
+    loadTravelPlans();
+  }, []);
+
+  const loadTravelPlans = async () => {
+    try {
+      setLoading(true);
+      const response = await API.travelBuddy.listPlans();
+      setPosts(response.data.plans || []);
+      setError(null);
+    } catch (err) {
+      console.error("Error loading travel plans:", err);
+      setError("Failed to load travel plans");
+      // Fallback to empty array
+      setPosts([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleCreatePost = async (formData) => {
-    // Here you would typically send the data to your backend
-    console.log("Creating post with data:", formData);
-    
-    // For now, just show a success message
-    alert("Post created successfully!");
-    
-    // You can add the new post to your posts list here
-    // For demo purposes, we'll just close the form
+    try {
+      await API.travelBuddy.createPlan(formData);
+      alert("Travel plan created successfully!");
+      setShowCreatePostForm(false);
+      // Reload the plans
+      loadTravelPlans();
+    } catch (err) {
+      console.error("Error creating travel plan:", err);
+      alert("Failed to create travel plan. Please try again.");
+    }
   };
 
   const handleChatToggle = () => {
@@ -172,15 +198,7 @@ export default function TravelBuddy() {
   };
 
   const handleRefreshPosts = () => {
-    // In real implementation, this would fetch latest posts from API
-    console.log("Refreshing posts...");
-    
-    // For demo purposes, we'll simulate a refresh by shuffling the posts
-    const shuffledPosts = [...mockPosts].sort(() => Math.random() - 0.5);
-    setPosts(shuffledPosts);
-    
-    // Show a brief loading state or success message
-    console.log("Posts refreshed!");
+    loadTravelPlans();
   };
 
 
@@ -247,7 +265,27 @@ export default function TravelBuddy() {
 
               {/* Posts list */}
               <div className="p-4 space-y-6">
-                {posts.map((p) => {
+                {loading ? (
+                  <div className="text-center py-8">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-cyan-600 mx-auto mb-4"></div>
+                    <p className="text-gray-600">Loading travel plans...</p>
+                  </div>
+                ) : error ? (
+                  <div className="text-center py-8">
+                    <p className="text-red-600 mb-4">{error}</p>
+                    <Button onClick={loadTravelPlans} variant="outline">
+                      Try Again
+                    </Button>
+                  </div>
+                ) : posts.length === 0 ? (
+                  <div className="text-center py-8">
+                    <p className="text-gray-600 mb-4">No travel plans found. Be the first to create one!</p>
+                    <Button onClick={() => setShowCreatePostForm(true)}>
+                      Create Travel Plan
+                    </Button>
+                  </div>
+                ) : (
+                  posts.map((p) => {
                   // Determine activity icon based on activity type
                   const getActivityIcon = (activity) => {
                     if (activity.toLowerCase().includes('camping')) {
@@ -297,7 +335,8 @@ export default function TravelBuddy() {
                       </div>
                     </article>
                   );
-                })}
+                })
+                )}
               </div>
             </section>
           </div>
