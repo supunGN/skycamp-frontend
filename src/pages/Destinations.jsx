@@ -3,12 +3,13 @@ import Footer from "../components/organisms/Footer";
 import LocationSearchSection from "../components/sections/LocationSearchSection";
 import DestinationCard from "../components/molecules/destination/DestinationCard";
 import Button from "../components/atoms/Button";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { API } from "../api";
 
 export default function Destinations() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [destinations, setDestinations] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
@@ -17,38 +18,79 @@ export default function Destinations() {
   const [selectedDistrict, setSelectedDistrict] = useState("");
   const [isFiltered, setIsFiltered] = useState(false);
 
-  // Load destinations from API
+  // Handle URL parameters for initial filtering
   useEffect(() => {
-    const loadDestinations = async () => {
-      try {
-        setIsLoading(true);
-        const response = await API.locations.getCampingDestinationsWithImages();
+    const districtFromUrl = searchParams.get("district");
+    if (districtFromUrl) {
+      setSelectedDistrict(districtFromUrl);
+      setIsFiltered(true);
+      // Automatically apply the filter when coming from home page search
+      handleDistrictFilterFromUrl(districtFromUrl);
+    } else {
+      // Load all destinations if no URL parameters
+      loadDestinations();
+    }
+  }, [searchParams]);
 
-        if (response.success) {
-          // Transform API data to match DestinationCard component expectations
-          const transformedDestinations = response.data.map((destination) => ({
-            name: destination.name,
-            description: destination.description,
-            image: destination.image_url || "/placeholder-image.jpg", // Fallback image
-            rating: 4.5, // Default rating since not in database
-            reviewCount: Math.floor(Math.random() * 100) + 10, // Random review count
-            locationId: destination.location_id,
-            district: destination.district,
-          }));
-          setDestinations(transformedDestinations);
-        } else {
-          setError("Failed to load destinations");
-        }
-      } catch (err) {
-        console.error("Error loading destinations:", err);
+  // Load destinations from API
+  const loadDestinations = async () => {
+    try {
+      setIsLoading(true);
+      const response = await API.locations.getCampingDestinationsWithImages();
+
+      if (response.success) {
+        // Transform API data to match DestinationCard component expectations
+        const transformedDestinations = response.data.map((destination) => ({
+          name: destination.name,
+          description: destination.description,
+          image: destination.image_url || "/placeholder-image.jpg", // Fallback image
+          rating: 4.5, // Default rating since not in database
+          reviewCount: Math.floor(Math.random() * 100) + 10, // Random review count
+          locationId: destination.location_id,
+          district: destination.district,
+        }));
+        setDestinations(transformedDestinations);
+      } else {
         setError("Failed to load destinations");
-      } finally {
-        setIsLoading(false);
       }
-    };
+    } catch (err) {
+      console.error("Error loading destinations:", err);
+      setError("Failed to load destinations");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-    loadDestinations();
-  }, []);
+  // Handle district filtering from URL parameters
+  const handleDistrictFilterFromUrl = async (district) => {
+    try {
+      setIsLoading(true);
+      const response = await API.locations.getCampingDestinationsByDistrict(
+        district
+      );
+
+      if (response.success) {
+        const transformedDestinations = response.data.map((destination) => ({
+          name: destination.name,
+          description: destination.description,
+          image: destination.image_url || "/placeholder-image.jpg",
+          rating: 4.5,
+          reviewCount: Math.floor(Math.random() * 100) + 10,
+          locationId: destination.location_id,
+          district: destination.district,
+        }));
+        setDestinations(transformedDestinations);
+        setShowAll(false);
+      } else {
+        setError("Failed to filter destinations by district");
+      }
+    } catch (err) {
+      console.error("Error filtering destinations:", err);
+      setError("Failed to filter destinations by district");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   // Get destinations to display (first 9 or all)
   const destinationsToShow = showAll ? destinations : destinations.slice(0, 9);
@@ -164,6 +206,7 @@ export default function Destinations() {
         onReset={handleReset}
         isLoading={isLoading}
         isFiltered={isFiltered}
+        category="camping destinations"
       />
 
       {/* Camping Destinations Section */}
@@ -171,13 +214,16 @@ export default function Destinations() {
         {/* Section Header */}
         <div className="mt-8 mb-6">
           <h2 className="text-3xl font-bold text-gray-900 mb-2">
-            Camping Destinations
+            {isFiltered
+              ? `Camping Destinations in ${selectedDistrict}`
+              : "Camping Destinations"}
           </h2>
           <p className="text-gray-600 text-base max-w-2xl leading-relaxed">
-            Discover breathtaking spots for your next outdoor adventure,
-            <br />
-            whether you're pitching a tent by waterfalls or watching the stars
-            from highland peaks.
+            {isFiltered
+              ? `Discover camping spots in ${selectedDistrict} for your next outdoor adventure.`
+              : `Discover breathtaking spots for your next outdoor adventure,
+                whether you're pitching a tent by waterfalls or watching the stars
+                from highland peaks.`}
           </p>
         </div>
         {/* Add more space between section header and grid */}

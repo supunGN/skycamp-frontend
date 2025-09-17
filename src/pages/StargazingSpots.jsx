@@ -3,12 +3,13 @@ import Footer from "../components/organisms/Footer";
 import Button from "../components/atoms/Button";
 import DestinationCard from "../components/molecules/destination/DestinationCard";
 import LocationSearchSection from "../components/sections/LocationSearchSection";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { API } from "../api";
 
 export default function StargazingSpots() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [stargazingSpots, setStargazingSpots] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -16,38 +17,79 @@ export default function StargazingSpots() {
   const [selectedDistrict, setSelectedDistrict] = useState("");
   const [isFiltered, setIsFiltered] = useState(false);
 
-  // Load stargazing spots from API
+  // Handle URL parameters for initial filtering
   useEffect(() => {
-    const loadStargazingSpots = async () => {
-      try {
-        setIsLoading(true);
-        const response = await API.locations.getStargazingSpotsWithImages();
+    const districtFromUrl = searchParams.get("district");
+    if (districtFromUrl) {
+      setSelectedDistrict(districtFromUrl);
+      setIsFiltered(true);
+      // Automatically apply the filter when coming from home page search
+      handleDistrictFilterFromUrl(districtFromUrl);
+    } else {
+      // Load all stargazing spots if no URL parameters
+      loadStargazingSpots();
+    }
+  }, [searchParams]);
 
-        if (response.success) {
-          // Transform API data to match DestinationCard component expectations
-          const transformedSpots = response.data.map((spot) => ({
-            name: spot.name,
-            description: spot.description,
-            image: spot.image_url || "/placeholder-image.jpg", // Fallback image
-            rating: 4.5, // Default rating since not in database
-            reviewCount: Math.floor(Math.random() * 100) + 10, // Random review count
-            locationId: spot.location_id,
-            district: spot.district,
-          }));
-          setStargazingSpots(transformedSpots);
-        } else {
-          setError("Failed to load stargazing spots");
-        }
-      } catch (err) {
-        console.error("Error loading stargazing spots:", err);
+  // Load stargazing spots from API
+  const loadStargazingSpots = async () => {
+    try {
+      setIsLoading(true);
+      const response = await API.locations.getStargazingSpotsWithImages();
+
+      if (response.success) {
+        // Transform API data to match DestinationCard component expectations
+        const transformedSpots = response.data.map((spot) => ({
+          name: spot.name,
+          description: spot.description,
+          image: spot.image_url || "/placeholder-image.jpg", // Fallback image
+          rating: 4.5, // Default rating since not in database
+          reviewCount: Math.floor(Math.random() * 100) + 10, // Random review count
+          locationId: spot.location_id,
+          district: spot.district,
+        }));
+        setStargazingSpots(transformedSpots);
+      } else {
         setError("Failed to load stargazing spots");
-      } finally {
-        setIsLoading(false);
       }
-    };
+    } catch (err) {
+      console.error("Error loading stargazing spots:", err);
+      setError("Failed to load stargazing spots");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-    loadStargazingSpots();
-  }, []);
+  // Handle district filtering from URL parameters
+  const handleDistrictFilterFromUrl = async (district) => {
+    try {
+      setIsLoading(true);
+      const response = await API.locations.getStargazingSpotsByDistrict(
+        district
+      );
+
+      if (response.success) {
+        const transformedSpots = response.data.map((spot) => ({
+          name: spot.name,
+          description: spot.description,
+          image: spot.image_url || "/placeholder-image.jpg",
+          rating: 4.5,
+          reviewCount: Math.floor(Math.random() * 100) + 10,
+          locationId: spot.location_id,
+          district: spot.district,
+        }));
+        setStargazingSpots(transformedSpots);
+        setShowAll(false);
+      } else {
+        setError("Failed to filter stargazing spots by district");
+      }
+    } catch (err) {
+      console.error("Error filtering stargazing spots:", err);
+      setError("Failed to filter stargazing spots by district");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   // Get spots to display (first 9 or all)
   const spotsToShow = showAll ? stargazingSpots : stargazingSpots.slice(0, 9);
@@ -165,6 +207,7 @@ export default function StargazingSpots() {
         onReset={handleReset}
         isLoading={isLoading}
         isFiltered={isFiltered}
+        category="stargazing spots"
       />
 
       {/* Stargazing Spots Section */}
@@ -172,12 +215,16 @@ export default function StargazingSpots() {
         {/* Section Header */}
         <div className="mt-8 mb-6">
           <h2 className="text-3xl font-bold text-gray-900 mb-2">
-            Stargazing Spots
+            {isFiltered
+              ? `Stargazing Spots in ${selectedDistrict}`
+              : "Stargazing Spots"}
           </h2>
           <p className="text-gray-600 text-base max-w-2xl leading-relaxed">
-            Discover breathtaking spots for your next outdoor adventure ,
-            whether you're pitching a tent by waterfalls or watching the stars
-            from highland peaks
+            {isFiltered
+              ? `Discover stargazing spots in ${selectedDistrict} for your next outdoor adventure.`
+              : `Discover breathtaking spots for your next outdoor adventure,
+                whether you're pitching a tent by waterfalls or watching the stars
+                from highland peaks.`}
           </p>
         </div>
         {/* Add more space between section header and grid */}

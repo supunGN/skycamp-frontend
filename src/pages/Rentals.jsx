@@ -4,7 +4,7 @@ import Footer from "../components/organisms/Footer";
 import LocationSearchSection from "../components/sections/LocationSearchSection";
 import RentalCard from "../components/molecules/RentalCard";
 import Button from "../components/atoms/Button";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { API } from "../api";
 
 // Camping Gear Sidebar Section (dynamic from database)
@@ -126,6 +126,7 @@ const CampingGearSidebar = () => {
 
 const Rentals = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [renters, setRenters] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -133,26 +134,57 @@ const Rentals = () => {
   const [selectedDistrict, setSelectedDistrict] = useState("");
   const [isFiltered, setIsFiltered] = useState(false);
 
+  // Handle URL parameters for initial filtering
   useEffect(() => {
-    const fetchRenters = async () => {
-      try {
-        setLoading(true);
-        const response = await API.renters.list();
-        if (response.success) {
-          setRenters(response.data);
-        } else {
-          setError("Failed to fetch renters");
-        }
-      } catch (err) {
-        console.error("Error fetching renters:", err);
-        setError("Failed to fetch renters");
-      } finally {
-        setLoading(false);
-      }
-    };
+    const districtFromUrl = searchParams.get("district");
+    if (districtFromUrl) {
+      setSelectedDistrict(districtFromUrl);
+      setIsFiltered(true);
+      // Automatically apply the filter when coming from home page search
+      handleDistrictFilterFromUrl(districtFromUrl);
+    } else {
+      // Load all renters if no URL parameters
+      fetchRenters();
+    }
+  }, [searchParams]);
 
-    fetchRenters();
-  }, []);
+  // Load all renters from API
+  const fetchRenters = async () => {
+    try {
+      setLoading(true);
+      const response = await API.renters.list();
+      if (response.success) {
+        setRenters(response.data);
+      } else {
+        setError("Failed to fetch renters");
+      }
+    } catch (err) {
+      console.error("Error fetching renters:", err);
+      setError("Failed to fetch renters");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Handle district filtering from URL parameters
+  const handleDistrictFilterFromUrl = async (district) => {
+    try {
+      setLoading(true);
+      const response = await API.renters.getByDistrict(district);
+
+      if (response.success) {
+        setRenters(response.data);
+        setShowAll(false);
+      } else {
+        setError("Failed to filter renters by district");
+      }
+    } catch (err) {
+      console.error("Error filtering renters:", err);
+      setError("Failed to filter renters by district");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleRentalClick = (renter) => {
     // Navigate to individual renter page
@@ -234,6 +266,7 @@ const Rentals = () => {
         onReset={handleReset}
         isLoading={loading}
         isFiltered={isFiltered}
+        category="gear rentals"
       />
       {/* Add space between search and rental area */}
       <div className="h-10" />
@@ -250,7 +283,9 @@ const Rentals = () => {
           {/* Rental Cards Section */}
           <div className="flex-1">
             <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-6">
-              Gear Rentals
+              {isFiltered
+                ? `Gear Rentals in ${selectedDistrict}`
+                : "Gear Rentals"}
             </h2>
 
             {loading && (

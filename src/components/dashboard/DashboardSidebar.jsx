@@ -10,9 +10,9 @@ import {
   ArrowRightOnRectangleIcon,
   Bars3Icon,
 } from "@heroicons/react/24/outline";
-import Modal from "../../molecules/Modal";
+import Modal from "../molecules/Modal";
 import { useNavigate } from "react-router-dom";
-import { API } from "../../../api";
+import { API } from "../../api";
 
 export default function DashboardSidebar({
   user: _user, // ignore this prop for user info card

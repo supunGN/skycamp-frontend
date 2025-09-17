@@ -98,17 +98,22 @@ const checkAuthFlowState = (pathname) => {
 function App() {
   // Session restore on app mount
   useEffect(() => {
-    // Always try to refresh session, but don't aggressively clear localStorage
-    API.auth
-      .me()
-      .then((res) => {
-        if (res?.authenticated && res?.user) {
-          localStorage.setItem("user", JSON.stringify(res.user));
-        }
-      })
-      .catch(() => {
-        // Do not clear localStorage here to avoid race after login
-      });
+    // Skip auth check on admin pages to avoid conflicts
+    const isAdminPage = window.location.pathname.startsWith("/admin");
+
+    if (!isAdminPage) {
+      // Always try to refresh session, but don't aggressively clear localStorage
+      API.auth
+        .me()
+        .then((res) => {
+          if (res?.authenticated && res?.user) {
+            localStorage.setItem("user", JSON.stringify(res.user));
+          }
+        })
+        .catch(() => {
+          // Do not clear localStorage here to avoid race after login
+        });
+    }
   }, []);
 
   return (

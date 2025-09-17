@@ -6,9 +6,9 @@ import {
   useNavigate,
   Navigate,
 } from "react-router-dom";
-import DashboardSidebar from "../../../components/dashboard/common/DashboardSidebar";
-import DashboardHeader from "../../../components/dashboard/common/DashboardHeader";
-import DashboardContent from "../../../components/dashboard/common/DashboardContent";
+import DashboardSidebar from "../../../components/dashboard/DashboardSidebar";
+import DashboardHeader from "../../../components/dashboard/DashboardHeader";
+import DashboardContent from "../../../components/dashboard/DashboardContent";
 import {
   BriefcaseIcon,
   CalendarDaysIcon,

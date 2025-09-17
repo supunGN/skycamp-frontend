@@ -1,7 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { API } from "../../api";
-import AdminSidebar from "../../components/dashboard/admin/AdminSidebar";
-import DashboardStatsCard from "../../components/dashboard/common/DashboardStatsCard";
+import AdminSidebar from "../../components/dashboard/AdminSidebar";
+import DashboardStatsCard from "../../components/dashboard/DashboardStatsCard";
+import UserManagement from "./UserManagement";
+import UserVerification from "./UserVerification";
 import {
   HomeIcon,
   UserGroupIcon,
@@ -19,6 +21,30 @@ import {
 
 export default function AdminDashboard() {
   const [activeMenu, setActiveMenu] = useState("Home");
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  // Check admin authentication on component mount
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const result = await API.admin.me();
+        if (result.success && result.authenticated) {
+          setIsAuthenticated(true);
+        } else {
+          // Redirect to login if not authenticated
+          window.location.replace("/admin/login");
+        }
+      } catch (error) {
+        console.error("Auth check failed:", error);
+        window.location.replace("/admin/login");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    checkAuth();
+  }, []);
 
   // Admin menu items based on wireframe
   const adminMenuItems = [
@@ -160,50 +186,90 @@ export default function AdminDashboard() {
     window.location.replace("/admin/login");
   };
 
+  // Show loading spinner while checking authentication
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-cyan-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Checking authentication...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Don't render anything if not authenticated (will redirect)
+  if (!isAuthenticated) {
+    return null;
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 flex">
-      {/* Admin Sidebar */}
-      <AdminSidebar
-        menuItems={adminMenuItems}
-        activeMenu={activeMenu}
-        onMenuSelect={setActiveMenu}
-        onLogout={handleLogout}
-      />
+      {/* Admin Sidebar - Fixed */}
+      <div className="fixed top-0 left-0 h-screen w-72 bg-gray-50 border-r border-gray-200 z-40">
+        <AdminSidebar
+          menuItems={adminMenuItems}
+          activeMenu={activeMenu}
+          onMenuSelect={setActiveMenu}
+          onLogout={handleLogout}
+        />
+      </div>
 
-      {/* Main Content */}
-      <div className="flex-1 lg:ml-72">
+      {/* Main Content - Scrollable */}
+      <div className="flex-1 ml-72 min-h-screen">
         <div className="p-6">
-          {/* Header */}
-          <div className="mb-8 flex justify-between items-start">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">
-                Admin Dashboard
-              </h1>
-              <p className="text-gray-600 mt-2">
-                Welcome back! Here's what's happening with SkyCamp.
+          {/* Header - Only show on Home page */}
+          {activeMenu === "Home" && (
+            <div className="mb-8 flex justify-between items-start">
+              <div>
+                <h1 className="text-3xl font-bold text-gray-900">
+                  Admin Dashboard
+                </h1>
+                <p className="text-gray-600 mt-2">
+                  Welcome back! Here's what's happening with SkyCamp.
+                </p>
+              </div>
+              <button
+                onClick={() => (window.location.href = "/")}
+                className="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors"
+              >
+                Switch to Website
+              </button>
+            </div>
+          )}
+
+          {/* Content based on active menu */}
+          {activeMenu === "Home" ? (
+            /* Stats Grid */
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {adminStats.map((stat, index) => (
+                <DashboardStatsCard
+                  key={index}
+                  title={stat.title}
+                  value={stat.value}
+                  icon={stat.icon}
+                  iconBg={stat.iconBg}
+                  iconColor={stat.iconColor}
+                />
+              ))}
+            </div>
+          ) : activeMenu === "User Management" ? (
+            /* User Management Component */
+            <UserManagement />
+          ) : activeMenu === "User Verification" ? (
+            /* User Verification Component */
+            <UserVerification />
+          ) : (
+            /* Placeholder for other menu items */
+            <div className="bg-white rounded-lg shadow-sm p-8 text-center">
+              <h2 className="text-xl font-semibold text-gray-900 mb-2">
+                {activeMenu}
+              </h2>
+              <p className="text-gray-600">
+                This section is under development. Coming soon!
               </p>
             </div>
-            <button
-              onClick={() => (window.location.href = "/")}
-              className="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors"
-            >
-              Switch to Website
-            </button>
-          </div>
-
-          {/* Stats Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {adminStats.map((stat, index) => (
-              <DashboardStatsCard
-                key={index}
-                title={stat.title}
-                value={stat.value}
-                icon={stat.icon}
-                iconBg={stat.iconBg}
-                iconColor={stat.iconColor}
-              />
-            ))}
-          </div>
+          )}
         </div>
       </div>
     </div>

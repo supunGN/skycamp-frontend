@@ -1,13 +1,12 @@
 import React, { useState } from "react";
 import {
-  Bars3Icon,
   ArrowRightOnRectangleIcon,
   ChevronDownIcon,
   ChevronRightIcon,
   HomeIcon,
 } from "@heroicons/react/24/outline";
-import Modal from "../../molecules/Modal";
-import { API } from "../../../api";
+import Modal from "../molecules/Modal";
+import { API } from "../../api";
 
 export default function AdminSidebar({
   menuItems,
@@ -15,7 +14,6 @@ export default function AdminSidebar({
   onMenuSelect,
   onLogout,
 }) {
-  const [open, setOpen] = useState(false);
   const [logoutModalOpen, setLogoutModalOpen] = useState(false);
   const [expandedSections, setExpandedSections] = useState({
     users: true,
@@ -99,36 +97,13 @@ export default function AdminSidebar({
         message="Are you sure you want to log out?"
       />
 
-      {/* Mobile Hamburger */}
-      <button
-        className="lg:hidden fixed top-4 left-4 z-50 p-2 bg-white rounded shadow"
-        onClick={() => setOpen((v) => !v)}
-        aria-label="Open sidebar"
-      >
-        <Bars3Icon className="w-6 h-6 text-slate-700" />
-      </button>
-
-      {/* Overlay for mobile */}
-      {open && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-30 z-40 lg:hidden"
-          onClick={() => setOpen(false)}
-        />
-      )}
-
       {/* Sidebar */}
-      <aside
-        className={`fixed top-0 left-0 h-screen w-72 bg-gray-50 border-r border-gray-200 flex flex-col z-50 transition-transform duration-200 overflow-hidden
-          ${
-            open ? "translate-x-0" : "-translate-x-full"
-          } lg:translate-x-0 lg:relative lg:block`}
-      >
+      <aside className="flex flex-col h-full w-full bg-gray-50 border-r border-gray-200 overflow-hidden">
         <div className="flex flex-col h-full">
           {/* Logo Section */}
           <div className="px-6 py-6">
             <div className="flex items-center gap-3">
               <img src="/logo.svg" alt="SkyCamp" className="h-8" />
-              <span className="text-lg font-semibold text-gray-800">Admin</span>
             </div>
           </div>
 
@@ -145,7 +120,6 @@ export default function AdminSidebar({
                   }`}
                 onClick={() => {
                   onMenuSelect && onMenuSelect("Home");
-                  setOpen(false);
                 }}
               >
                 <HomeIcon
@@ -190,7 +164,6 @@ export default function AdminSidebar({
                             }`}
                           onClick={() => {
                             onMenuSelect && onMenuSelect(item.name);
-                            setOpen(false);
                           }}
                         >
                           {item.icon && (
