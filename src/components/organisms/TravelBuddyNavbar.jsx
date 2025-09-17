@@ -206,7 +206,7 @@ export default function TravelBuddyNavbar({ onChatToggle, onRefresh }) {
             </Link>
             <button
               onClick={() => {
-                navigate('/travel-buddy/chat');
+                navigate("/travel-buddy/chat");
                 setMenuOpen(false);
               }}
               className="block text-lg font-medium text-gray-900 hover:text-cyan-600"

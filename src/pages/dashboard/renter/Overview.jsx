@@ -1,5 +1,5 @@
 import React from "react";
-import DashboardStatsCard from "../../../components/dashboard/common/DashboardStatsCard";
+import DashboardStatsCard from "../../../components/dashboard/DashboardStatsCard";
 import {
   BriefcaseIcon,
   CalendarDaysIcon,

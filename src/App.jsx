@@ -99,20 +99,25 @@ const checkAuthFlowState = (pathname) => {
 function App() {
   // Session restore on app mount
   useEffect(() => {
-    // Always try to refresh session, but don't aggressively clear localStorage
-    API.auth
-      .me()
-      .then((res) => {
-        // /auth/me returns: { success, data: { authenticated, user } }
-        const auth = res?.data?.authenticated;
-        const user = res?.data?.user;
-        if (auth && user) {
-          localStorage.setItem("user", JSON.stringify(user));
-        }
-      })
-      .catch(() => {
-        // Do not clear localStorage here to avoid race after login
-      });
+    // Skip auth check on admin pages to avoid conflicts
+    const isAdminPage = window.location.pathname.startsWith("/admin");
+
+    if (!isAdminPage) {
+      // Always try to refresh session, but don't aggressively clear localStorage
+      API.auth
+        .me()
+        .then((res) => {
+          // /auth/me returns: { success, data: { authenticated, user } }
+          const auth = res?.data?.authenticated;
+          const user = res?.data?.user;
+          if (auth && user) {
+            localStorage.setItem("user", JSON.stringify(user));
+          }
+        })
+        .catch(() => {
+          // Do not clear localStorage here to avoid race after login
+        });
+    }
   }, []);
 
   return (
@@ -122,37 +127,37 @@ function App() {
         {/* Public Pages */}
         <Route path="/" element={<Home />} />
         <Route path="/rentals" element={<Rentals />} />
-        <Route 
-          path="/travel-buddy" 
+        <Route
+          path="/travel-buddy"
           element={
             <TravelBuddyProtectedRoute>
               <TravelBuddy />
             </TravelBuddyProtectedRoute>
-          } 
+          }
         />
-        <Route 
-          path="/travel-buddy/feed" 
+        <Route
+          path="/travel-buddy/feed"
           element={
             <TravelBuddyProtectedRoute>
               <TravelBuddy />
             </TravelBuddyProtectedRoute>
-          } 
+          }
         />
-        <Route 
-          path="/travel-buddy/chat" 
+        <Route
+          path="/travel-buddy/chat"
           element={
             <TravelBuddyProtectedRoute>
               <ChatPage />
             </TravelBuddyProtectedRoute>
-          } 
+          }
         />
-        <Route 
-          path="/travel-buddy/requests" 
+        <Route
+          path="/travel-buddy/requests"
           element={
             <TravelBuddyProtectedRoute>
               <TravelBuddy />
             </TravelBuddyProtectedRoute>
-          } 
+          }
         />
         <Route path="/destinations" element={<Destinations />} />
         <Route path="/stargazing-spots" element={<StargazingSpots />} />

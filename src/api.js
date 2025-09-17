@@ -47,6 +47,64 @@ export const API = {
     logout() {
       return ok(http.post("/admin/logout"));
     },
+    // User Management
+    getCustomers() {
+      return ok(http.get("/admin/users/customers"));
+    },
+    getRenters() {
+      return ok(http.get("/admin/users/renters"));
+    },
+    getGuides() {
+      return ok(http.get("/admin/users/guides"));
+    },
+    getSuspendedUsers() {
+      return ok(http.get("/admin/users/suspended"));
+    },
+    getDeletedUsers() {
+      return ok(http.get("/admin/users/deleted"));
+    },
+    suspendUser({ user_id, user_type, reason }) {
+      return ok(
+        http.post("/admin/users/suspend", { user_id, user_type, reason })
+      );
+    },
+    activateUser({ user_id, user_type, reason }) {
+      return ok(
+        http.post("/admin/users/activate", { user_id, user_type, reason })
+      );
+    },
+    deleteUser({ user_id, user_type, reason }) {
+      return ok(
+        http.post("/admin/users/delete", { user_id, user_type, reason })
+      );
+    },
+    getActivityLog() {
+      return ok(http.get("/admin/activity-log"));
+    },
+    // User Verification endpoints
+    getPendingVerifications() {
+      return ok(http.get("/admin/verifications/pending"));
+    },
+    getRejectedUsers() {
+      return ok(http.get("/admin/verifications/rejected"));
+    },
+    approveUser({ user_id, user_type, reason }) {
+      return ok(
+        http.post("/admin/verifications/approve", {
+          user_id,
+          user_type,
+          reason,
+        })
+      );
+    },
+    rejectUser({ user_id, user_type, reason }) {
+      return ok(
+        http.post("/admin/verifications/reject", { user_id, user_type, reason })
+      );
+    },
+    getVerificationActivityLog() {
+      return ok(http.get("/admin/verifications/activity-log"));
+    },
   },
   auth: {
     // multipart: DO NOT set Content-Type manually
@@ -151,10 +209,35 @@ export const API = {
     list(params) {
       return ok(http.get("/renters", { params }));
     },
+    getByDistrict(district) {
+      return ok(http.get("/renters/by-district", { params: { district } }));
+    },
+    show(id) {
+      return ok(http.get(`/renters/${id}`));
+    },
   },
+
   guides: {
     list(params) {
       return ok(http.get("/guides", { params }));
+    },
+    getByDistrict(district) {
+      return ok(http.get("/guides/by-district", { params: { district } }));
+    },
+    show(id) {
+      return ok(http.get(`/guides/${id}`));
+    },
+  },
+  // ==== EQUIPMENT ====
+  equipment: {
+    getCategories() {
+      return ok(http.get("/equipment/categories"));
+    },
+    getCategoriesWithEquipment() {
+      return ok(http.get("/equipment/categories-with-equipment"));
+    },
+    getEquipmentByCategory(categoryId) {
+      return ok(http.get("/equipment/by-category", { params: { categoryId } }));
     },
   },
   // ==== CART / CHECKOUT ====

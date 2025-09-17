@@ -1,5 +1,5 @@
 import React from "react";
-import DashboardNotificationPanel from "../../../components/dashboard/common/DashboardNotificationPanel";
+import DashboardNotificationPanel from "../../../components/dashboard/DashboardNotificationPanel";
 
 const mockNotifications = [
   {

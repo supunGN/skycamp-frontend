@@ -13,6 +13,7 @@ export default function LocationSearchSection({
   onReset,
   isLoading = false,
   isFiltered = false,
+  category = "locations",
 }) {
   const [internalSelectedDistrict, setInternalSelectedDistrict] = useState("");
   const [districts, setDistricts] = useState([]);
@@ -201,7 +202,7 @@ export default function LocationSearchSection({
           {isFiltered && (
             <div className="mt-4 p-3 bg-cyan-50 border border-cyan-200 rounded-md">
               <p className="text-sm text-cyan-800 text-center">
-                Showing locations in <strong>{selectedDistrict}</strong>{" "}
+                Showing {category} in <strong>{selectedDistrict}</strong>{" "}
                 district
               </p>
             </div>
