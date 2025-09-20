@@ -6,7 +6,7 @@ import PersonalDetails from "./profile/PersonalDetails";
 import Security from "./profile/Security";
 import Verification from "./profile/Verification";
 import MyBookings from "./profile/MyBookings";
-import TravelBuddy from "./profile/TravelBuddy";
+import TravelBuddy from "../TravelBuddy/pages/TravelBuddyProfile";
 import Settings from "./profile/Settings";
 import { ArrowLeftIcon } from "@heroicons/react/24/outline";
 import { API } from "../api";

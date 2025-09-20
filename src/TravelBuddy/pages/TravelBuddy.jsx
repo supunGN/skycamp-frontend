@@ -1,10 +1,10 @@
-import TravelBuddyNavbar from "../components/organisms/TravelBuddyNavbar";
-import Footer from "../components/organisms/Footer";
-import Button from "../components/atoms/Button";
-import CreatePostForm from "../components/molecules/CreatePostForm";
+import TravelBuddyNavbar from "../components/TravelBuddyNavbar";
+import Footer from "../../components/organisms/Footer";
+import Button from "../../components/atoms/Button";
+import CreatePostForm from "../../components/molecules/CreatePostForm";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { API } from "../api";
+import { API } from "../../api";
 import {
   Plus as PlusIcon,
   Search as MagnifyingGlassIcon,

@@ -2,10 +2,10 @@
 
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import Button from "../atoms/Button";
-import TravelBuddyModal from "../molecules/TravelBuddyModal";
+import Button from "../../components/atoms/Button";
+import TravelBuddyModal from "./TravelBuddyModal";
 import { API } from "../../api";
-import buddyImage from "../../assets/travelbuddy/travel-buddy-cta.png";
+import buddyImage from "../assets/travelbuddy/travel-buddy-cta.png";
 
 export default function TravelBuddyCTA() {
   const [showModal, setShowModal] = useState(false);

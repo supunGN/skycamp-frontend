@@ -10,7 +10,8 @@ import {
   ArrowRightOnRectangleIcon,
   UserCircleIcon,
 } from "@heroicons/react/24/outline";
-import Button from "../atoms/Button";
+import Button from "../../components/atoms/Button";
+import travelBuddyLogo from "../assets/travelbuddy/TravelBuddy Logo.svg";
 
 export default function TravelBuddyNavbar({ onChatToggle, onRefresh }) {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -46,38 +47,37 @@ export default function TravelBuddyNavbar({ onChatToggle, onRefresh }) {
       {/* Desktop Navigation */}
       <header className="hidden lg:flex fixed top-0 left-0 w-full z-50 bg-white shadow-lg">
         <div className="max-w-7xl mx-auto px-6 flex justify-between items-center w-full py-4">
-          {/* Logo + Title */}
+          {/* Logo */}
           <div className="flex items-center">
             <button
               onClick={onRefresh}
               className="flex items-center text-xl font-bold text-cyan-600 hover:text-cyan-700 transition-colors"
             >
               <img
-                src="/src/assets/travelbuddy/TravelBuddy Logo.svg"
+                src={travelBuddyLogo}
                 alt="Travel Buddy"
                 className="h-8"
               />
             </button>
           </div>
 
-          {/* Center Links */}
+          {/* Center Navigation Links */}
           <nav className="flex items-center space-x-8">
             <Link
               to="/travel-buddy/feed"
-              className="text-gray-700 hover:text-cyan-600 font-medium"
+              className="text-gray-700 hover:text-cyan-600 font-medium transition-colors"
             >
               Feed
             </Link>
-
             <Link
               to="/travel-buddy/chat"
-              className="text-gray-700 hover:text-cyan-600 font-medium"
+              className="text-gray-700 hover:text-cyan-600 font-medium transition-colors"
             >
               Messages
             </Link>
             <Link
               to="/travel-buddy/requests"
-              className="text-gray-700 hover:text-cyan-600 font-medium"
+              className="text-gray-700 hover:text-cyan-600 font-medium transition-colors"
             >
               Travel Requests
             </Link>
@@ -86,16 +86,12 @@ export default function TravelBuddyNavbar({ onChatToggle, onRefresh }) {
           {/* Right Side Controls */}
           <div className="flex items-center space-x-4">
             <Link to="/">
-              <Button
-                variant="outline"
-                size="md"
-                className="hidden xl:inline-flex"
-              >
+              <button className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium">
                 Switch to Home Site
-              </Button>
+              </button>
             </Link>
-            <Cog6ToothIcon className="w-6 h-6 text-gray-600 hover:text-cyan-600 cursor-pointer" />
-            <BellIcon className="w-6 h-6 text-gray-600 hover:text-cyan-600 cursor-pointer" />
+            <Cog6ToothIcon className="w-6 h-6 text-gray-600 hover:text-cyan-600 cursor-pointer transition-colors" />
+            <BellIcon className="w-6 h-6 text-gray-600 hover:text-cyan-600 cursor-pointer transition-colors" />
             {user ? (
               <div className="relative">
                 <button
@@ -147,7 +143,7 @@ export default function TravelBuddyNavbar({ onChatToggle, onRefresh }) {
             className="flex items-center text-xl font-bold text-cyan-600 hover:text-cyan-700 transition-colors"
           >
             <img
-              src="/src/assets/travelbuddy/TravelBuddy Logo.svg"
+              src={travelBuddyLogo}
               alt="Travel Buddy"
               className="h-8"
             />
@@ -182,7 +178,7 @@ export default function TravelBuddyNavbar({ onChatToggle, onRefresh }) {
               className="flex items-center text-xl font-bold text-cyan-600 hover:text-cyan-700 transition-colors"
             >
               <img
-                src="/src/assets/travelbuddy/TravelBuddy Logo.svg"
+                src={travelBuddyLogo}
                 alt="Travel Buddy"
                 className="h-8"
               />
@@ -225,9 +221,9 @@ export default function TravelBuddyNavbar({ onChatToggle, onRefresh }) {
           {/* Mobile Controls */}
           <div className="absolute bottom-6 left-6 right-6 space-y-4">
             <Link to="/" onClick={() => setMenuOpen(false)}>
-              <Button variant="outline" size="lg" className="w-full">
+              <button className="w-full px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium">
                 Switch to Home Site
-              </Button>
+              </button>
             </Link>
             <div className="flex items-center justify-between px-1">
               <Cog6ToothIcon className="w-6 h-6 text-gray-600" />

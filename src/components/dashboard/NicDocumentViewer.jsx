@@ -103,7 +103,7 @@ export default function NicDocumentViewer({
                       <img
                         src={`${
                           import.meta.env.VITE_API_URL
-                        }/storage/uploads/users/${imageUrl}`}
+                        }/public/storage/uploads/users/${imageUrl}`}
                         alt={`NIC ${imageLabel} - ${userName}`}
                         className="w-full h-auto rounded-lg shadow-lg border border-gray-200"
                         onError={(e) => {

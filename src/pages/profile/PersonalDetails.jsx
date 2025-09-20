@@ -134,7 +134,7 @@ const PersonalDetails = ({ user, formData, onInputChange, onSave }) => {
                 />
               ) : user?.profile_picture ? (
                 <img
-                  src={`http://localhost/skycamp/skycamp-backend/storage/uploads/${user.profile_picture}`}
+                  src={`http://localhost/skycamp/skycamp-backend/public/storage/uploads/${user.profile_picture}`}
                   alt="Profile"
                   className="w-full h-full object-cover"
                 />

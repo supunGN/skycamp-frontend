@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import TravelBuddyNavbar from "../components/organisms/TravelBuddyNavbar";
+import TravelBuddyNavbar from "../TravelBuddy/components/TravelBuddyNavbar";
 import IndividualChatView from "../components/molecules/IndividualChatView";
 import { 
   MagnifyingGlassIcon, 

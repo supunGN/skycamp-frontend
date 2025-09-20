@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
-import { API } from "../api";
-import TravelBuddyModal from "./molecules/TravelBuddyModal";
+import { API } from "../../api";
+import TravelBuddyModal from "./TravelBuddyModal";
 
 // Helper function to get user from localStorage
 const getUser = () => {

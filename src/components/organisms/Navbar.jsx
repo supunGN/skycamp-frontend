@@ -104,12 +104,6 @@ export default function Navbar() {
             >
               Guides
             </Link>
-            <Link
-              to="/travel-buddy"
-              className="text-gray-700 hover:text-cyan-600 font-medium"
-            >
-              Travel Buddy
-            </Link>
 
             {/* Destinations Dropdown */}
             <div className="relative group">
@@ -150,6 +144,15 @@ export default function Navbar() {
               <HeartIcon className="w-6 h-6 text-gray-600 hover:text-cyan-600 cursor-pointer" />
             </Link>
 
+            {/* Travel Buddy Switch Button - Only for customers */}
+            {user && user.user_role === "customer" && (
+              <Link to="/travel-buddy">
+                <button className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium">
+                  Switch to Travel Buddy
+                </button>
+              </Link>
+            )}
+
             {/* Admin Dashboard Switch Button */}
             {admin && (
               <button
@@ -169,7 +172,7 @@ export default function Navbar() {
                 >
                   {user.profile_picture ? (
                     <img
-                      src={`http://localhost/skycamp/skycamp-backend/storage/uploads/${user.profile_picture}`}
+                      src={`http://localhost/skycamp/skycamp-backend/public/storage/uploads/${user.profile_picture}`}
                       alt="Profile"
                       className="w-8 h-8 rounded-full object-cover border border-gray-300"
                     />
@@ -314,13 +317,6 @@ export default function Navbar() {
             >
               Guides
             </Link>
-            <Link
-              to="/travel-buddy"
-              onClick={() => setMenuOpen(false)}
-              className="block text-lg font-medium text-gray-900 hover:text-cyan-600"
-            >
-              Travel Buddy
-            </Link>
 
             {/* Destinations Section */}
             <div>
@@ -397,6 +393,17 @@ export default function Navbar() {
               <span>Wishlist</span>
             </Link>
 
+            {/* Travel Buddy Switch Button - Mobile - Only for customers */}
+            {user && user.user_role === "customer" && (
+              <Link
+                to="/travel-buddy"
+                onClick={() => setMenuOpen(false)}
+                className="flex items-center justify-center w-full px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium"
+              >
+                Switch to Travel Buddy
+              </Link>
+            )}
+
             {/* Admin Dashboard Switch Button - Mobile */}
             {admin && (
               <button
@@ -421,7 +428,7 @@ export default function Navbar() {
                 >
                   {user.profile_picture ? (
                     <img
-                      src={`http://localhost/skycamp/skycamp-backend/storage/uploads/${user.profile_picture}`}
+                      src={`http://localhost/skycamp/skycamp-backend/public/storage/uploads/${user.profile_picture}`}
                       alt="Profile"
                       className="w-8 h-8 rounded-full object-cover border border-gray-300"
                     />
