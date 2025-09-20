@@ -4,7 +4,7 @@ import { API } from "./api";
 import { useSecureSession } from "./hooks/useSecureSession";
 import { WishlistProvider } from "./contexts/WishlistContext";
 import ScrollToTop from "./components/ScrollToTop";
-import TravelBuddyProtectedRoute from "./components/TravelBuddyProtectedRoute";
+import TravelBuddyProtectedRoute from "./TravelBuddy/components/TravelBuddyProtectedRoute";
 import { ToastProvider } from "./components/atoms/ToastProvider";
 import Home from "./pages/Home";
 import Rentals from "./pages/Rentals";

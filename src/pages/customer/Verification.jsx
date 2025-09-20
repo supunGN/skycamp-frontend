@@ -9,6 +9,7 @@ import {
   InformationCircleIcon,
   XCircleIcon,
 } from "@heroicons/react/24/outline";
+import { getVerificationImageUrls } from "../../utils/cacheBusting";
 
 const Verification = ({ user }) => {
   const [nicFrontFile, setNicFrontFile] = useState(null);
@@ -30,7 +31,7 @@ const Verification = ({ user }) => {
   const [rejectionDate, setRejectionDate] = useState(null);
   const [canResubmit, setCanResubmit] = useState(false);
 
-  // Build a public URL from whatever is stored (absolute/relative)
+  // Build a public URL from whatever is stored (absolute/relative) with cache-busting
   const buildPublicUrl = (p) => {
     if (!p) return null;
     // Normalize slashes
@@ -56,7 +57,12 @@ const Verification = ({ user }) => {
     ) {
       // Assume already relative under storage/uploads
     }
-    return `http://localhost/skycamp/skycamp-backend/storage/uploads/${relative}`;
+
+    // Add cache-busting parameter using user's updated_at timestamp
+    const timestamp = user?.updated_at
+      ? new Date(user.updated_at).getTime()
+      : Date.now();
+    return `http://localhost/skycamp/skycamp-backend/storage/uploads/${relative}?ts=${timestamp}`;
   };
 
   // On mount, load from API (authoritative), fallback to user object

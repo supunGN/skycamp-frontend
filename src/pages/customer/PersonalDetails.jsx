@@ -9,6 +9,7 @@ import {
   CheckIcon,
 } from "@heroicons/react/24/outline";
 import { API } from "../../api";
+import { getProfilePictureUrl } from "../../utils/cacheBusting";
 
 const PersonalDetails = ({ user, formData, onInputChange, onSave }) => {
   const [isEditing, setIsEditing] = useState(false);
@@ -134,7 +135,7 @@ const PersonalDetails = ({ user, formData, onInputChange, onSave }) => {
                 />
               ) : user?.profile_picture ? (
                 <img
-                  src={`http://localhost/skycamp/skycamp-backend/public/storage/uploads/${user.profile_picture}`}
+                  src={getProfilePictureUrl(user)}
                   alt="Profile"
                   className="w-full h-full object-cover"
                 />

@@ -11,6 +11,7 @@ import {
   UserCircleIcon,
 } from "@heroicons/react/24/outline";
 import Button from "../atoms/Button";
+import { getProfilePictureUrl } from "../../utils/cacheBusting";
 
 export default function TravelBuddyNavbar({ onChatToggle, onRefresh }) {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -104,7 +105,7 @@ export default function TravelBuddyNavbar({ onChatToggle, onRefresh }) {
                 >
                   {user.profile_picture ? (
                     <img
-                      src={`http://localhost/skycamp/skycamp-backend/public/storage/uploads/${user.profile_picture}`}
+                      src={getProfilePictureUrl(user)}
                       alt="Profile"
                       className="w-8 h-8 rounded-full object-cover border border-gray-300"
                     />
@@ -241,7 +242,7 @@ export default function TravelBuddyNavbar({ onChatToggle, onRefresh }) {
                 >
                   {user.profile_picture ? (
                     <img
-                      src={`http://localhost/skycamp/skycamp-backend/public/storage/uploads/${user.profile_picture}`}
+                      src={getProfilePictureUrl(user)}
                       alt="Profile"
                       className="w-8 h-8 rounded-full object-cover border border-gray-300"
                     />

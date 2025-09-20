@@ -17,6 +17,7 @@ import { API } from "../../api";
 import { useNotifications } from "../../hooks/useNotifications";
 import { useWishlistContext } from "../../contexts/WishlistContext";
 import NotificationDropdown from "../molecules/NotificationDropdown";
+import { getProfilePictureUrl } from "../../utils/cacheBusting";
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -236,7 +237,7 @@ export default function Navbar() {
                   >
                     {user?.profile_picture ? (
                       <img
-                        src={`http://localhost/skycamp/skycamp-backend/storage/uploads/${user.profile_picture}`}
+                        src={getProfilePictureUrl(user)}
                         alt="Profile"
                         className="w-8 h-8 rounded-full object-cover border border-gray-300"
                       />
@@ -525,7 +526,7 @@ export default function Navbar() {
                 >
                   {user?.profile_picture ? (
                     <img
-                      src={`http://localhost/skycamp/skycamp-backend/public/storage/uploads/${user.profile_picture}`}
+                      src={getProfilePictureUrl(user)}
                       alt="Profile"
                       className="w-8 h-8 rounded-full object-cover border border-gray-300"
                     />

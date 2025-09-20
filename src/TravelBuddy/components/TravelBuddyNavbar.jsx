@@ -12,6 +12,7 @@ import {
 } from "@heroicons/react/24/outline";
 import Button from "../../components/atoms/Button";
 import travelBuddyLogo from "../assets/travelbuddy/TravelBuddy Logo.svg";
+import { getProfilePictureUrl } from "../../utils/cacheBusting";
 
 export default function TravelBuddyNavbar({ onChatToggle, onRefresh }) {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -53,11 +54,7 @@ export default function TravelBuddyNavbar({ onChatToggle, onRefresh }) {
               onClick={onRefresh}
               className="flex items-center text-xl font-bold text-cyan-600 hover:text-cyan-700 transition-colors"
             >
-              <img
-                src={travelBuddyLogo}
-                alt="Travel Buddy"
-                className="h-8"
-              />
+              <img src={travelBuddyLogo} alt="Travel Buddy" className="h-8" />
             </button>
           </div>
 
@@ -100,7 +97,7 @@ export default function TravelBuddyNavbar({ onChatToggle, onRefresh }) {
                 >
                   {user.profile_picture ? (
                     <img
-                      src={`http://localhost/skycamp/skycamp-backend/public/storage/uploads/${user.profile_picture}`}
+                      src={getProfilePictureUrl(user)}
                       alt="Profile"
                       className="w-8 h-8 rounded-full object-cover border border-gray-300"
                     />
@@ -142,11 +139,7 @@ export default function TravelBuddyNavbar({ onChatToggle, onRefresh }) {
             onClick={onRefresh}
             className="flex items-center text-xl font-bold text-cyan-600 hover:text-cyan-700 transition-colors"
           >
-            <img
-              src={travelBuddyLogo}
-              alt="Travel Buddy"
-              className="h-8"
-            />
+            <img src={travelBuddyLogo} alt="Travel Buddy" className="h-8" />
           </button>
           <button
             onClick={() => setMenuOpen(!menuOpen)}
@@ -177,11 +170,7 @@ export default function TravelBuddyNavbar({ onChatToggle, onRefresh }) {
               }}
               className="flex items-center text-xl font-bold text-cyan-600 hover:text-cyan-700 transition-colors"
             >
-              <img
-                src={travelBuddyLogo}
-                alt="Travel Buddy"
-                className="h-8"
-              />
+              <img src={travelBuddyLogo} alt="Travel Buddy" className="h-8" />
             </button>
             <button
               onClick={() => setMenuOpen(false)}
@@ -237,7 +226,7 @@ export default function TravelBuddyNavbar({ onChatToggle, onRefresh }) {
                 >
                   {user.profile_picture ? (
                     <img
-                      src={`http://localhost/skycamp/skycamp-backend/public/storage/uploads/${user.profile_picture}`}
+                      src={getProfilePictureUrl(user)}
                       alt="Profile"
                       className="w-8 h-8 rounded-full object-cover border border-gray-300"
                     />

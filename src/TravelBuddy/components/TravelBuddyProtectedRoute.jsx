@@ -24,7 +24,7 @@ export default function TravelBuddyProtectedRoute({ children }) {
     const checkAccess = async () => {
       try {
         const user = getUser();
-        
+
         // Check if user is authenticated
         if (!user) {
           setIsAuthorized(false);
@@ -42,15 +42,15 @@ export default function TravelBuddyProtectedRoute({ children }) {
 
         // Check Travel Buddy status
         const response = await API.travelBuddy.getStatus();
-        
-        if (response.data.enabled) {
+
+        if (response && response.enabled) {
           setIsAuthorized(true);
         } else {
           setError("Travel Buddy not enabled");
           setIsAuthorized(false);
           setShowModal(true);
         }
-        
+
         setIsLoading(false);
       } catch (error) {
         console.error("Error checking Travel Buddy access:", error);

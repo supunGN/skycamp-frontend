@@ -363,7 +363,7 @@ const Rentals = () => {
                       <RentalCard
                         image={
                           renter.image ||
-                          "http://localhost/skycamp/skycamp-backend/public/storage/uploads/users/default-profile.png"
+                          "http://localhost/skycamp/skycamp-backend/storage/uploads/users/default-profile.png"
                         }
                         location={renter.location}
                         name={renter.name}

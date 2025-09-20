@@ -16,6 +16,7 @@ import {
   ExclamationTriangleIcon,
   DocumentTextIcon,
 } from "@heroicons/react/24/outline";
+import { getVerificationImageUrls } from "../../utils/cacheBusting";
 
 export default function UserVerification({ onVerificationAction }) {
   const [activeTab, setActiveTab] = useState("pending");
@@ -148,8 +149,11 @@ export default function UserVerification({ onVerificationAction }) {
             // Clean up the path
             relativePath = relativePath.replace(/^\/+/, ""); // Remove leading slashes
 
-            // Build the full URL (pointing to public directory)
-            return `http://localhost/skycamp/skycamp-backend/public/storage/uploads/${relativePath}`;
+            // Build the full URL with cache-busting (pointing to storage directory)
+            const timestamp = new Date(
+              row.updated_at || row.created_at || Date.now()
+            ).getTime();
+            return `http://localhost/skycamp/skycamp-backend/storage/uploads/${relativePath}?ts=${timestamp}`;
           };
 
           return (
