@@ -146,6 +146,12 @@ export default function DashboardSidebar({
                     />
                   )}
                   <span className="text-base">{item.name}</span>
+                  {/* Unread count badge */}
+                  {item.unreadCount > 0 && (
+                    <span className="ml-auto bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium">
+                      {item.unreadCount > 99 ? "99+" : item.unreadCount}
+                    </span>
+                  )}
                 </button>
               ))}
             </nav>

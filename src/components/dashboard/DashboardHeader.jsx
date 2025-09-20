@@ -1,5 +1,6 @@
 import React from "react";
 import { BellIcon, HomeIcon } from "@heroicons/react/24/outline";
+import NotificationDropdown from "./NotificationDropdown";
 
 function getDashboardSubtitle(user, subtitle = "") {
   // If a subtitle is already provided, use it
@@ -23,6 +24,7 @@ export default function DashboardHeader({
   userName,
   subtitle,
   onNotificationClick,
+  onUnreadCountChange,
 }) {
   // Always get user name from localStorage if not provided
   let displayName = userName;
@@ -63,16 +65,8 @@ export default function DashboardHeader({
           Switch to Website
         </button>
 
-        {/* Notifications Button */}
-        <button
-          className="relative p-2 rounded-full hover:bg-cyan-50 focus:outline-none focus:ring-2 focus:ring-cyan-500"
-          onClick={onNotificationClick}
-          aria-label="Notifications"
-        >
-          <BellIcon className="w-6 h-6 text-cyan-700" />
-          {/* Optionally add a notification dot */}
-          {/* <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span> */}
-        </button>
+        {/* Notifications Dropdown */}
+        <NotificationDropdown onUnreadCountChange={onUnreadCountChange} />
       </div>
     </header>
   );

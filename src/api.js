@@ -13,6 +13,21 @@ export const http = axios.create({
 // Optional: request interceptor (add default headers etc.)
 http.interceptors.request.use((config) => {
   // Don't set Content-Type for FormData; Axios will set correct boundary.
+
+  // Add user ID from localStorage to headers for authentication
+  const user = localStorage.getItem("user");
+  if (user) {
+    try {
+      const userData = JSON.parse(user);
+      if (userData.id) {
+        config.headers["X-User-ID"] = userData.id;
+        config.headers["X-User-Role"] = userData.user_role;
+      }
+    } catch (e) {
+      console.warn("Failed to parse user data from localStorage:", e);
+    }
+  }
+
   return config;
 });
 
@@ -23,6 +38,7 @@ http.interceptors.response.use(
     const res = err.response;
     const data = res?.data || {};
     const message = data.message || err.message || "Network error";
+
     return Promise.reject({
       status: res?.status ?? 0,
       message,
@@ -83,7 +99,20 @@ export const API = {
     },
     // User Verification endpoints
     getPendingVerifications() {
+      console.log("🔍 API: Calling getPendingVerifications...");
       return ok(http.get("/admin/verifications/pending"));
+    },
+    getPendingCustomerVerifications() {
+      console.log("🔍 API: Calling getPendingCustomerVerifications...");
+      return ok(http.get("/admin/verifications/pending/customers"));
+    },
+    getPendingRenterVerifications() {
+      console.log("🔍 API: Calling getPendingRenterVerifications...");
+      return ok(http.get("/admin/verifications/pending/renters"));
+    },
+    getPendingGuideVerifications() {
+      console.log("🔍 API: Calling getPendingGuideVerifications...");
+      return ok(http.get("/admin/verifications/pending/guides"));
     },
     getPendingVerificationCount() {
       return ok(http.get("/admin/verifications/pending-count"));
@@ -107,6 +136,10 @@ export const API = {
     },
     getVerificationActivityLog() {
       return ok(http.get("/admin/verifications/activity-log"));
+    },
+    createTestData() {
+      console.log("🔍 API: Calling createTestData...");
+      return ok(http.post("/admin/verifications/create-test-data"));
     },
   },
   auth: {
@@ -273,6 +306,93 @@ export const API = {
     },
     show(id) {
       return ok(http.get(`/renters/${id}`));
+    },
+  },
+
+  // ==== RENTER DASHBOARD ====
+  renterDashboard: {
+    getStats() {
+      return ok(http.get("/renter/dashboard/stats"));
+    },
+    getProfile() {
+      return ok(http.get("/renter/profile"));
+    },
+    updateProfile(data) {
+      return ok(http.post("/renter/profile", data));
+    },
+    getVerificationDocs() {
+      return ok(http.get("/renter/verification/docs"));
+    },
+    submitVerification(formData) {
+      return ok(http.post("/renter/verification/submit", formData));
+    },
+
+    // Equipment Management
+    getEquipmentCatalog() {
+      return ok(http.get("/renter/equipment/catalog"));
+    },
+    getRenterEquipment() {
+      return ok(http.get("/renter/equipment/list"));
+    },
+    addEquipment(formData) {
+      console.log(
+        "📸 PHOTO UPLOAD: Starting equipment photo upload process..."
+      );
+      console.log("📸 PHOTO UPLOAD: FormData contents:", {
+        equipment_id: formData.get("equipment_id"),
+        item_condition: formData.get("item_condition"),
+        price_per_day: formData.get("price_per_day"),
+        stock_quantity: formData.get("stock_quantity"),
+        files_count: formData.getAll("condition_photos[]").length,
+      });
+      return ok(http.post("/renter/equipment/add", formData));
+    },
+    updateEquipment(id, data) {
+      return ok(http.put(`/renter/equipment/update/${id}`, data));
+    },
+    updateEquipmentWithPhotos(id, formData) {
+      return ok(http.post(`/renter/equipment/update/${id}`, formData));
+    },
+    deleteEquipment(id) {
+      return ok(http.put(`/renter/equipment/delete/${id}`));
+    },
+    restoreEquipment(id) {
+      return ok(http.put(`/renter/equipment/restore/${id}`));
+    },
+    removeEquipmentPhoto(photoId) {
+      return ok(http.delete(`/renter/equipment/photo/${photoId}`));
+    },
+    setPrimaryPhoto(photoId) {
+      return ok(http.put(`/renter/equipment/photo/${photoId}/set-primary`));
+    },
+
+    // Location Management
+    getAvailableLocations() {
+      return ok(http.get("/renter/locations/available"));
+    },
+    getRenterLocations() {
+      return ok(http.get("/renter/locations/coverage"));
+    },
+    updateRenterLocations(data) {
+      return ok(http.put("/renter/locations/update", data));
+    },
+    checkLocationRemoval(locationName) {
+      return ok(
+        http.get(
+          `/renter/locations/check-removal/${encodeURIComponent(locationName)}`
+        )
+      );
+    },
+
+    // Bookings Management
+    getRenterBookings() {
+      return ok(http.get("/renter/bookings"));
+    },
+    markBookingAsReceived(bookingId) {
+      return ok(http.put(`/renter/bookings/${bookingId}/mark-received`));
+    },
+    createTestNotifications() {
+      return ok(http.post("/renter/test-notifications"));
     },
   },
 
