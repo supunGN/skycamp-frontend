@@ -1,4 +1,4 @@
-import TravelBuddyNavbar from "../components/TravelBuddyNavbar";
+import TravelBuddyNavbar from "../../components/organisms/TravelBuddyNavbar";
 import Footer from "../../components/organisms/Footer";
 import Button from "../../components/atoms/Button";
 import CreatePostForm from "../../components/molecules/CreatePostForm";
@@ -19,8 +19,16 @@ import {
 const mockUsers = [
   { id: 1, name: "John Smith", avatar: "/src/assets/auth/profile-pic.svg" },
   { id: 2, name: "Laura Chen", avatar: "/src/assets/auth/profile-pic.svg" },
-  { id: 3, name: "Sameesha Pasanya", avatar: "/src/assets/auth/profile-pic.svg" },
-  { id: 4, name: "Isini Sandunika", avatar: "/src/assets/auth/profile-pic.svg" },
+  {
+    id: 3,
+    name: "Sameesha Pasanya",
+    avatar: "/src/assets/auth/profile-pic.svg",
+  },
+  {
+    id: 4,
+    name: "Isini Sandunika",
+    avatar: "/src/assets/auth/profile-pic.svg",
+  },
   { id: 5, name: "Kamal Perera", avatar: "/src/assets/auth/profile-pic.svg" },
   { id: 6, name: "Tharindu Silva", avatar: "/src/assets/auth/profile-pic.svg" },
   { id: 7, name: "Sarah Johnson", avatar: "/src/assets/auth/profile-pic.svg" },
@@ -31,10 +39,26 @@ const mockUsers = [
   { id: 12, name: "James Miller", avatar: "/src/assets/auth/profile-pic.svg" },
   { id: 13, name: "Anna Davis", avatar: "/src/assets/auth/profile-pic.svg" },
   { id: 14, name: "Robert Taylor", avatar: "/src/assets/auth/profile-pic.svg" },
-  { id: 15, name: "Maria Rodriguez", avatar: "/src/assets/auth/profile-pic.svg" },
-  { id: 16, name: "Kevin Anderson", avatar: "/src/assets/auth/profile-pic.svg" },
-  { id: 17, name: "Jennifer White", avatar: "/src/assets/auth/profile-pic.svg" },
-  { id: 18, name: "Christopher Harris", avatar: "/src/assets/auth/profile-pic.svg" },
+  {
+    id: 15,
+    name: "Maria Rodriguez",
+    avatar: "/src/assets/auth/profile-pic.svg",
+  },
+  {
+    id: 16,
+    name: "Kevin Anderson",
+    avatar: "/src/assets/auth/profile-pic.svg",
+  },
+  {
+    id: 17,
+    name: "Jennifer White",
+    avatar: "/src/assets/auth/profile-pic.svg",
+  },
+  {
+    id: 18,
+    name: "Christopher Harris",
+    avatar: "/src/assets/auth/profile-pic.svg",
+  },
   { id: 19, name: "Amanda Clark", avatar: "/src/assets/auth/profile-pic.svg" },
   { id: 20, name: "Daniel Lewis", avatar: "/src/assets/auth/profile-pic.svg" },
 ];
@@ -194,20 +218,21 @@ export default function TravelBuddy() {
   };
 
   const handleChatToggle = () => {
-    navigate('/travel-buddy/chat');
+    navigate("/travel-buddy/chat");
   };
 
   const handleRefreshPosts = () => {
     loadTravelPlans();
   };
 
-
   return (
     <>
-      <TravelBuddyNavbar onChatToggle={handleChatToggle} onRefresh={handleRefreshPosts} />
+      <TravelBuddyNavbar
+        onChatToggle={handleChatToggle}
+        onRefresh={handleRefreshPosts}
+      />
       <main className="bg-white pt-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
-
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
             {/* Left: People List */}
             <aside className="lg:col-span-3 bg-white h-screen lg:h-screen flex flex-col sticky top-0 lg:sticky top-0 pl-4">
@@ -223,12 +248,24 @@ export default function TravelBuddy() {
               </div>
               <div className="flex-1 overflow-y-auto scrollbar-hide hover:scrollbar-default">
                 {mockUsers.map((u) => (
-                  <div key={u.id} className="flex items-center justify-between px-4 py-3 hover:bg-gray-50">
+                  <div
+                    key={u.id}
+                    className="flex items-center justify-between px-4 py-3 hover:bg-gray-50"
+                  >
                     <div className="flex items-center gap-3 min-w-0">
-                      <img src={u.avatar} alt={u.name} className="w-9 h-9 rounded-full" />
-                      <span className="text-gray-900 font-medium truncate">{u.name}</span>
+                      <img
+                        src={u.avatar}
+                        alt={u.name}
+                        className="w-9 h-9 rounded-full"
+                      />
+                      <span className="text-gray-900 font-medium truncate">
+                        {u.name}
+                      </span>
                     </div>
-                    <button className="p-2 rounded-full hover:bg-gray-100 text-gray-600" aria-label="Add">
+                    <button
+                      className="p-2 rounded-full hover:bg-gray-100 text-gray-600"
+                      aria-label="Add"
+                    >
                       <PlusIcon className="w-5 h-5" />
                     </button>
                   </div>
@@ -242,7 +279,11 @@ export default function TravelBuddy() {
               <div className="p-4">
                 <div className="max-w-2xl mx-auto border-b border-gray-200 pb-4">
                   <div className="flex items-center gap-3">
-                    <img src="/src/assets/auth/profile-pic.svg" alt="me" className="w-9 h-9 rounded-full" />
+                    <img
+                      src="/src/assets/auth/profile-pic.svg"
+                      alt="me"
+                      className="w-9 h-9 rounded-full"
+                    />
                     <div className="relative flex-1">
                       <input
                         type="text"
@@ -251,8 +292,8 @@ export default function TravelBuddy() {
                         onClick={() => setShowCreatePostForm(true)}
                         readOnly
                       />
-                      <button 
-                        className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-gray-600" 
+                      <button
+                        className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-gray-600"
                         aria-label="Add image"
                         onClick={() => setShowCreatePostForm(true)}
                       >
@@ -279,75 +320,100 @@ export default function TravelBuddy() {
                   </div>
                 ) : posts.length === 0 ? (
                   <div className="text-center py-8">
-                    <p className="text-gray-600 mb-4">No travel plans found. Be the first to create one!</p>
+                    <p className="text-gray-600 mb-4">
+                      No travel plans found. Be the first to create one!
+                    </p>
                     <Button onClick={() => setShowCreatePostForm(true)}>
                       Create Travel Plan
                     </Button>
                   </div>
                 ) : (
                   posts.map((p) => {
-                  // Determine activity icon based on activity type
-                  const getActivityIcon = (activity) => {
-                    if (activity.toLowerCase().includes('camping')) {
+                    // Determine activity icon based on activity type
+                    const getActivityIcon = (activity) => {
+                      if (activity.toLowerCase().includes("camping")) {
+                        return <TentIcon className="w-5 h-5 text-cyan-600" />;
+                      }
+                      if (activity.toLowerCase().includes("stargazing")) {
+                        return (
+                          <SparklesIcon className="w-5 h-5 text-cyan-600" />
+                        );
+                      }
                       return <TentIcon className="w-5 h-5 text-cyan-600" />;
-                    }
-                    if (activity.toLowerCase().includes('stargazing')) {
-                      return <SparklesIcon className="w-5 h-5 text-cyan-600" />;
-                    }
-                    return <TentIcon className="w-5 h-5 text-cyan-600" />;
-                  };
+                    };
 
-                  return (
-                    <article key={p.id} className="border rounded-lg shadow-sm p-5 max-w-2xl mx-auto">
-                      <div className="flex items-start justify-between">
-                        <div className="flex items-center gap-3">
-                          <img src="/src/assets/auth/profile-pic.svg" alt={p.user} className="w-10 h-10 rounded-full" />
-                          <h3 className="text-lg font-semibold text-gray-900">{p.user}</h3>
+                    return (
+                      <article
+                        key={p.id}
+                        className="border rounded-lg shadow-sm p-5 max-w-2xl mx-auto"
+                      >
+                        <div className="flex items-start justify-between">
+                          <div className="flex items-center gap-3">
+                            <img
+                              src="/src/assets/auth/profile-pic.svg"
+                              alt={p.user}
+                              className="w-10 h-10 rounded-full"
+                            />
+                            <h3 className="text-lg font-semibold text-gray-900">
+                              {p.user}
+                            </h3>
+                          </div>
+                          <span className="text-sm text-gray-500">
+                            {p.time}
+                          </span>
                         </div>
-                        <span className="text-sm text-gray-500">{p.time}</span>
-                      </div>
 
-                      <div className="grid grid-cols-2 gap-x-8 gap-y-2 mt-4 pl-4">
-                        <div className="flex items-center gap-2">
-                          <MapPinIcon className="w-5 h-5 text-cyan-600" />
-                          <span className="text-cyan-600 font-medium">{p.location}</span>
+                        <div className="grid grid-cols-2 gap-x-8 gap-y-2 mt-4 pl-4">
+                          <div className="flex items-center gap-2">
+                            <MapPinIcon className="w-5 h-5 text-cyan-600" />
+                            <span className="text-cyan-600 font-medium">
+                              {p.location}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <UsersIcon className="w-5 h-5 text-cyan-600" />
+                            <span className="text-cyan-600 font-medium">
+                              {p.companions} companions needed
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            {getActivityIcon(p.activity)}
+                            <span className="text-cyan-600 font-medium">
+                              {p.activity}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <CalendarDaysIcon className="w-5 h-5 text-cyan-600" />
+                            <span className="text-cyan-600 font-medium">
+                              {p.dateRange}
+                            </span>
+                          </div>
                         </div>
-                        <div className="flex items-center gap-2">
-                          <UsersIcon className="w-5 h-5 text-cyan-600" />
-                          <span className="text-cyan-600 font-medium">{p.companions} companions needed</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          {getActivityIcon(p.activity)}
-                          <span className="text-cyan-600 font-medium">{p.activity}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <CalendarDaysIcon className="w-5 h-5 text-cyan-600" />
-                          <span className="text-cyan-600 font-medium">{p.dateRange}</span>
-                        </div>
-                      </div>
 
-                      <p className="text-gray-700 mt-4 leading-relaxed">{p.description}</p>
+                        <p className="text-gray-700 mt-4 leading-relaxed">
+                          {p.description}
+                        </p>
 
-                      <div className="mt-4 bg-gray-200 rounded-md h-56 sm:h-72 w-full" />
+                        <div className="mt-4 bg-gray-200 rounded-md h-56 sm:h-72 w-full" />
 
-                      <div className="mt-4 flex justify-end">
-                        <Button size="md">Connect</Button>
-                      </div>
-                    </article>
-                  );
-                })
+                        <div className="mt-4 flex justify-end">
+                          <Button size="md">Connect</Button>
+                        </div>
+                      </article>
+                    );
+                  })
                 )}
               </div>
             </section>
           </div>
         </div>
       </main>
-      
+
       {/* Divider */}
       <hr className="mt-20 mb-0 border-gray-200 max-w-7xl mx-auto w-full" />
-      
+
       <Footer />
-      
+
       {/* Create Post Form Modal */}
       {showCreatePostForm && (
         <CreatePostForm
@@ -355,7 +421,6 @@ export default function TravelBuddy() {
           onSubmit={handleCreatePost}
         />
       )}
-
     </>
   );
 }

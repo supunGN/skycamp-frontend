@@ -9,6 +9,8 @@ import {
   Cog6ToothIcon,
   ArrowRightOnRectangleIcon,
   UserCircleIcon,
+  HeartIcon,
+  ShoppingCartIcon,
 } from "@heroicons/react/24/outline";
 import Button from "../atoms/Button";
 import { getProfilePictureUrl } from "../../utils/cacheBusting";
@@ -47,8 +49,8 @@ export default function TravelBuddyNavbar({ onChatToggle, onRefresh }) {
       {/* Desktop Navigation */}
       <header className="hidden lg:flex fixed top-0 left-0 w-full z-50 bg-white shadow-lg">
         <div className="max-w-7xl mx-auto px-6 flex justify-between items-center w-full py-4">
-          {/* Logo + Title */}
-          <div className="flex items-center">
+          {/* Logo and Navigation Links - Left Grouped */}
+          <div className="flex items-center space-x-12">
             <button
               onClick={onRefresh}
               className="flex items-center text-xl font-bold text-cyan-600 hover:text-cyan-700 transition-colors"
@@ -59,44 +61,57 @@ export default function TravelBuddyNavbar({ onChatToggle, onRefresh }) {
                 className="h-8"
               />
             </button>
+
+            <nav className="flex items-center space-x-8">
+              <Link
+                to="/travel-buddy/feed"
+                className="text-gray-700 hover:text-cyan-600 font-medium"
+              >
+                Feed
+              </Link>
+
+              <Link
+                to="/travel-buddy/chat"
+                className="text-gray-700 hover:text-cyan-600 font-medium"
+              >
+                Messages
+              </Link>
+              <Link
+                to="/travel-buddy/requests"
+                className="text-gray-700 hover:text-cyan-600 font-medium"
+              >
+                Travel Requests
+              </Link>
+            </nav>
           </div>
-
-          {/* Center Links */}
-          <nav className="flex items-center space-x-8">
-            <Link
-              to="/travel-buddy/feed"
-              className="text-gray-700 hover:text-cyan-600 font-medium"
-            >
-              Feed
-            </Link>
-
-            <Link
-              to="/travel-buddy/chat"
-              className="text-gray-700 hover:text-cyan-600 font-medium"
-            >
-              Messages
-            </Link>
-            <Link
-              to="/travel-buddy/requests"
-              className="text-gray-700 hover:text-cyan-600 font-medium"
-            >
-              Travel Requests
-            </Link>
-          </nav>
 
           {/* Right Side Controls */}
           <div className="flex items-center space-x-4">
             <Link to="/">
               <Button
-                variant="outline"
-                size="md"
+                variant="secondary"
+                size="sm"
                 className="hidden xl:inline-flex"
               >
                 Switch to Home Site
               </Button>
             </Link>
-            <Cog6ToothIcon className="w-6 h-6 text-gray-600 hover:text-cyan-600 cursor-pointer" />
-            <BellIcon className="w-6 h-6 text-gray-600 hover:text-cyan-600 cursor-pointer" />
+            <Link to="/cart">
+              <div className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors cursor-pointer">
+                <ShoppingCartIcon className="w-6 h-6" />
+              </div>
+            </Link>
+            <Link to="/wishlist">
+              <div className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors cursor-pointer">
+                <HeartIcon className="w-6 h-6" />
+              </div>
+            </Link>
+            <div className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors cursor-pointer">
+              <BellIcon className="w-6 h-6" />
+            </div>
+            <div className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors cursor-pointer">
+              <Cog6ToothIcon className="w-6 h-6" />
+            </div>
             {user ? (
               <div className="relative">
                 <button
@@ -226,13 +241,29 @@ export default function TravelBuddyNavbar({ onChatToggle, onRefresh }) {
           {/* Mobile Controls */}
           <div className="absolute bottom-6 left-6 right-6 space-y-4">
             <Link to="/" onClick={() => setMenuOpen(false)}>
-              <Button variant="outline" size="lg" className="w-full">
+              <Button variant="secondary" size="lg" className="w-full">
                 Switch to Home Site
               </Button>
             </Link>
-            <div className="flex items-center justify-between px-1">
-              <Cog6ToothIcon className="w-6 h-6 text-gray-600" />
+            <Link to="/cart" onClick={() => setMenuOpen(false)}>
+              <div className="flex items-center space-x-3 text-lg font-medium text-gray-900 hover:text-cyan-600">
+                <ShoppingCartIcon className="w-6 h-6 text-gray-600" />
+                <span>Cart</span>
+              </div>
+            </Link>
+            <Link to="/wishlist" onClick={() => setMenuOpen(false)}>
+              <div className="flex items-center space-x-3 text-lg font-medium text-gray-900 hover:text-cyan-600">
+                <HeartIcon className="w-6 h-6 text-gray-600" />
+                <span>Wishlist</span>
+              </div>
+            </Link>
+            <div className="flex items-center space-x-3 text-lg font-medium text-gray-900 hover:text-cyan-600">
               <BellIcon className="w-6 h-6 text-gray-600" />
+              <span>Notifications</span>
+            </div>
+            <div className="flex items-center space-x-3 text-lg font-medium text-gray-900 hover:text-cyan-600">
+              <Cog6ToothIcon className="w-6 h-6 text-gray-600" />
+              <span>Settings</span>
             </div>
             {user ? (
               <div className="relative">

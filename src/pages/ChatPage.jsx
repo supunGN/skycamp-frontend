@@ -1,10 +1,10 @@
 import React, { useState } from "react";
-import TravelBuddyNavbar from "../TravelBuddy/components/TravelBuddyNavbar";
+import TravelBuddyNavbar from "../components/organisms/TravelBuddyNavbar";
 import IndividualChatView from "../components/molecules/IndividualChatView";
-import { 
-  MagnifyingGlassIcon, 
+import {
+  MagnifyingGlassIcon,
   ArrowPathIcon,
-  PhotoIcon
+  PhotoIcon,
 } from "@heroicons/react/24/outline";
 
 const mockChats = [
@@ -16,7 +16,7 @@ const mockChats = [
     image: "/src/assets/hero/Slide1.png",
     lastMessage: "Looking forward to the hike!",
     lastMessageTime: "2 hours ago",
-    unreadCount: 2
+    unreadCount: 2,
   },
   {
     id: 2,
@@ -26,7 +26,7 @@ const mockChats = [
     image: null,
     lastMessage: "See you at the meeting point",
     lastMessageTime: "1 day ago",
-    unreadCount: 0
+    unreadCount: 0,
   },
   {
     id: 3,
@@ -36,7 +36,7 @@ const mockChats = [
     image: "/src/assets/hero/slide2.png",
     lastMessage: "Don't forget your camera!",
     lastMessageTime: "3 days ago",
-    unreadCount: 1
+    unreadCount: 1,
   },
   {
     id: 4,
@@ -46,7 +46,7 @@ const mockChats = [
     image: "/src/assets/hero/slide3.png",
     lastMessage: "Weather looks great!",
     lastMessageTime: "1 week ago",
-    unreadCount: 0
+    unreadCount: 0,
   },
   {
     id: 5,
@@ -56,17 +56,33 @@ const mockChats = [
     image: null,
     lastMessage: "Thanks for the amazing trip!",
     lastMessageTime: "2 weeks ago",
-    unreadCount: 0
+    unreadCount: 0,
   },
   {
     id: 6,
     location: "Wilpattu National Park",
     endDate: "07 July 2024",
-    participants: ["User A", "User B", "User C", "User D", "User E", "User F", "User G", "User H", "User I", "User J", "User K", "User L", "User M", "User N", "User O"],
+    participants: [
+      "User A",
+      "User B",
+      "User C",
+      "User D",
+      "User E",
+      "User F",
+      "User G",
+      "User H",
+      "User I",
+      "User J",
+      "User K",
+      "User L",
+      "User M",
+      "User N",
+      "User O",
+    ],
     image: "/src/assets/hero/slide4.png",
     lastMessage: "Best camping trip ever!",
     lastMessageTime: "1 month ago",
-    unreadCount: 0
+    unreadCount: 0,
   },
   {
     id: 7,
@@ -76,7 +92,7 @@ const mockChats = [
     image: "/src/assets/hero/slide5.png",
     lastMessage: "Amazing sunrise views!",
     lastMessageTime: "2 months ago",
-    unreadCount: 0
+    unreadCount: 0,
   },
   {
     id: 8,
@@ -86,7 +102,7 @@ const mockChats = [
     image: null,
     lastMessage: "Whale watching was incredible!",
     lastMessageTime: "3 months ago",
-    unreadCount: 1
+    unreadCount: 1,
   },
   {
     id: 9,
@@ -96,7 +112,7 @@ const mockChats = [
     image: "/src/assets/hero/Slide1.png",
     lastMessage: "Tea plantation tour was fantastic",
     lastMessageTime: "4 months ago",
-    unreadCount: 0
+    unreadCount: 0,
   },
   {
     id: 10,
@@ -106,8 +122,8 @@ const mockChats = [
     image: "/src/assets/hero/slide2.png",
     lastMessage: "Pilgrimage completed successfully!",
     lastMessageTime: "5 months ago",
-    unreadCount: 0
-  }
+    unreadCount: 0,
+  },
 ];
 
 export default function ChatPage() {
@@ -116,9 +132,12 @@ export default function ChatPage() {
   const [filterType, setFilterType] = useState("all"); // "all", "unread"
   const [chats, setChats] = useState(mockChats);
 
-  const filteredChats = chats.filter(chat => {
-    const matchesSearch = chat.location.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesFilter = filterType === "all" || (filterType === "unread" && chat.unreadCount > 0);
+  const filteredChats = chats.filter((chat) => {
+    const matchesSearch = chat.location
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase());
+    const matchesFilter =
+      filterType === "all" || (filterType === "unread" && chat.unreadCount > 0);
     return matchesSearch && matchesFilter;
   });
 
@@ -126,17 +145,15 @@ export default function ChatPage() {
     setSelectedChat(chat);
     // Mark chat as read when selected
     if (chat.unreadCount > 0) {
-      setChats(prevChats => 
-        prevChats.map(c => 
-          c.id === chat.id ? { ...c, unreadCount: 0 } : c
-        )
+      setChats((prevChats) =>
+        prevChats.map((c) => (c.id === chat.id ? { ...c, unreadCount: 0 } : c))
       );
     }
   };
 
   const handleMarkAllAsRead = () => {
-    setChats(prevChats => 
-      prevChats.map(chat => ({ ...chat, unreadCount: 0 }))
+    setChats((prevChats) =>
+      prevChats.map((chat) => ({ ...chat, unreadCount: 0 }))
     );
   };
 
@@ -146,11 +163,13 @@ export default function ChatPage() {
 
   return (
     <div className="h-screen flex flex-col bg-white">
-      <TravelBuddyNavbar onChatToggle={() => {}} onRefresh={handleRefreshPosts} />
-      
+      <TravelBuddyNavbar
+        onChatToggle={() => {}}
+        onRefresh={handleRefreshPosts}
+      />
+
       <main className="flex-1 pt-24 flex overflow-hidden">
         <div className="flex w-full h-full">
-          
           {/* Left Pane: Chat List */}
           <aside className="w-1/3 bg-white border-r border-gray-200 flex flex-col min-h-0">
             {/* Header */}
@@ -190,15 +209,14 @@ export default function ChatPage() {
                   }`}
                 >
                   Unread
-                  {chats.filter(chat => chat.unreadCount > 0).length > 0 && (
+                  {chats.filter((chat) => chat.unreadCount > 0).length > 0 && (
                     <span className="absolute -top-1 -right-1 bg-cyan-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                      {chats.filter(chat => chat.unreadCount > 0).length}
+                      {chats.filter((chat) => chat.unreadCount > 0).length}
                     </span>
                   )}
                 </button>
               </div>
             </div>
-
 
             {/* Chat List - Independently Scrollable */}
             <div className="flex-1 overflow-y-auto min-h-0">
@@ -240,15 +258,18 @@ export default function ChatPage() {
                             </div>
                           )}
                         </div>
-                        
+
                         <p className="text-xs text-gray-500 mb-1">
-                          {new Date(chat.endDate) < new Date() ? "Ended" : "Ends"}: {chat.endDate}
+                          {new Date(chat.endDate) < new Date()
+                            ? "Ended"
+                            : "Ends"}
+                          : {chat.endDate}
                         </p>
-                        
+
                         <p className="text-sm text-gray-600 truncate mb-1">
                           {chat.lastMessage}
                         </p>
-                        
+
                         <p className="text-xs text-gray-400">
                           {chat.lastMessageTime}
                         </p>
@@ -261,20 +282,18 @@ export default function ChatPage() {
                       <PhotoIcon className="w-8 h-8 text-gray-400" />
                     </div>
                     <h3 className="text-lg font-medium text-gray-900 mb-2">
-                      {filterType === "unread" 
-                        ? "No unread messages" 
-                        : searchTerm 
-                          ? "No chats found" 
-                          : "No messages yet"
-                      }
+                      {filterType === "unread"
+                        ? "No unread messages"
+                        : searchTerm
+                        ? "No chats found"
+                        : "No messages yet"}
                     </h3>
                     <p className="text-gray-500 text-sm">
-                      {filterType === "unread" 
-                        ? "All caught up!" 
-                        : searchTerm 
-                          ? "Try adjusting your search" 
-                          : "Start a conversation to see messages here"
-                      }
+                      {filterType === "unread"
+                        ? "All caught up!"
+                        : searchTerm
+                        ? "Try adjusting your search"
+                        : "Start a conversation to see messages here"}
                     </p>
                   </div>
                 )}
@@ -285,8 +304,8 @@ export default function ChatPage() {
           {/* Right Pane: Individual Chat */}
           <section className="flex-1 bg-white flex flex-col min-h-0">
             {selectedChat ? (
-              <IndividualChatView 
-                chat={selectedChat} 
+              <IndividualChatView
+                chat={selectedChat}
                 onBack={() => setSelectedChat(null)}
               />
             ) : (
@@ -295,8 +314,12 @@ export default function ChatPage() {
                   <div className="w-20 h-20 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-6">
                     <PhotoIcon className="w-10 h-10 text-gray-400" />
                   </div>
-                  <h3 className="text-xl font-medium text-gray-900 mb-3">Select a conversation</h3>
-                  <p className="text-gray-500 text-lg">Choose a chat from the list to start messaging</p>
+                  <h3 className="text-xl font-medium text-gray-900 mb-3">
+                    Select a conversation
+                  </h3>
+                  <p className="text-gray-500 text-lg">
+                    Choose a chat from the list to start messaging
+                  </p>
                 </div>
               </div>
             )}

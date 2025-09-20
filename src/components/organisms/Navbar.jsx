@@ -87,128 +87,139 @@ export default function Navbar() {
       {/* Desktop Navigation */}
       <header className="hidden lg:flex fixed top-0 left-0 w-full z-50 bg-white shadow-lg">
         <div className="max-w-7xl mx-auto px-6 flex justify-between items-center w-full py-4">
-          {/* Logo */}
-          <Link
-            to="/"
-            className="flex items-center text-xl font-bold text-cyan-600"
-          >
-            <img src="/logo.svg" alt="SkyCamp" className="h-8 mr-2" />
-          </Link>
-
-          {/* Navigation Links */}
-          <nav className="flex items-center space-x-8">
+          {/* Logo and Navigation Links - Left Grouped */}
+          <div className="flex items-center space-x-12">
             <Link
               to="/"
-              className="text-gray-700 hover:text-cyan-600 font-medium"
-              onClick={() => window.scrollTo(0, 0)}
+              className="flex items-center text-xl font-bold text-cyan-600"
             >
-              Home
-            </Link>
-            <Link
-              to="/rentals"
-              className="text-gray-700 hover:text-cyan-600 font-medium"
-              onClick={() => window.scrollTo(0, 0)}
-            >
-              Rentals
-            </Link>
-            <Link
-              to="/guides"
-              className="text-gray-700 hover:text-cyan-600 font-medium"
-            >
-              Guides
+              <img src="/logo.svg" alt="SkyCamp" className="h-8 mr-2" />
             </Link>
 
-            {/* Destinations Dropdown */}
-            <div className="relative group">
-              <button className="flex items-center space-x-1 text-gray-700 hover:text-cyan-600 font-medium">
-                <span>Destinations</span>
-                <ChevronDownIcon className="w-4 h-4" />
-              </button>
-              <div className="absolute top-full left-1/2 -translate-x-1/2 bg-white border rounded-md shadow-lg w-72 z-50 group-hover:block hidden transition-all duration-150 py-2 px-2">
-                <Link
-                  to="/destinations"
-                  className="block px-4 py-3 hover:bg-gray-50 rounded-md"
-                >
-                  <div className="font-medium">Camping Destination</div>
-                  <div className="text-sm text-gray-500">
-                    Top outdoor spots to pitch your tent comfortably
-                  </div>
-                </Link>
-                <Link
-                  to="/stargazing-spots"
-                  className="block px-4 py-3 hover:bg-gray-50 rounded-md"
-                >
-                  <div className="font-medium">Stargazing Spots</div>
-                  <div className="text-sm text-gray-500">
-                    Best dark-sky places for night sky watching
-                  </div>
-                </Link>
+            <nav className="flex items-center space-x-8">
+              <Link
+                to="/"
+                className="text-gray-700 hover:text-cyan-600 font-medium"
+                onClick={() => window.scrollTo(0, 0)}
+              >
+                Home
+              </Link>
+              <Link
+                to="/rentals"
+                className="text-gray-700 hover:text-cyan-600 font-medium"
+                onClick={() => window.scrollTo(0, 0)}
+              >
+                Rentals
+              </Link>
+              <Link
+                to="/guides"
+                className="text-gray-700 hover:text-cyan-600 font-medium"
+              >
+                Guides
+              </Link>
+
+              {/* Destinations Dropdown */}
+              <div className="relative group">
+                <button className="flex items-center space-x-1 text-gray-700 hover:text-cyan-600 font-medium">
+                  <span>Destinations</span>
+                  <ChevronDownIcon className="w-4 h-4" />
+                </button>
+                <div className="absolute top-full left-1/2 -translate-x-1/2 bg-white border rounded-md shadow-lg w-72 z-50 group-hover:block hidden transition-all duration-150 py-2 px-2">
+                  <Link
+                    to="/destinations"
+                    className="block px-4 py-3 hover:bg-gray-50 rounded-md"
+                  >
+                    <div className="font-medium">Camping Destination</div>
+                    <div className="text-sm text-gray-500">
+                      Top outdoor spots to pitch your tent comfortably
+                    </div>
+                  </Link>
+                  <Link
+                    to="/stargazing-spots"
+                    className="block px-4 py-3 hover:bg-gray-50 rounded-md"
+                  >
+                    <div className="font-medium">Stargazing Spots</div>
+                    <div className="text-sm text-gray-500">
+                      Best dark-sky places for night sky watching
+                    </div>
+                  </Link>
+                </div>
               </div>
-            </div>
-          </nav>
+            </nav>
+          </div>
 
           {/* Right Side Icons and Login/Profile */}
           <div className="flex items-center space-x-4">
-            <Link to="/cart">
-              <ShoppingCartIcon className="w-6 h-6 text-gray-600 hover:text-cyan-600 cursor-pointer" />
-            </Link>
-            {isCustomer && (
-              <Link to="/wishlist" className="relative">
-                <HeartIcon className="w-6 h-6 text-gray-600 hover:text-cyan-600 cursor-pointer" />
-                {wishlistCount > 0 && (
-                  <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-semibold">
-                    {wishlistCount > 99 ? "99+" : wishlistCount}
-                  </span>
-                )}
-              </Link>
-            )}
-
             {/* Travel Buddy Switch Button - Only for customers */}
             {user && user.user_role === "customer" && (
               <Link to="/travel-buddy">
-                <button className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium">
+                <Button variant="secondary" size="sm">
                   Switch to Travel Buddy
-                </button>
+                </Button>
               </Link>
             )}
 
             {/* Admin Dashboard Switch Button */}
             {admin && (
-              <button
+              <Button
+                variant="secondary"
+                size="sm"
                 onClick={() => (window.location.href = "/admin")}
-                className="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors text-sm font-medium"
               >
                 Switch to Admin Dashboard
-              </button>
+              </Button>
             )}
 
             {/* Guide Dashboard Switch Button */}
             {user &&
               user.user_role === "service_provider" &&
               user.provider_type === "Local Guide" && (
-                <button
+                <Button
+                  variant="secondary"
+                  size="sm"
                   onClick={() =>
                     (window.location.href = "/dashboard/guide/overview")
                   }
-                  className="px-4 py-2 bg-cyan-600 text-white rounded-lg hover:bg-cyan-700 transition-colors text-sm font-medium"
                 >
                   Switch to Guide Dashboard
-                </button>
+                </Button>
               )}
 
             {/* Renter Dashboard Switch Button */}
             {user &&
               user.user_role === "service_provider" &&
               user.provider_type === "Equipment Renter" && (
-                <button
+                <Button
+                  variant="secondary"
+                  size="sm"
                   onClick={() =>
                     (window.location.href = "/dashboard/renter/overview")
                   }
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
                 >
                   Switch to Renter Dashboard
-                </button>
+                </Button>
               )}
+
+            {/* Only show cart and wishlist for non-admin users */}
+            {!admin && (
+              <>
+                <Link to="/cart">
+                  <div className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors cursor-pointer">
+                    <ShoppingCartIcon className="w-6 h-6" />
+                  </div>
+                </Link>
+                <Link to="/wishlist" className="relative">
+                  <div className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors cursor-pointer">
+                    <HeartIcon className="w-6 h-6" />
+                    {wishlistCount > 0 && (
+                      <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-semibold">
+                        {wishlistCount > 99 ? "99+" : wishlistCount}
+                      </span>
+                    )}
+                  </div>
+                </Link>
+              </>
+            )}
 
             {/* Conditional rendering for user/profile/admin */}
             {user ? (
@@ -432,8 +443,87 @@ export default function Navbar() {
             </div>
           </div>
 
-          {/* Mobile Icons (Notification, Cart, Wishlist) - Above Login/Profile Button */}
+          {/* Mobile Icons and Switch Buttons - Above Login/Profile Button */}
           <div className="absolute bottom-24 left-6 right-6 space-y-4">
+            {/* Travel Buddy Switch Button - Mobile - Only for customers */}
+            {user && user.user_role === "customer" && (
+              <Link to="/travel-buddy" onClick={() => setMenuOpen(false)}>
+                <Button variant="secondary" size="lg" className="w-full">
+                  Switch to Travel Buddy
+                </Button>
+              </Link>
+            )}
+
+            {/* Admin Dashboard Switch Button - Mobile */}
+            {admin && (
+              <Button
+                variant="secondary"
+                size="lg"
+                className="w-full"
+                onClick={() => {
+                  setMenuOpen(false);
+                  window.location.href = "/admin";
+                }}
+              >
+                Switch to Admin Dashboard
+              </Button>
+            )}
+
+            {/* Guide Dashboard Switch Button - Mobile */}
+            {user &&
+              user.user_role === "service_provider" &&
+              user.provider_type === "Local Guide" && (
+                <Button
+                  variant="secondary"
+                  size="lg"
+                  className="w-full"
+                  onClick={() => {
+                    setMenuOpen(false);
+                    window.location.href = "/dashboard/guide/overview";
+                  }}
+                >
+                  Switch to Guide Dashboard
+                </Button>
+              )}
+
+            {/* Renter Dashboard Switch Button - Mobile */}
+            {user &&
+              user.user_role === "service_provider" &&
+              user.provider_type === "Equipment Renter" && (
+                <Button
+                  variant="secondary"
+                  size="lg"
+                  className="w-full"
+                  onClick={() => {
+                    setMenuOpen(false);
+                    window.location.href = "/dashboard/renter/overview";
+                  }}
+                >
+                  Switch to Renter Dashboard
+                </Button>
+              )}
+
+            {/* Only show cart and wishlist for non-admin users */}
+            {!admin && (
+              <>
+                <Link
+                  to="/cart"
+                  onClick={() => setMenuOpen(false)}
+                  className="flex items-center space-x-3 text-lg font-medium text-gray-900 hover:text-cyan-600"
+                >
+                  <ShoppingCartIcon className="w-6 h-6 text-gray-600" />
+                  <span>Cart</span>
+                </Link>
+                <Link
+                  to="/wishlist"
+                  onClick={() => setMenuOpen(false)}
+                  className="flex items-center space-x-3 text-lg font-medium text-gray-900 hover:text-cyan-600"
+                >
+                  <HeartIcon className="w-6 h-6 text-gray-600" />
+                  <span>Wishlist</span>
+                </Link>
+              </>
+            )}
             <Link
               to="/notifications"
               onClick={() => setMenuOpen(false)}
@@ -442,78 +532,6 @@ export default function Navbar() {
               <BellIcon className="w-6 h-6 text-gray-600" />
               <span>Notification</span>
             </Link>
-            <Link
-              to="/cart"
-              onClick={() => setMenuOpen(false)}
-              className="flex items-center space-x-3 text-lg font-medium text-gray-900 hover:text-cyan-600"
-            >
-              <ShoppingCartIcon className="w-6 h-6 text-gray-600" />
-              <span>Cart</span>
-            </Link>
-            {isCustomer && (
-              <Link
-                to="/wishlist"
-                onClick={() => setMenuOpen(false)}
-                className="flex items-center space-x-3 text-lg font-medium text-gray-900 hover:text-cyan-600"
-              >
-                <HeartIcon className="w-6 h-6 text-gray-600" />
-                <span>Wishlist</span>
-              </Link>
-            )}
-
-            {/* Travel Buddy Switch Button - Mobile - Only for customers */}
-            {user && user.user_role === "customer" && (
-              <Link
-                to="/travel-buddy"
-                onClick={() => setMenuOpen(false)}
-                className="flex items-center justify-center w-full px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium"
-              >
-                Switch to Travel Buddy
-              </Link>
-            )}
-
-            {/* Admin Dashboard Switch Button - Mobile */}
-            {admin && (
-              <button
-                onClick={() => {
-                  setMenuOpen(false);
-                  window.location.href = "/admin";
-                }}
-                className="flex items-center justify-center w-full px-4 py-3 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors text-sm font-medium"
-              >
-                Switch to Admin Dashboard
-              </button>
-            )}
-
-            {/* Guide Dashboard Switch Button - Mobile */}
-            {user &&
-              user.user_role === "service_provider" &&
-              user.provider_type === "Local Guide" && (
-                <button
-                  onClick={() => {
-                    setMenuOpen(false);
-                    window.location.href = "/dashboard/guide/overview";
-                  }}
-                  className="flex items-center justify-center w-full px-4 py-3 bg-cyan-600 text-white rounded-lg hover:bg-cyan-700 transition-colors text-sm font-medium"
-                >
-                  Switch to Guide Dashboard
-                </button>
-              )}
-
-            {/* Renter Dashboard Switch Button - Mobile */}
-            {user &&
-              user.user_role === "service_provider" &&
-              user.provider_type === "Equipment Renter" && (
-                <button
-                  onClick={() => {
-                    setMenuOpen(false);
-                    window.location.href = "/dashboard/renter/overview";
-                  }}
-                  className="flex items-center justify-center w-full px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
-                >
-                  Switch to Renter Dashboard
-                </button>
-              )}
           </div>
 
           {/* Login/Profile Button */}
