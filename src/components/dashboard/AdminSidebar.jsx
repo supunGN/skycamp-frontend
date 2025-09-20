@@ -95,7 +95,7 @@ export default function AdminSidebar({
             localStorage.removeItem("admin");
             if (onLogout) onLogout();
             // Force a full reload to clear any in-memory app state
-            window.location.replace("/admin/login");
+            window.location.replace("/login");
           }
         }}
         title="Log out"

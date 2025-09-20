@@ -66,6 +66,26 @@ const getUser = () => {
   }
 };
 
+// Helper function to check if user is admin
+const isAdminUser = () => {
+  try {
+    const admin = localStorage.getItem("admin");
+    return admin !== null;
+  } catch {
+    return false;
+  }
+};
+
+// Helper function to check if user is regular user (not admin)
+const isRegularUser = () => {
+  try {
+    const user = localStorage.getItem("user");
+    return user !== null;
+  } catch {
+    return false;
+  }
+};
+
 // Helper function to get admin from localStorage
 const getAdmin = () => {
   try {
@@ -273,12 +293,14 @@ function App() {
           <Route path="/fullrenter" element={<FullRenter />} />
           <Route path="/guide/:id" element={<Guide />} />
 
-          {/* Admin Routes */}
+          {/* Admin Routes - Enhanced Security */}
           <Route
             path="/admin/login"
             element={
-              session.isAdmin ? (
+              isAdminUser() ? (
                 <Navigate to="/admin" replace />
+              ) : isRegularUser() ? (
+                <Navigate to="/" replace />
               ) : (
                 <AdminLogin />
               )
@@ -287,7 +309,7 @@ function App() {
           <Route
             path="/admin"
             element={
-              session.isAdmin ? (
+              isAdminUser() ? (
                 <AdminDashboard />
               ) : (
                 <Navigate to="/admin/login" replace />
@@ -299,7 +321,7 @@ function App() {
           <Route
             path="/admin/destinations/new"
             element={
-              session.isAdmin ? (
+              isAdminUser() ? (
                 <AdminAddDestination />
               ) : (
                 <Navigate to="/admin/login" replace />

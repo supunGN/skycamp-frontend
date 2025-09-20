@@ -191,7 +191,7 @@ export default function AdminDashboard() {
   const handleLogout = async () => {
     await API.admin.logout();
     localStorage.removeItem("admin");
-    window.location.replace("/admin/login");
+    window.location.replace("/login");
   };
 
   const handleVerificationAction = () => {

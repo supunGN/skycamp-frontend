@@ -178,6 +178,34 @@ export default function Navbar() {
               </button>
             )}
 
+            {/* Guide Dashboard Switch Button */}
+            {user &&
+              user.user_role === "service_provider" &&
+              user.provider_type === "Local Guide" && (
+                <button
+                  onClick={() =>
+                    (window.location.href = "/dashboard/guide/overview")
+                  }
+                  className="px-4 py-2 bg-cyan-600 text-white rounded-lg hover:bg-cyan-700 transition-colors text-sm font-medium"
+                >
+                  Switch to Guide Dashboard
+                </button>
+              )}
+
+            {/* Renter Dashboard Switch Button */}
+            {user &&
+              user.user_role === "service_provider" &&
+              user.provider_type === "Equipment Renter" && (
+                <button
+                  onClick={() =>
+                    (window.location.href = "/dashboard/renter/overview")
+                  }
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+                >
+                  Switch to Renter Dashboard
+                </button>
+              )}
+
             {/* Conditional rendering for user/profile/admin */}
             {user ? (
               <div className="flex items-center gap-4">
@@ -448,6 +476,36 @@ export default function Navbar() {
                 Switch to Admin Dashboard
               </button>
             )}
+
+            {/* Guide Dashboard Switch Button - Mobile */}
+            {user &&
+              user.user_role === "service_provider" &&
+              user.provider_type === "Local Guide" && (
+                <button
+                  onClick={() => {
+                    setMenuOpen(false);
+                    window.location.href = "/dashboard/guide/overview";
+                  }}
+                  className="flex items-center justify-center w-full px-4 py-3 bg-cyan-600 text-white rounded-lg hover:bg-cyan-700 transition-colors text-sm font-medium"
+                >
+                  Switch to Guide Dashboard
+                </button>
+              )}
+
+            {/* Renter Dashboard Switch Button - Mobile */}
+            {user &&
+              user.user_role === "service_provider" &&
+              user.provider_type === "Equipment Renter" && (
+                <button
+                  onClick={() => {
+                    setMenuOpen(false);
+                    window.location.href = "/dashboard/renter/overview";
+                  }}
+                  className="flex items-center justify-center w-full px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+                >
+                  Switch to Renter Dashboard
+                </button>
+              )}
           </div>
 
           {/* Login/Profile Button */}
