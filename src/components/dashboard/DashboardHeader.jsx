@@ -1,5 +1,5 @@
 import React from "react";
-import { BellIcon } from "@heroicons/react/24/outline";
+import { BellIcon, HomeIcon } from "@heroicons/react/24/outline";
 
 function getDashboardSubtitle(user, subtitle = "") {
   // If a subtitle is already provided, use it
@@ -52,15 +52,28 @@ export default function DashboardHeader({
           <div className="text-gray-500 text-sm">{computedSubtitle}</div>
         )}
       </div>
-      <button
-        className="relative p-2 rounded-full hover:bg-cyan-50 focus:outline-none focus:ring-2 focus:ring-cyan-500"
-        onClick={onNotificationClick}
-        aria-label="Notifications"
-      >
-        <BellIcon className="w-6 h-6 text-cyan-700" />
-        {/* Optionally add a notification dot */}
-        {/* <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span> */}
-      </button>
+      <div className="flex items-center gap-3">
+        {/* Switch to Website Button */}
+        <button
+          onClick={() => (window.location.href = "/")}
+          className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-colors duration-200"
+          title="Switch to Website"
+        >
+          <HomeIcon className="w-4 h-4" />
+          Switch to Website
+        </button>
+
+        {/* Notifications Button */}
+        <button
+          className="relative p-2 rounded-full hover:bg-cyan-50 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+          onClick={onNotificationClick}
+          aria-label="Notifications"
+        >
+          <BellIcon className="w-6 h-6 text-cyan-700" />
+          {/* Optionally add a notification dot */}
+          {/* <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span> */}
+        </button>
+      </div>
     </header>
   );
 }

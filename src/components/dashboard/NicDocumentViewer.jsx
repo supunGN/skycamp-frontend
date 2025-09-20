@@ -101,14 +101,16 @@ export default function NicDocumentViewer({
                   <div className="relative max-w-2xl w-full">
                     {imageUrl ? (
                       <img
-                        src={`${
-                          import.meta.env.VITE_API_URL
-                        }/public/storage/uploads/users/${imageUrl}`}
+                        src={imageUrl}
                         alt={`NIC ${imageLabel} - ${userName}`}
                         className="w-full h-auto rounded-lg shadow-lg border border-gray-200"
                         onError={(e) => {
+                          console.error("Image failed to load:", imageUrl);
                           e.target.src = "/placeholder-nic.jpg";
                           e.target.alt = "NIC image not available";
+                        }}
+                        onLoad={() => {
+                          console.log("Image loaded successfully:", imageUrl);
                         }}
                       />
                     ) : (

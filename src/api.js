@@ -85,6 +85,9 @@ export const API = {
     getPendingVerifications() {
       return ok(http.get("/admin/verifications/pending"));
     },
+    getPendingVerificationCount() {
+      return ok(http.get("/admin/verifications/pending-count"));
+    },
     getRejectedUsers() {
       return ok(http.get("/admin/verifications/rejected"));
     },
@@ -130,6 +133,9 @@ export const API = {
     submitVerification(formData) {
       return ok(http.post("/auth/verification/submit", formData));
     },
+    getVerificationDocs() {
+      return ok(http.get("/auth/verification/docs"));
+    },
     // Password flows (legacy PHP endpoints)
     forgotPassword(email) {
       const body = new URLSearchParams({ email });
@@ -142,6 +148,59 @@ export const API = {
     resetPassword({ token, new_password }) {
       const body = new URLSearchParams({ token, new_password });
       return ok(http.post("/auth/password/reset.php", body));
+    },
+  },
+  // ==== NOTIFICATIONS ====
+  notifications: {
+    getUserNotifications(limit = 50) {
+      return ok(http.get(`/notifications?limit=${limit}`));
+    },
+    getUnreadCount() {
+      return ok(http.get("/notifications/unread-count"));
+    },
+    markAsRead(notificationId) {
+      return ok(
+        http.post("/notifications/mark-read", {
+          notification_id: notificationId,
+        })
+      );
+    },
+    markAllAsRead() {
+      return ok(http.post("/notifications/mark-all-read"));
+    },
+  },
+  // ==== WISHLIST ====
+  wishlist: {
+    getItems() {
+      return ok(http.get("/wishlist"));
+    },
+    addItem(itemType, itemId, itemData) {
+      return ok(
+        http.post("/wishlist/add", {
+          item_type: itemType,
+          item_id: itemId,
+          item_data: itemData,
+        })
+      );
+    },
+    removeItem(itemType, itemId) {
+      return ok(
+        http.post("/wishlist/remove", {
+          item_type: itemType,
+          item_id: itemId,
+        })
+      );
+    },
+    checkItem(itemType, itemId) {
+      return ok(
+        http.get(`/wishlist/check?item_type=${itemType}&item_id=${itemId}`)
+      );
+    },
+    getItemCount() {
+      return ok(http.get("/wishlist/count"));
+    },
+    clearWishlist() {
+      return ok(http.post("/wishlist/clear"));
     },
   },
   // ==== LOCATIONS ====

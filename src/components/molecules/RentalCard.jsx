@@ -1,8 +1,16 @@
 import React from "react";
-import { Heart } from "lucide-react";
+import WishlistButton from "../atoms/WishlistButton";
 
 // RentalCard component for displaying rental package info
-const RentalCard = ({ image, location, name, phone, rating, reviewCount }) => {
+const RentalCard = ({
+  image,
+  location,
+  name,
+  phone,
+  rating,
+  reviewCount,
+  equipmentId,
+}) => {
   return (
     <div className="bg-white rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer group overflow-hidden w-full relative">
       {/* Image Container */}
@@ -12,12 +20,20 @@ const RentalCard = ({ image, location, name, phone, rating, reviewCount }) => {
           alt={name}
           className="w-full h-56 object-cover group-hover:scale-105 transition-transform duration-300"
         />
-        {/* Heart Icon Overlay */}
-        <button
-          className="absolute top-4 right-4 p-2 rounded-full bg-white/80 backdrop-blur-sm hover:bg-white transition-all duration-200 group"
-        >
-          <Heart className="w-5 h-5 text-gray-600 hover:text-red-500" />
-        </button>
+        {/* Wishlist Button Overlay */}
+        <div className="absolute top-4 right-4">
+          <WishlistButton
+            itemType="equipment"
+            itemId={equipmentId}
+            itemData={{
+              name: name,
+              description: `Equipment rental in ${location}`,
+              image_url: image,
+              price: null, // Price would come from equipment data
+            }}
+            className="p-2 rounded-full bg-white/80 backdrop-blur-sm hover:bg-white transition-all duration-200"
+          />
+        </div>
       </div>
       {/* Content Container */}
       <div className="p-4 sm:p-6">
@@ -33,13 +49,19 @@ const RentalCard = ({ image, location, name, phone, rating, reviewCount }) => {
         <div className="text-sm text-gray-700 mb-2">{phone}</div>
         {/* Rating Section */}
         <div className="flex items-center gap-2">
-          <span className="text-sm font-medium text-gray-900">{rating.toFixed(1)}</span>
+          <span className="text-sm font-medium text-gray-900">
+            {rating.toFixed(1)}
+          </span>
           <div className="flex items-center gap-1">
             {/* Render 5 stars, filled based on rating */}
             {[...Array(5)].map((_, i) => (
               <svg
                 key={i}
-                className={`w-4 h-4 ${i < Math.round(rating) ? "text-yellow-400 fill-yellow-400" : "text-gray-300"}`}
+                className={`w-4 h-4 ${
+                  i < Math.round(rating)
+                    ? "text-yellow-400 fill-yellow-400"
+                    : "text-gray-300"
+                }`}
                 fill="currentColor"
                 viewBox="0 0 20 20"
               >
@@ -54,4 +76,4 @@ const RentalCard = ({ image, location, name, phone, rating, reviewCount }) => {
   );
 };
 
-export default RentalCard; 
+export default RentalCard;

@@ -1,7 +1,7 @@
-import React, { useState } from "react";
-import { HeartIcon } from "@heroicons/react/24/solid";
+import React from "react";
 import { FiMapPin } from "react-icons/fi";
 import profilePic from "../../assets/auth/profile-pic.svg";
+import WishlistButton from "../atoms/WishlistButton";
 
 export default function GuideCard({
   location,
@@ -11,16 +11,8 @@ export default function GuideCard({
   rating,
   reviews,
   profileImage,
-  isFavorite = false,
-  onFavoriteToggle,
+  guideId, // Add guideId prop for wishlist functionality
 }) {
-  const [favorite, setFavorite] = useState(isFavorite);
-
-  const handleFavorite = () => {
-    setFavorite((prev) => !prev);
-    if (onFavoriteToggle) onFavoriteToggle(!favorite);
-  };
-
   return (
     <div className="bg-white rounded-2xl p-5 flex w-full max-w-3xl mx-auto items-center shadow-sm hover:shadow-lg transition-shadow duration-300">
       {/* Profile Image */}
@@ -38,19 +30,17 @@ export default function GuideCard({
             <FiMapPin className="w-4 h-4 text-cyan-500 mr-1" />
             <span>{location}</span>
           </div>
-          <button
-            onClick={handleFavorite}
+          <WishlistButton
+            itemType="guide"
+            itemId={guideId}
+            itemData={{
+              name: name,
+              description: `Guide in ${location}`,
+              image_url: profileImage,
+              price: parseFloat(rate),
+            }}
             className="bg-transparent rounded-full p-1 hover:bg-cyan-50 transition"
-            aria-label="Favorite"
-            type="button"
-          >
-            <HeartIcon
-              className={`w-6 h-6 ${
-                favorite ? "text-cyan-600" : "text-gray-300"
-              }`}
-              fill={favorite ? "#06b6d4" : "none"}
-            />
-          </button>
+          />
         </div>
         <div className="font-bold text-lg text-gray-900 truncate">{name}</div>
         <div className="text-gray-600 text-sm">{contact}</div>

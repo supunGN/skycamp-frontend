@@ -12,6 +12,30 @@ export default function VerificationActionModal({
 }) {
   const [reason, setReason] = useState("");
 
+  // Predefined messages for quick selection
+  const predefinedMessages = {
+    approve: [
+      "NIC documents are clear and valid. Identity verified successfully.",
+      "All required documents submitted correctly. User identity confirmed.",
+      "NIC images are legible and match the provided information.",
+      "Document verification completed. User meets verification requirements.",
+      "Identity documents are authentic and properly submitted.",
+      "NIC verification successful. User is eligible for platform services.",
+      "All verification criteria met. Documents are valid and clear.",
+      "User identity confirmed through NIC verification process.",
+    ],
+    reject: [
+      "NIC documents are unclear or illegible. Please resubmit with better quality images.",
+      "NIC images do not match the provided personal information.",
+      "Incomplete document submission. Both front and back NIC images required.",
+      "NIC documents appear to be altered or tampered with.",
+      "Document quality is insufficient for verification purposes.",
+      "NIC information does not match user profile details.",
+      "Documents submitted are not valid identification.",
+      "Verification failed due to document authenticity concerns.",
+    ],
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     onConfirm(reason);
@@ -20,6 +44,10 @@ export default function VerificationActionModal({
   const handleClose = () => {
     setReason("");
     onClose();
+  };
+
+  const handlePredefinedMessage = (message) => {
+    setReason(message);
   };
 
   const isApprove = action === "approve";
@@ -50,10 +78,14 @@ export default function VerificationActionModal({
                 <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                   <div className="sm:flex sm:items-start">
                     <div
-                      className={`mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-${actionColor}-100 sm:mx-0 sm:h-10 sm:w-10`}
+                      className={`mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full sm:mx-0 sm:h-10 sm:w-10 ${
+                        isApprove ? "bg-green-100" : "bg-red-100"
+                      }`}
                     >
                       <ActionIcon
-                        className={`h-6 w-6 text-${actionColor}-600`}
+                        className={`h-6 w-6 ${
+                          isApprove ? "text-green-600" : "text-red-600"
+                        }`}
                         aria-hidden="true"
                       />
                     </div>
@@ -104,6 +136,32 @@ export default function VerificationActionModal({
                     >
                       Reason for {actionText.toLowerCase()}ing
                     </label>
+
+                    {/* Predefined Messages */}
+                    <div className="mt-2 mb-3">
+                      <p className="text-xs text-gray-500 mb-2">
+                        Quick select a predefined message:
+                      </p>
+                      <div className="grid grid-cols-1 gap-2 max-h-32 overflow-y-auto">
+                        {predefinedMessages[action]?.map((message, index) => (
+                          <button
+                            key={index}
+                            type="button"
+                            onClick={() => handlePredefinedMessage(message)}
+                            className={`text-left p-2 text-xs rounded border transition-colors ${
+                              reason === message
+                                ? isApprove
+                                  ? "bg-green-50 border-green-300 text-green-700"
+                                  : "bg-red-50 border-red-300 text-red-700"
+                                : "bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100 hover:border-gray-300"
+                            }`}
+                          >
+                            {message}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
                     <div className="mt-1">
                       <textarea
                         id="reason"
@@ -127,7 +185,11 @@ export default function VerificationActionModal({
                   <button
                     type="submit"
                     disabled={loading}
-                    className={`w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-${actionColor}-600 text-base font-medium text-white hover:bg-${actionColor}-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-${actionColor}-500 sm:ml-3 sm:w-auto sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed`}
+                    className={`w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 text-base font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2 sm:ml-3 sm:w-auto sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed ${
+                      isApprove
+                        ? "bg-green-600 hover:bg-green-700 focus:ring-green-500"
+                        : "bg-red-600 hover:bg-red-700 focus:ring-red-500"
+                    }`}
                   >
                     {loading ? (
                       <div className="flex items-center">

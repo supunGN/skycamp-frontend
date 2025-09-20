@@ -1,5 +1,5 @@
 import React from "react";
-import DashboardStatsCard from "../../../components/dashboard/DashboardStatsCard";
+import DashboardStatsCard from "../../components/dashboard/DashboardStatsCard";
 import {
   BriefcaseIcon,
   CalendarDaysIcon,
@@ -14,16 +14,20 @@ export default function Overview() {
       </h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
         <DashboardStatsCard
-          title="Total Trips"
-          value={12}
+          title="Total Rentals"
+          value={10}
           icon={BriefcaseIcon}
         />
         <DashboardStatsCard
           title="Upcoming Bookings"
-          value={5}
+          value={7}
           icon={CalendarDaysIcon}
         />
-        <DashboardStatsCard title="Reviews" value={20} icon={StarIcon} />
+        <DashboardStatsCard
+          title="Customer Reviews"
+          value={15}
+          icon={StarIcon}
+        />
       </div>
       <div className="bg-white p-4 rounded shadow-sm">
         Recent Activity (Coming Soon)

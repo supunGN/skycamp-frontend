@@ -7,12 +7,14 @@ import {
 } from "@heroicons/react/24/outline";
 import Modal from "../molecules/Modal";
 import { API } from "../../api";
+import { usePendingVerificationCount } from "../../hooks/usePendingVerificationCount";
 
 export default function AdminSidebar({
   menuItems,
   activeMenu,
   onMenuSelect,
   onLogout,
+  refreshKey,
 }) {
   const [logoutModalOpen, setLogoutModalOpen] = useState(false);
   const [expandedSections, setExpandedSections] = useState({
@@ -20,6 +22,9 @@ export default function AdminSidebar({
     content: false,
     operations: false,
   });
+
+  // Get pending verification count
+  const { count: pendingCount } = usePendingVerificationCount(refreshKey);
 
   // Get admin info from localStorage
   let adminEmail = "admin@skycamp.com";
@@ -90,7 +95,7 @@ export default function AdminSidebar({
             localStorage.removeItem("admin");
             if (onLogout) onLogout();
             // Force a full reload to clear any in-memory app state
-            window.location.replace("/admin/login");
+            window.location.replace("/login");
           }
         }}
         title="Log out"
@@ -175,7 +180,13 @@ export default function AdminSidebar({
                               }`}
                             />
                           )}
-                          <span className="text-base">{item.name}</span>
+                          <span className="text-base flex-1">{item.name}</span>
+                          {item.name === "User Verification" &&
+                            pendingCount > 0 && (
+                              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-800 border border-red-200">
+                                {pendingCount}
+                              </span>
+                            )}
                         </button>
                       ))}
                     </nav>

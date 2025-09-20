@@ -28,7 +28,6 @@ export default function AddDestinationForm() {
   const imageUploadRef = useRef(null);
   const [imagePreview, setImagePreview] = useState(null);
 
-  // Handle text inputs
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -36,7 +35,6 @@ export default function AddDestinationForm() {
     });
   };
 
-  // File upload preview
   const handleFileUpload = (e) => {
     const file = e.target.files[0];
     if (file) setImagePreview(URL.createObjectURL(file));
@@ -47,9 +45,8 @@ export default function AddDestinationForm() {
     if (imageUploadRef.current) imageUploadRef.current.value = "";
   };
 
-  // Initialize Leaflet map
   useEffect(() => {
-    const leafletMap = L.map("destination-map").setView([7.8731, 80.7718], 7); // Center on Sri Lanka
+    const leafletMap = L.map("destination-map").setView([7.8731, 80.7718], 7);
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
       attribution:
         'Map data © <a href="https://www.openstreetmap.org/">OpenStreetMap</a>',
@@ -72,7 +69,6 @@ export default function AddDestinationForm() {
     return () => leafletMap.remove();
   }, []);
 
-  // Submit form
   const handleSubmit = async (e) => {
     e.preventDefault();
     const data = new FormData();
@@ -104,16 +100,14 @@ export default function AddDestinationForm() {
   return (
     <div className="min-h-screen bg-white">
       <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
-        {/* Back Navigation */}
         <Link
-          to="/destinations"
+          to="/admin"
           className="inline-flex items-center text-gray-600 hover:text-cyan-600 mb-6 text-sm font-semibold transition-colors"
         >
           <ArrowLeftIcon className="w-4 h-4 mr-2" />
-          Back to Destinations
+          Back to Admin
         </Link>
 
-        {/* Header */}
         <div className="space-y-1 sm:space-y-2 mb-6">
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900">
             Add New Destination
@@ -127,7 +121,6 @@ export default function AddDestinationForm() {
           onSubmit={handleSubmit}
           className="bg-gray-50 rounded-lg p-6 sm:p-8 space-y-6 shadow-sm"
         >
-          {/* Destination Name */}
           <div className="space-y-2">
             <label className="block text-sm font-medium text-gray-700">
               Destination Name
@@ -141,7 +134,6 @@ export default function AddDestinationForm() {
             />
           </div>
 
-          {/* Type and District */}
           <div className="grid sm:grid-cols-2 gap-4">
             <div className="space-y-2">
               <label className="block text-sm font-medium text-gray-700">
@@ -171,7 +163,6 @@ export default function AddDestinationForm() {
             </div>
           </div>
 
-          {/* Location */}
           <div className="space-y-2">
             <label className="block text-sm font-medium text-gray-700">
               Location
@@ -185,7 +176,6 @@ export default function AddDestinationForm() {
             />
           </div>
 
-          {/* Short Description */}
           <div className="space-y-2">
             <label className="block text-sm font-medium text-gray-700">
               Short Description
@@ -200,7 +190,6 @@ export default function AddDestinationForm() {
             />
           </div>
 
-          {/* Full Description */}
           <div className="space-y-2">
             <label className="block text-sm font-medium text-gray-700">
               Full Description
@@ -215,7 +204,6 @@ export default function AddDestinationForm() {
             />
           </div>
 
-          {/* Map Picker */}
           <div className="space-y-2">
             <label className="block text-sm font-medium text-gray-700">
               Pick Location on Map
@@ -240,7 +228,6 @@ export default function AddDestinationForm() {
             </div>
           </div>
 
-          {/* Image Upload */}
           <div className="space-y-2">
             <label className="block text-sm font-medium text-gray-700">
               Destination Image
@@ -286,7 +273,6 @@ export default function AddDestinationForm() {
             </div>
           </div>
 
-          {/* Submit */}
           <Button type="submit" className="w-full mt-6" size="lg">
             Add Destination
           </Button>

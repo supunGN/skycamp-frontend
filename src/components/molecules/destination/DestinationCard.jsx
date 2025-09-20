@@ -1,34 +1,34 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Heart, Star } from "lucide-react"
+import { Star } from "lucide-react";
+import WishlistButton from "../../atoms/WishlistButton";
 
-const DestinationCard = ({ image, name, description, rating, reviewCount, onCardClick, onHeartClick }) => {
-  const [isLiked, setIsLiked] = useState(false)
-
-  const handleHeartClick = (e) => {
-    e.stopPropagation() // Prevent card click when heart is clicked
-    setIsLiked(!isLiked)
-    if (onHeartClick) {
-      onHeartClick(name, !isLiked)
-    }
-  }
-
+const DestinationCard = ({
+  image,
+  name,
+  description,
+  rating,
+  reviewCount,
+  onCardClick,
+  locationId,
+}) => {
   const handleCardClick = () => {
     if (onCardClick) {
-      onCardClick(name)
+      onCardClick(name);
     }
-  }
+  };
 
   // Generate star rating display
   const renderStars = () => {
-    const stars = []
-    const fullStars = Math.floor(rating)
-    const hasHalfStar = rating % 1 !== 0
+    const stars = [];
+    const fullStars = Math.floor(rating);
+    const hasHalfStar = rating % 1 !== 0;
 
     // Full stars
     for (let i = 0; i < fullStars; i++) {
-      stars.push(<Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />)
+      stars.push(
+        <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+      );
     }
 
     // Half star
@@ -39,18 +39,18 @@ const DestinationCard = ({ image, name, description, rating, reviewCount, onCard
           <div className="absolute inset-0 overflow-hidden w-1/2">
             <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
           </div>
-        </div>,
-      )
+        </div>
+      );
     }
 
     // Empty stars
-    const emptyStars = 5 - Math.ceil(rating)
+    const emptyStars = 5 - Math.ceil(rating);
     for (let i = 0; i < emptyStars; i++) {
-      stars.push(<Star key={`empty-${i}`} className="w-4 h-4 text-gray-300" />)
+      stars.push(<Star key={`empty-${i}`} className="w-4 h-4 text-gray-300" />);
     }
 
-    return stars
-  }
+    return stars;
+  };
 
   return (
     <div
@@ -65,17 +65,20 @@ const DestinationCard = ({ image, name, description, rating, reviewCount, onCard
           className="w-full h-48 sm:h-56 md:h-64 object-cover group-hover:scale-105 transition-transform duration-300"
         />
 
-        {/* Heart Icon Overlay */}
-        <button
-          onClick={handleHeartClick}
-          className="absolute top-4 right-4 p-2 rounded-full bg-white/80 backdrop-blur-sm hover:bg-white transition-all duration-200 group"
-        >
-          <Heart
-            className={`w-5 h-5 transition-colors duration-200 ${
-              isLiked ? "fill-red-500 text-red-500" : "text-gray-600 hover:text-red-500"
-            }`}
+        {/* Wishlist Button Overlay */}
+        <div className="absolute top-4 right-4">
+          <WishlistButton
+            itemType="location"
+            itemId={locationId}
+            itemData={{
+              name: name,
+              description: description,
+              image_url: image,
+              price: null, // Locations don't have prices
+            }}
+            className="p-2 rounded-full bg-white/80 backdrop-blur-sm hover:bg-white transition-all duration-200"
           />
-        </button>
+        </div>
       </div>
 
       {/* Content Container */}
@@ -86,11 +89,15 @@ const DestinationCard = ({ image, name, description, rating, reviewCount, onCard
         </h3>
 
         {/* Description */}
-        <p className="text-sm leading-relaxed mb-4 line-clamp-2 text-gray-600">{description}</p>
+        <p className="text-sm leading-relaxed mb-4 line-clamp-2 text-gray-600">
+          {description}
+        </p>
 
         {/* Rating Section */}
         <div className="flex items-center gap-2">
-          <span className="text-sm font-medium text-gray-900">{rating.toFixed(1)}</span>
+          <span className="text-sm font-medium text-gray-900">
+            {rating.toFixed(1)}
+          </span>
 
           <div className="flex items-center gap-1">{renderStars()}</div>
 
@@ -98,7 +105,7 @@ const DestinationCard = ({ image, name, description, rating, reviewCount, onCard
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default DestinationCard
+export default DestinationCard;

@@ -1,11 +1,11 @@
 import React from "react";
-import DashboardNotificationPanel from "../../../components/dashboard/DashboardNotificationPanel";
+import DashboardNotificationPanel from "../../components/dashboard/DashboardNotificationPanel";
 
 const mockNotifications = [
   {
     id: 1,
     title: "New Booking",
-    description: "John Doe booked your tent rental.",
+    description: "John Doe booked a trip for July 20.",
     timestamp: "2 hours ago",
   },
   {
@@ -16,9 +16,15 @@ const mockNotifications = [
   },
   {
     id: 3,
-    title: "Booking Cancelled",
-    description: "Mark cancelled his stove rental.",
-    timestamp: "2 days ago",
+    title: "System Update",
+    description: "New policy for guide cancellations.",
+    timestamp: "3 days ago",
+  },
+  {
+    id: 4,
+    title: "Reminder",
+    description: "Upcoming trip with Alex Lee.",
+    timestamp: "1 hour ago",
   },
 ];
 

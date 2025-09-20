@@ -51,7 +51,7 @@ const MyBookings = () => {
     switch (status) {
       case "confirmed":
         return {
-          color: "blue",
+          color: "cyan",
           icon: CalendarDaysIcon,
           label: "Confirmed",
         };
@@ -91,10 +91,10 @@ const MyBookings = () => {
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-100 p-6">
+      <div className="bg-gradient-to-r from-cyan-50 to-indigo-50 rounded-xl border border-cyan-100 p-6">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-blue-100 rounded-lg">
-            <CalendarDaysIcon className="w-6 h-6 text-blue-600" />
+          <div className="p-2 bg-cyan-100 rounded-lg">
+            <CalendarDaysIcon className="w-6 h-6 text-cyan-600" />
           </div>
           <div>
             <h2 className="text-lg font-semibold text-gray-900">My Bookings</h2>
@@ -265,7 +265,7 @@ const MyBookings = () => {
       {bookings.length > 0 && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 text-center">
-            <div className="text-2xl font-bold text-blue-600">
+            <div className="text-2xl font-bold text-cyan-600">
               {bookings.filter((b) => b.status === "confirmed").length}
             </div>
             <div className="text-sm text-gray-600">Active Bookings</div>
