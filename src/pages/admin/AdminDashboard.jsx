@@ -23,6 +23,7 @@ export default function AdminDashboard() {
   const [activeMenu, setActiveMenu] = useState("Home");
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   // Check admin authentication on component mount
   useEffect(() => {
@@ -33,10 +34,17 @@ export default function AdminDashboard() {
           setIsAuthenticated(true);
         } else {
           // Redirect to login if not authenticated
+          try {
+            // Clear any stale admin state to avoid redirect loops
+            localStorage.removeItem("admin");
+          } catch {}
           window.location.replace("/admin/login");
         }
       } catch (error) {
         console.error("Auth check failed:", error);
+        try {
+          localStorage.removeItem("admin");
+        } catch {}
         window.location.replace("/admin/login");
       } finally {
         setLoading(false);
@@ -186,6 +194,11 @@ export default function AdminDashboard() {
     window.location.replace("/admin/login");
   };
 
+  const handleVerificationAction = () => {
+    // Trigger refresh of pending verification count
+    setRefreshKey((prev) => prev + 1);
+  };
+
   // Show loading spinner while checking authentication
   if (loading) {
     return (
@@ -206,32 +219,33 @@ export default function AdminDashboard() {
   return (
     <div className="min-h-screen bg-gray-50 flex">
       {/* Admin Sidebar - Fixed */}
-      <div className="fixed top-0 left-0 h-screen w-72 bg-gray-50 border-r border-gray-200 z-40">
+      <div className="fixed top-0 left-0 h-screen w-72 bg-white border-r border-gray-200 z-40 shadow-sm">
         <AdminSidebar
           menuItems={adminMenuItems}
           activeMenu={activeMenu}
           onMenuSelect={setActiveMenu}
           onLogout={handleLogout}
+          refreshKey={refreshKey}
         />
       </div>
 
       {/* Main Content - Scrollable */}
-      <div className="flex-1 ml-72 min-h-screen">
-        <div className="p-6">
+      <div className="flex-1 ml-72 min-h-screen bg-gray-50">
+        <div className="p-8">
           {/* Header - Only show on Home page */}
           {activeMenu === "Home" && (
-            <div className="mb-8 flex justify-between items-start">
+            <div className="mb-10 flex justify-between items-start">
               <div>
-                <h1 className="text-3xl font-bold text-gray-900">
+                <h1 className="text-3xl font-bold text-gray-900 tracking-tight">
                   Admin Dashboard
                 </h1>
-                <p className="text-gray-600 mt-2">
+                <p className="text-lg text-gray-600 mt-3 leading-relaxed">
                   Welcome back! Here's what's happening with SkyCamp.
                 </p>
               </div>
               <button
                 onClick={() => (window.location.href = "/")}
-                className="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors"
+                className="px-6 py-3 bg-cyan-600 text-white rounded-lg hover:bg-cyan-700 transition-all duration-200 font-semibold shadow-sm"
               >
                 Switch to Website
               </button>
@@ -241,7 +255,7 @@ export default function AdminDashboard() {
           {/* Content based on active menu */}
           {activeMenu === "Home" ? (
             /* Stats Grid */
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {adminStats.map((stat, index) => (
                 <DashboardStatsCard
                   key={index}
@@ -258,14 +272,14 @@ export default function AdminDashboard() {
             <UserManagement />
           ) : activeMenu === "User Verification" ? (
             /* User Verification Component */
-            <UserVerification />
+            <UserVerification onVerificationAction={handleVerificationAction} />
           ) : (
             /* Placeholder for other menu items */
-            <div className="bg-white rounded-lg shadow-sm p-8 text-center">
-              <h2 className="text-xl font-semibold text-gray-900 mb-2">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-12 text-center">
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">
                 {activeMenu}
               </h2>
-              <p className="text-gray-600">
+              <p className="text-lg text-gray-600 leading-relaxed">
                 This section is under development. Coming soon!
               </p>
             </div>

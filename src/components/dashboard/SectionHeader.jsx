@@ -11,14 +11,18 @@ export default function SectionHeader({
       <div className="py-4">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-lg font-semibold text-gray-900">{title}</h2>
+            <h1 className="text-2xl font-bold text-gray-900 tracking-tight mb-2">
+              {title}
+            </h1>
             {subtitle && (
-              <p className="text-sm text-gray-600 mt-1">{subtitle}</p>
+              <p className="text-base text-gray-600 leading-relaxed">
+                {subtitle}
+              </p>
             )}
           </div>
 
           {actions && (
-            <div className="flex items-center space-x-3">{actions}</div>
+            <div className="flex items-center space-x-4">{actions}</div>
           )}
         </div>
       </div>

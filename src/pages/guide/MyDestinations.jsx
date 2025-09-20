@@ -1,6 +1,6 @@
 import React from "react";
-import DestinationCard from "../../../components/molecules/destination/DestinationCard";
-import Button from "../../../components/atoms/Button";
+import DestinationCard from "../../components/molecules/destination/DestinationCard";
+import Button from "../../components/atoms/Button";
 
 const mockDestinations = [
   {
@@ -38,7 +38,7 @@ export default function MyDestinations() {
       <Button className="mb-6">Add New Destination</Button>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {mockDestinations.map((dest) => (
-          <DestinationCard key={dest.id} {...dest} />
+          <DestinationCard key={dest.id} {...dest} locationId={dest.id} />
         ))}
       </div>
     </div>

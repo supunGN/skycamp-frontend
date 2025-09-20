@@ -40,15 +40,20 @@ export default function Destinations() {
 
       if (response.success) {
         // Transform API data to match DestinationCard component expectations
-        const transformedDestinations = response.data.map((destination) => ({
-          name: destination.name,
-          description: destination.description,
-          image: destination.image_url || "/placeholder-image.jpg", // Fallback image
-          rating: 4.5, // Default rating since not in database
-          reviewCount: Math.floor(Math.random() * 100) + 10, // Random review count
-          locationId: destination.location_id,
-          district: destination.district,
-        }));
+        const transformedDestinations = response.data
+          .filter((destination) => destination.location_id) // Only include destinations with valid IDs
+          .map((destination) => {
+            return {
+              name: destination.name,
+              description: destination.description,
+              image: destination.image_url || "/placeholder-image.jpg", // Fallback image
+              rating: 4.5, // Default rating since not in database
+              reviewCount: Math.floor(Math.random() * 100) + 10, // Random review count
+              locationId: destination.location_id,
+              district: destination.district,
+            };
+          });
+
         setDestinations(transformedDestinations);
       } else {
         setError("Failed to load destinations");
@@ -70,15 +75,18 @@ export default function Destinations() {
       );
 
       if (response.success) {
-        const transformedDestinations = response.data.map((destination) => ({
-          name: destination.name,
-          description: destination.description,
-          image: destination.image_url || "/placeholder-image.jpg",
-          rating: 4.5,
-          reviewCount: Math.floor(Math.random() * 100) + 10,
-          locationId: destination.location_id,
-          district: destination.district,
-        }));
+        const transformedDestinations = response.data
+          .filter((destination) => destination.location_id)
+          .map((destination) => ({
+            name: destination.name,
+            description: destination.description,
+            image: destination.image_url || "/placeholder-image.jpg",
+            rating: 4.5,
+            reviewCount: Math.floor(Math.random() * 100) + 10,
+            locationId: destination.location_id,
+            district: destination.district,
+          }));
+
         setDestinations(transformedDestinations);
         setShowAll(false);
       } else {
@@ -238,6 +246,7 @@ export default function Destinations() {
               description={dest.description}
               rating={dest.rating}
               reviewCount={dest.reviewCount}
+              locationId={dest.locationId}
               onCardClick={() => {
                 const urlFriendlyName = dest.name
                   .toLowerCase()

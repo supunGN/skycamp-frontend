@@ -17,7 +17,7 @@ import {
   DocumentTextIcon,
 } from "@heroicons/react/24/outline";
 
-export default function UserVerification() {
+export default function UserVerification({ onVerificationAction }) {
   const [activeTab, setActiveTab] = useState("pending");
   const [searchTerm, setSearchTerm] = useState("");
   const [pendingVerifications, setPendingVerifications] = useState([]);
@@ -126,14 +126,41 @@ export default function UserVerification() {
         key: "nic_documents",
         label: "NIC Documents",
         sortable: false,
-        render: (value, row) => (
-          <NicDocumentViewer
-            frontImage={row.nic_front_image}
-            backImage={row.nic_back_image}
-            userName={`${row.first_name} ${row.last_name}`}
-            nicNumber={row.nic_number}
-          />
-        ),
+        render: (value, row) => {
+          // Build public URLs from relative paths
+          const buildImageUrl = (imagePath) => {
+            if (!imagePath) return null;
+
+            // Handle different path formats
+            let relativePath = imagePath;
+
+            // If it's already a full path, extract the relative part
+            if (imagePath.includes("storage/uploads/")) {
+              const idx = imagePath.indexOf("storage/uploads/");
+              relativePath = imagePath.substring(
+                idx + "storage/uploads/".length
+              );
+            } else if (imagePath.includes("\\")) {
+              // Handle Windows paths
+              relativePath = imagePath.replace(/\\/g, "/");
+            }
+
+            // Clean up the path
+            relativePath = relativePath.replace(/^\/+/, ""); // Remove leading slashes
+
+            // Build the full URL (pointing to public directory)
+            return `http://localhost/skycamp/skycamp-backend/public/storage/uploads/${relativePath}`;
+          };
+
+          return (
+            <NicDocumentViewer
+              frontImage={buildImageUrl(row.nic_front_image)}
+              backImage={buildImageUrl(row.nic_back_image)}
+              userName={`${row.first_name} ${row.last_name}`}
+              nicNumber={row.nic_number}
+            />
+          );
+        },
       });
     }
 
@@ -151,7 +178,7 @@ export default function UserVerification() {
     // Add date columns
     if (activeTab === "pending") {
       baseColumns.push({
-        key: "created_at",
+        key: "verification_requested_at",
         label: "Submitted At",
         sortable: true,
         render: (value) => (
@@ -163,6 +190,18 @@ export default function UserVerification() {
     }
 
     if (activeTab === "rejected") {
+      baseColumns.push({
+        key: "reason",
+        label: "Rejection Reason",
+        sortable: true,
+        render: (value) => (
+          <div className="flex items-center text-sm text-gray-900">
+            <span className="max-w-xs truncate" title={value}>
+              {value || "No reason provided"}
+            </span>
+          </div>
+        ),
+      });
       baseColumns.push({
         key: "rejected_at",
         label: "Rejected At",
@@ -233,7 +272,7 @@ export default function UserVerification() {
 
   // Handle verification actions
   const handleVerificationAction = (action, user) => {
-    // Determine userType based on user role
+    // Determine userType based on user role from database
     const userType = user.role ? user.role.toLowerCase() : "customer";
 
     setActionModal({
@@ -277,6 +316,11 @@ export default function UserVerification() {
         // Close modal and refresh data
         setActionModal({ isOpen: false, action: "", user: null, userType: "" });
         await fetchVerificationData();
+
+        // Trigger refresh of pending verification count in sidebar
+        if (onVerificationAction) {
+          onVerificationAction();
+        }
       } else {
         setError(
           `Failed to ${action.toLowerCase()} verification: ${result.message}`

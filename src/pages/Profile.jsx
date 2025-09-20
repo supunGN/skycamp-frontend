@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from "react";
 import Navbar from "../components/organisms/Navbar";
 import Footer from "../components/organisms/Footer";
-import ProfileHorizontalNav from "../components/molecules/ProfileHorizontalNav";
-import PersonalDetails from "./profile/PersonalDetails";
-import Security from "./profile/Security";
-import Verification from "./profile/Verification";
-import MyBookings from "./profile/MyBookings";
-import TravelBuddy from "./profile/TravelBuddy";
-import Settings from "./profile/Settings";
+import HorizontalTabs from "../components/molecules/HorizontalTabs";
+import PersonalDetails from "./customer/PersonalDetails";
+import Security from "./customer/Security";
+import Verification from "./customer/Verification";
+import MyBookings from "./customer/MyBookings";
+import TravelBuddy from "./customer/TravelBuddy";
+import Settings from "./customer/Settings";
 import { ArrowLeftIcon } from "@heroicons/react/24/outline";
 import { API } from "../api";
 
@@ -161,10 +161,60 @@ export default function Profile() {
 
         {/* Main Content */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          {/* Horizontal Navigation */}
-          <ProfileHorizontalNav
+          {/* Horizontal Navigation - Customer Tabs */}
+          <HorizontalTabs
             activeTab={activeTab}
             onTabChange={setActiveTab}
+            tabs={[
+              {
+                key: "details",
+                label: "Personal Details",
+                color: "text-cyan-700",
+                activeBg: "bg-cyan-100",
+                activeText: "text-cyan-800",
+                bgColor: "bg-cyan-600",
+              },
+              {
+                key: "password",
+                label: "Security",
+                color: "text-cyan-700",
+                activeBg: "bg-cyan-100",
+                activeText: "text-cyan-800",
+                bgColor: "bg-cyan-600",
+              },
+              {
+                key: "verification",
+                label: "Verification",
+                color: "text-cyan-700",
+                activeBg: "bg-cyan-100",
+                activeText: "text-cyan-800",
+                bgColor: "bg-cyan-600",
+              },
+              {
+                key: "bookings",
+                label: "My Bookings",
+                color: "text-cyan-700",
+                activeBg: "bg-cyan-100",
+                activeText: "text-cyan-800",
+                bgColor: "bg-cyan-600",
+              },
+              {
+                key: "travel-buddy",
+                label: "Travel Buddy",
+                color: "text-cyan-700",
+                activeBg: "bg-cyan-100",
+                activeText: "text-cyan-800",
+                bgColor: "bg-cyan-600",
+              },
+              {
+                key: "settings",
+                label: "Settings",
+                color: "text-cyan-700",
+                activeBg: "bg-cyan-100",
+                activeText: "text-cyan-800",
+                bgColor: "bg-cyan-600",
+              },
+            ]}
           />
 
           {/* Page Content - Centered */}

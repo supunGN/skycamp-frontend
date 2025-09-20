@@ -39,15 +39,17 @@ export default function StargazingSpots() {
 
       if (response.success) {
         // Transform API data to match DestinationCard component expectations
-        const transformedSpots = response.data.map((spot) => ({
-          name: spot.name,
-          description: spot.description,
-          image: spot.image_url || "/placeholder-image.jpg", // Fallback image
-          rating: 4.5, // Default rating since not in database
-          reviewCount: Math.floor(Math.random() * 100) + 10, // Random review count
-          locationId: spot.location_id,
-          district: spot.district,
-        }));
+        const transformedSpots = response.data
+          .filter((spot) => spot.location_id) // Only include spots with valid IDs
+          .map((spot) => ({
+            name: spot.name,
+            description: spot.description,
+            image: spot.image_url || "/placeholder-image.jpg", // Fallback image
+            rating: 4.5, // Default rating since not in database
+            reviewCount: Math.floor(Math.random() * 100) + 10, // Random review count
+            locationId: spot.location_id,
+            district: spot.district,
+          }));
         setStargazingSpots(transformedSpots);
       } else {
         setError("Failed to load stargazing spots");
@@ -239,6 +241,7 @@ export default function StargazingSpots() {
               description={spot.description}
               rating={spot.rating}
               reviewCount={spot.reviewCount}
+              locationId={spot.locationId}
               onCardClick={() => {
                 const urlFriendlyName = spot.name
                   .toLowerCase()

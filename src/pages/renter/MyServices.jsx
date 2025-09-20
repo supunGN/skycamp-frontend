@@ -1,6 +1,6 @@
 import React from "react";
-import Button from "../../../components/atoms/Button";
-import DestinationCard from "../../../components/molecules/destination/DestinationCard";
+import Button from "../../components/atoms/Button";
+import DestinationCard from "../../components/molecules/destination/DestinationCard";
 
 const mockServices = [
   {
@@ -44,7 +44,11 @@ export default function MyServices() {
       <Button className="mb-6">Add New Service</Button>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {mockServices.map((service) => (
-          <DestinationCard key={service.id} {...service} />
+          <DestinationCard
+            key={service.id}
+            {...service}
+            locationId={service.id}
+          />
         ))}
       </div>
     </div>

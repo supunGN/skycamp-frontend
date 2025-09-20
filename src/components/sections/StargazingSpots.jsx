@@ -21,16 +21,21 @@ const StargazingSpots = () => {
 
         if (response.success) {
           // Transform API data to match DestinationCard component expectations
-          const transformedSpots = response.data.map((spot) => ({
-            id: spot.location_id,
-            name: spot.name,
-            description: spot.description,
-            image: spot.image_url || "/placeholder-image.jpg", // Fallback image
-            rating: 4.5, // Default rating since not in database yet
-            reviewCount: Math.floor(Math.random() * 100) + 10, // Random review count
-            locationId: spot.location_id,
-            district: spot.district,
-          }));
+          const transformedSpots = response.data
+            .filter((spot) => spot.location_id) // Only include spots with valid IDs
+            .map((spot) => {
+              return {
+                id: spot.location_id,
+                name: spot.name,
+                description: spot.description,
+                image: spot.image_url || "/placeholder-image.jpg", // Fallback image
+                rating: 4.5, // Default rating since not in database yet
+                reviewCount: Math.floor(Math.random() * 100) + 10, // Random review count
+                locationId: spot.location_id,
+                district: spot.district,
+              };
+            });
+
           setStargazingSpots(transformedSpots);
         } else {
           setError("Failed to load stargazing spots");
@@ -56,14 +61,11 @@ const StargazingSpots = () => {
         .trim();
       navigate(`/destination/${spot.locationId}/${urlFriendlyName}`);
     } else {
-      console.log(`Clicked on ${spotName}`);
+      // Handle click without spot found
     }
   };
 
   const handleHeartClick = (spotName, isLiked) => {
-    console.log(
-      `${isLiked ? "Added to" : "Removed from"} wishlist: ${spotName}`
-    );
     // Add wishlist logic here
   };
 
@@ -123,7 +125,7 @@ const StargazingSpots = () => {
               rating={spot.rating}
               reviewCount={spot.reviewCount}
               onCardClick={handleCardClick}
-              onHeartClick={handleHeartClick}
+              locationId={spot.id}
             />
           ))}
         </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import {
   Bars3Icon,
@@ -13,8 +13,10 @@ import {
   UserCircleIcon,
 } from "@heroicons/react/24/outline";
 import Button from "../atoms/Button";
-import React from "react";
 import { API } from "../../api";
+import { useNotifications } from "../../hooks/useNotifications";
+import { useWishlistContext } from "../../contexts/WishlistContext";
+import NotificationDropdown from "../molecules/NotificationDropdown";
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -22,6 +24,16 @@ export default function Navbar() {
   const [user, setUser] = useState(null);
   const [admin, setAdmin] = useState(null);
   const [profileDropdown, setProfileDropdown] = useState(false);
+  const [notificationDropdownOpen, setNotificationDropdownOpen] =
+    useState(false);
+
+  // Get notifications for logged-in users only
+  const { notifications, unreadCount, markAsRead, markAllAsRead } =
+    useNotifications(user ? 1 : 0);
+
+  // Get wishlist count from context (only for customers)
+  const { itemCount: wishlistCount, isAuthenticated: isCustomer } =
+    useWishlistContext();
 
   // Read user and admin from localStorage on mount
   React.useEffect(() => {
@@ -142,13 +154,19 @@ export default function Navbar() {
 
           {/* Right Side Icons and Login/Profile */}
           <div className="flex items-center space-x-4">
-            <BellIcon className="w-6 h-6 text-gray-600 hover:text-cyan-600 cursor-pointer" />
             <Link to="/cart">
               <ShoppingCartIcon className="w-6 h-6 text-gray-600 hover:text-cyan-600 cursor-pointer" />
             </Link>
-            <Link to="/wishlist">
-              <HeartIcon className="w-6 h-6 text-gray-600 hover:text-cyan-600 cursor-pointer" />
-            </Link>
+            {isCustomer && (
+              <Link to="/wishlist" className="relative">
+                <HeartIcon className="w-6 h-6 text-gray-600 hover:text-cyan-600 cursor-pointer" />
+                {wishlistCount > 0 && (
+                  <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-semibold">
+                    {wishlistCount > 99 ? "99+" : wishlistCount}
+                  </span>
+                )}
+              </Link>
+            )}
 
             {/* Admin Dashboard Switch Button */}
             {admin && (
@@ -162,38 +180,57 @@ export default function Navbar() {
 
             {/* Conditional rendering for user/profile/admin */}
             {user ? (
-              <div className="relative">
-                <button
-                  className="flex items-center focus:outline-none"
-                  onClick={() => setProfileDropdown((v) => !v)}
-                >
-                  {user.profile_picture ? (
-                    <img
-                      src={`http://localhost/skycamp/skycamp-backend/storage/uploads/${user.profile_picture}`}
-                      alt="Profile"
-                      className="w-8 h-8 rounded-full object-cover border border-gray-300"
-                    />
-                  ) : (
-                    <UserCircleIcon className="w-8 h-8 text-gray-400" />
+              <div className="flex items-center gap-4">
+                {/* Notification Bell */}
+                <div className="relative">
+                  <button
+                    onClick={() =>
+                      setNotificationDropdownOpen(!notificationDropdownOpen)
+                    }
+                    className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors relative"
+                  >
+                    <BellIcon className="w-6 h-6" />
+                    {unreadCount > 0 && (
+                      <span className="absolute -top-1 -right-1 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-red-500 rounded-full">
+                        {unreadCount > 99 ? "99+" : unreadCount}
+                      </span>
+                    )}
+                  </button>
+                </div>
+                {/* User Profile */}
+                <div className="relative">
+                  <button
+                    className="flex items-center focus:outline-none"
+                    onClick={() => setProfileDropdown((v) => !v)}
+                  >
+                    {user?.profile_picture ? (
+                      <img
+                        src={`http://localhost/skycamp/skycamp-backend/storage/uploads/${user.profile_picture}`}
+                        alt="Profile"
+                        className="w-8 h-8 rounded-full object-cover border border-gray-300"
+                      />
+                    ) : (
+                      <UserCircleIcon className="w-8 h-8 text-gray-400" />
+                    )}
+                  </button>
+                  {profileDropdown && (
+                    <div className="absolute right-0 mt-2 w-40 bg-white border rounded shadow-lg z-50">
+                      <Link
+                        to={getProfileLink()}
+                        className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                        onClick={() => setProfileDropdown(false)}
+                      >
+                        Profile
+                      </Link>
+                      <button
+                        className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
+                        onClick={handleLogout}
+                      >
+                        Log out
+                      </button>
+                    </div>
                   )}
-                </button>
-                {profileDropdown && (
-                  <div className="absolute right-0 mt-2 w-40 bg-white border rounded shadow-lg z-50">
-                    <Link
-                      to={getProfileLink()}
-                      className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
-                      onClick={() => setProfileDropdown(false)}
-                    >
-                      Profile
-                    </Link>
-                    <button
-                      className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
-                      onClick={handleLogout}
-                    >
-                      Log out
-                    </button>
-                  </div>
-                )}
+                </div>
               </div>
             ) : admin ? (
               <div className="relative">
@@ -388,14 +425,16 @@ export default function Navbar() {
               <ShoppingCartIcon className="w-6 h-6 text-gray-600" />
               <span>Cart</span>
             </Link>
-            <Link
-              to="/wishlist"
-              onClick={() => setMenuOpen(false)}
-              className="flex items-center space-x-3 text-lg font-medium text-gray-900 hover:text-cyan-600"
-            >
-              <HeartIcon className="w-6 h-6 text-gray-600" />
-              <span>Wishlist</span>
-            </Link>
+            {isCustomer && (
+              <Link
+                to="/wishlist"
+                onClick={() => setMenuOpen(false)}
+                className="flex items-center space-x-3 text-lg font-medium text-gray-900 hover:text-cyan-600"
+              >
+                <HeartIcon className="w-6 h-6 text-gray-600" />
+                <span>Wishlist</span>
+              </Link>
+            )}
 
             {/* Admin Dashboard Switch Button - Mobile */}
             {admin && (
@@ -419,7 +458,7 @@ export default function Navbar() {
                   className="flex items-center w-full justify-start gap-2 px-4 py-2 bg-gray-100 rounded-lg focus:outline-none"
                   onClick={() => setProfileDropdown((v) => !v)}
                 >
-                  {user.profile_picture ? (
+                  {user?.profile_picture ? (
                     <img
                       src={`http://localhost/skycamp/skycamp-backend/storage/uploads/${user.profile_picture}`}
                       alt="Profile"
@@ -429,7 +468,7 @@ export default function Navbar() {
                     <UserCircleIcon className="w-8 h-8 text-gray-400" />
                   )}
                   <span className="text-gray-900 font-medium">
-                    {user.first_name || "Profile"}
+                    {user?.first_name || "Profile"}
                   </span>
                 </button>
                 {profileDropdown && (
@@ -483,7 +522,6 @@ export default function Navbar() {
                           console.error("Admin logout error:", error);
                         } finally {
                           localStorage.removeItem("admin");
-                          setMenuOpen(false);
                           window.location.replace("/");
                         }
                       }}
@@ -503,6 +541,18 @@ export default function Navbar() {
           </div>
         </div>
       </div>
+
+      {/* Notification Dropdown */}
+      {user && (
+        <NotificationDropdown
+          notifications={notifications}
+          unreadCount={unreadCount}
+          onMarkAsRead={markAsRead}
+          onMarkAllAsRead={markAllAsRead}
+          isOpen={notificationDropdownOpen}
+          onClose={() => setNotificationDropdownOpen(false)}
+        />
+      )}
     </>
   );
 }

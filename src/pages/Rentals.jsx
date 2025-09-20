@@ -370,6 +370,7 @@ const Rentals = () => {
                         phone={renter.phone}
                         rating={renter.rating}
                         reviewCount={renter.reviewCount}
+                        equipmentId={renter.renter_id || renter.id}
                       />
                     </div>
                   ))}

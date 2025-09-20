@@ -1,46 +1,57 @@
 import React from "react";
 
-// Tab data can be passed as props in the future for reusability
-const TABS = [
-  { label: "Camping Destinations", count: 5 },
-  { label: "Stargazing Spots", count: 5 },
-  { label: "Guides", count: 6 },
-  { label: "Renters", count: 7 },
-];
-
-const HorizontalTabs = ({ activeTab, setActiveTab }) => {
-  // If not controlled, fallback to internal state (for backward compatibility)
-  const [internalTab, setInternalTab] = React.useState(0);
-  const isControlled = typeof activeTab === "number" && typeof setActiveTab === "function";
-  const currentTab = isControlled ? activeTab : internalTab;
-  const handleTabClick = (idx) => {
-    if (isControlled) {
-      setActiveTab(idx);
-    } else {
-      setInternalTab(idx);
-    }
-  };
-
+export default function HorizontalTabs({
+  tabs = [],
+  activeTab,
+  onTabChange,
+  className = "",
+}) {
   return (
-    <div className="flex flex-wrap gap-2 bg-white p-2 rounded-2xl shadow-sm w-full">
-      {TABS.map((tab, idx) => (
-        <button
-          key={tab.label}
-          onClick={() => handleTabClick(idx)}
-          className={`flex items-center px-4 py-2 rounded-xl border transition-colors font-medium text-base
-            ${
-              currentTab === idx
-                ? "bg-cyan-50 text-cyan-700 border-cyan-500 shadow"
-                : "bg-white text-gray-500 border-transparent hover:bg-gray-100"
-            }
-          `}
-        >
-          <span>{tab.label}</span>
-          <span className={`ml-2 text-xs font-semibold px-2 py-0.5 rounded-full border ${currentTab === idx ? "bg-white text-cyan-700 border-cyan-300" : "bg-gray-100 text-gray-500 border-gray-200"}`}>{tab.count}</span>
-        </button>
-      ))}
+    <div className={`mb-6 ${className}`}>
+      {/* Professional Horizontal Tabs */}
+      <div className="border-b border-gray-200">
+        <nav className="flex space-x-8" aria-label="Tabs">
+          {tabs.map((tab) => {
+            const isActive = activeTab === tab.key;
+
+            return (
+              <button
+                key={tab.key}
+                onClick={() => onTabChange(tab.key)}
+                className={`group relative flex items-center py-4 px-1 border-b-2 font-semibold text-sm transition-all duration-200 ${
+                  isActive
+                    ? `${tab.color} border-current`
+                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                }`}
+                aria-current={isActive ? "page" : undefined}
+              >
+                {/* Label */}
+                <span className="mr-3 font-medium">{tab.label}</span>
+
+                {/* Count Badge */}
+                {tab.count !== undefined && (
+                  <span
+                    className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold transition-colors ${
+                      isActive
+                        ? `${tab.activeBg} ${tab.activeText}`
+                        : "bg-gray-100 text-gray-600 group-hover:bg-gray-200"
+                    }`}
+                  >
+                    {tab.count}
+                  </span>
+                )}
+
+                {/* Active indicator */}
+                {isActive && (
+                  <div
+                    className={`absolute bottom-0 left-0 right-0 h-0.5 ${tab.bgColor} rounded-full`}
+                  />
+                )}
+              </button>
+            );
+          })}
+        </nav>
+      </div>
     </div>
   );
-};
-
-export default HorizontalTabs; 
+}

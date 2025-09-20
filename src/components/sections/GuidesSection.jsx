@@ -63,6 +63,7 @@ export default function GuidesSection({
                 rating={guide.rating}
                 reviews={guide.reviewCount}
                 profileImage={guide.image}
+                guideId={guide.id}
               />
             </Link>
           ))}

@@ -81,7 +81,8 @@ const TravelBuddy = ({ user }) => {
       console.error("Failed to update Travel Buddy status", err);
       // Optional: add a lightweight inline error indicator
       alert(
-        err?.message || "Failed to update Travel Buddy status. Please try again."
+        err?.message ||
+          "Failed to update Travel Buddy status. Please try again."
       );
     } finally {
       setIsSaving(false);
@@ -96,10 +97,10 @@ const TravelBuddy = ({ user }) => {
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-xl border border-purple-100 p-6">
+      <div className="bg-gradient-to-r from-cyan-50 to-indigo-50 rounded-xl border border-cyan-100 p-6">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-purple-100 rounded-lg">
-            <UserGroupIcon className="w-6 h-6 text-purple-600" />
+          <div className="p-2 bg-cyan-100 rounded-lg">
+            <UserGroupIcon className="w-6 h-6 text-cyan-600" />
           </div>
           <div className="flex-1">
             <h2 className="text-lg font-semibold text-gray-900">
@@ -111,7 +112,7 @@ const TravelBuddy = ({ user }) => {
           </div>
           <button
             onClick={() => setShowInfo(!showInfo)}
-            className="p-2 text-purple-600 hover:bg-purple-100 rounded-lg transition-colors"
+            className="p-2 text-cyan-600 hover:bg-cyan-100 rounded-lg transition-colors"
           >
             <InformationCircleIcon className="w-5 h-5" />
           </button>
@@ -120,13 +121,13 @@ const TravelBuddy = ({ user }) => {
 
       {/* Travel Buddy Information */}
       {showInfo && (
-        <div className="bg-blue-50 border border-blue-200 rounded-xl p-6">
-          <h3 className="font-medium text-blue-900 mb-3">
+        <div className="bg-cyan-50 border border-cyan-200 rounded-xl p-6">
+          <h3 className="font-medium text-cyan-900 mb-3">
             How Travel Buddy Works
           </h3>
-          <div className="space-y-3 text-sm text-blue-800">
+          <div className="space-y-3 text-sm text-cyan-800">
             <div className="flex items-start gap-3">
-              <span className="w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">
+              <span className="w-6 h-6 bg-cyan-600 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">
                 1
               </span>
               <span>
@@ -134,7 +135,7 @@ const TravelBuddy = ({ user }) => {
               </span>
             </div>
             <div className="flex items-start gap-3">
-              <span className="w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">
+              <span className="w-6 h-6 bg-cyan-600 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">
                 2
               </span>
               <span>
@@ -142,13 +143,13 @@ const TravelBuddy = ({ user }) => {
               </span>
             </div>
             <div className="flex items-start gap-3">
-              <span className="w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">
+              <span className="w-6 h-6 bg-cyan-600 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">
                 3
               </span>
               <span>Receive and send requests to join travel adventures</span>
             </div>
             <div className="flex items-start gap-3">
-              <span className="w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">
+              <span className="w-6 h-6 bg-cyan-600 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">
                 4
               </span>
               <span>
@@ -181,7 +182,11 @@ const TravelBuddy = ({ user }) => {
               onChange={handleStatusToggle}
               disabled={isSaving}
             />
-            <div className={`w-11 h-6 ${isSaving ? "opacity-60" : ""} bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600`}></div>
+            <div
+              className={`w-11 h-6 ${
+                isSaving ? "opacity-60" : ""
+              } bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-cyan-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-cyan-600`}
+            ></div>
           </label>
         </div>
 
@@ -210,7 +215,7 @@ const TravelBuddy = ({ user }) => {
             <h3 className="text-lg font-semibold text-gray-900">
               My Travel Plans
             </h3>
-            <Button className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-sm">
+            <Button className="px-4 py-2 bg-cyan-600 hover:bg-cyan-700 text-white rounded-lg text-sm">
               Create New Plan
             </Button>
           </div>
@@ -231,7 +236,7 @@ const TravelBuddy = ({ user }) => {
                         className={`px-2 py-1 rounded-full text-xs font-medium ${
                           plan.status === "active"
                             ? "bg-green-100 text-green-800"
-                            : "bg-blue-100 text-blue-800"
+                            : "bg-cyan-100 text-cyan-800"
                         }`}
                       >
                         {plan.status === "active" ? "Open" : "Full"}
@@ -265,7 +270,7 @@ const TravelBuddy = ({ user }) => {
                     <button className="px-3 py-2 text-sm text-gray-600 bg-gray-50 border border-gray-200 rounded-lg hover:bg-gray-100 transition-colors">
                       Edit
                     </button>
-                    <button className="px-3 py-2 text-sm text-purple-600 bg-purple-50 border border-purple-200 rounded-lg hover:bg-purple-100 transition-colors">
+                    <button className="px-3 py-2 text-sm text-cyan-600 bg-cyan-50 border border-cyan-200 rounded-lg hover:bg-cyan-100 transition-colors">
                       View Requests
                     </button>
                   </div>
@@ -279,7 +284,7 @@ const TravelBuddy = ({ user }) => {
                 <p className="text-gray-600 mb-4">
                   You haven't created any travel plans yet
                 </p>
-                <Button className="px-6 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg">
+                <Button className="px-6 py-2 bg-cyan-600 hover:bg-cyan-700 text-white rounded-lg">
                   Create Your First Plan
                 </Button>
               </div>
@@ -310,7 +315,7 @@ const TravelBuddy = ({ user }) => {
                       <span className="text-sm text-gray-600">
                         wants to join
                       </span>
-                      <span className="font-medium text-purple-600">
+                      <span className="font-medium text-cyan-600">
                         {request.plan}
                       </span>
                     </div>

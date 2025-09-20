@@ -22,16 +22,19 @@ const CampingDestinations = () => {
 
         if (response.success) {
           // Transform API data to match DestinationCard component expectations
-          const transformedDestinations = response.data.map((destination) => ({
-            id: destination.location_id,
-            name: destination.name,
-            description: destination.description,
-            image: destination.image_url || "/placeholder-image.jpg", // Fallback image
-            rating: 4.5, // Default rating since not in database yet
-            reviewCount: Math.floor(Math.random() * 100) + 10, // Random review count
-            locationId: destination.location_id,
-            district: destination.district,
-          }));
+          const transformedDestinations = response.data
+            .filter((destination) => destination.location_id) // Only include destinations with valid IDs
+            .map((destination) => ({
+              id: destination.location_id,
+              name: destination.name,
+              description: destination.description,
+              image: destination.image_url || "/placeholder-image.jpg", // Fallback image
+              rating: 4.5, // Default rating since not in database yet
+              reviewCount: Math.floor(Math.random() * 100) + 10, // Random review count
+              locationId: destination.location_id,
+              district: destination.district,
+            }));
+
           setDestinations(transformedDestinations);
         } else {
           setError("Failed to load destinations");
@@ -59,14 +62,11 @@ const CampingDestinations = () => {
         .trim();
       navigate(`/destination/${destination.locationId}/${urlFriendlyName}`);
     } else {
-      console.log(`Clicked on ${destinationName}`);
+      // Handle click without destination found
     }
   };
 
   const handleHeartClick = (destinationName, isLiked) => {
-    console.log(
-      `${isLiked ? "Added to" : "Removed from"} wishlist: ${destinationName}`
-    );
     // Add wishlist logic here
   };
 
@@ -126,7 +126,7 @@ const CampingDestinations = () => {
               rating={destination.rating}
               reviewCount={destination.reviewCount}
               onCardClick={handleCardClick}
-              onHeartClick={handleHeartClick}
+              locationId={destination.id}
             />
           ))}
         </div>
