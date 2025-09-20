@@ -153,7 +153,8 @@ export default function UserVerification({ onVerificationAction }) {
             const timestamp = new Date(
               row.updated_at || row.created_at || Date.now()
             ).getTime();
-            return `http://localhost/skycamp/skycamp-backend/storage/uploads/${relativePath}?ts=${timestamp}`;
+            const finalUrl = `http://localhost/skycamp/skycamp-backend/storage/uploads/${relativePath}?ts=${timestamp}`;
+            return finalUrl;
           };
 
           return (
@@ -401,7 +402,6 @@ export default function UserVerification({ onVerificationAction }) {
         }
         onSort={(column, direction) => {
           // TODO: Implement sorting logic
-          console.log(`Sort by ${column} ${direction}`);
         }}
       />
 

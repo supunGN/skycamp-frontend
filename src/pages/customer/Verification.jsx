@@ -71,16 +71,17 @@ const Verification = ({ user }) => {
 
     const load = async () => {
       try {
-        const res = await API.auth.getVerificationDocs();
-        const data = res?.data;
+        const data = await API.auth.getVerificationDocs();
+
         if (!cancelled && data) {
-          setExistingFrontUrl(data.nic_front_image_url || null);
-          setExistingBackUrl(data.nic_back_image_url || null);
-          setRejectionReason(data.rejection_reason || null);
-          setRejectionDate(data.rejection_date || null);
-          setCanResubmit(data.can_resubmit || false);
+          setExistingFrontUrl(data.data?.nic_front_image_url || null);
+          setExistingBackUrl(data.data?.nic_back_image_url || null);
+          setRejectionReason(data.data?.rejection_reason || null);
+          setRejectionDate(data.data?.rejection_date || null);
+          setCanResubmit(data.data?.can_resubmit || false);
         }
       } catch (e) {
+        console.error("Failed to load verification docs:", e);
         // Fallback to user object if API not available
         const front = user?.nic_front_image || user?.nic_front || null;
         const back = user?.nic_back_image || user?.nic_back || null;
@@ -485,7 +486,11 @@ const Verification = ({ user }) => {
                   )}
               </div>
             </div>
-            {(existingFrontUrl || existingBackUrl) && !replaceMode ? (
+            {/* Show NIC images if user is verified OR has uploaded images */}
+            {(user?.verification_status === "Yes" ||
+              existingFrontUrl ||
+              existingBackUrl) &&
+            !replaceMode ? (
               <div className="space-y-4">
                 <div className="grid md:grid-cols-2 gap-6">
                   <div>
