@@ -25,6 +25,7 @@ export default function DashboardHeader({
   subtitle,
   onNotificationClick,
   onUnreadCountChange,
+  unreadCount = 0,
 }) {
   // Always get user name from localStorage if not provided
   let displayName = userName;
@@ -66,7 +67,10 @@ export default function DashboardHeader({
         </button>
 
         {/* Notifications Dropdown */}
-        <NotificationDropdown onUnreadCountChange={onUnreadCountChange} />
+        <NotificationDropdown
+          onUnreadCountChange={onUnreadCountChange}
+          initialUnreadCount={unreadCount}
+        />
       </div>
     </header>
   );

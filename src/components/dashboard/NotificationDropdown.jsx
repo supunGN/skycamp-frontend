@@ -3,10 +3,13 @@ import { BellIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { API } from "../../api";
 import { formatDistanceToNow } from "date-fns/formatDistanceToNow";
 
-export default function NotificationDropdown({ onUnreadCountChange }) {
+export default function NotificationDropdown({
+  onUnreadCountChange,
+  initialUnreadCount = 0,
+}) {
   const [isOpen, setIsOpen] = useState(false);
   const [notifications, setNotifications] = useState([]);
-  const [unreadCount, setUnreadCount] = useState(0);
+  const [unreadCount, setUnreadCount] = useState(initialUnreadCount);
   const [loading, setLoading] = useState(false);
   const dropdownRef = useRef(null);
 
@@ -58,6 +61,22 @@ export default function NotificationDropdown({ onUnreadCountChange }) {
       fetchNotifications();
     }
   }, [isOpen]);
+
+  // Poll for notifications every 30 seconds
+  useEffect(() => {
+    fetchNotifications(); // Initial fetch
+
+    const interval = setInterval(() => {
+      fetchNotifications();
+    }, 30000); // Poll every 30 seconds
+
+    return () => clearInterval(interval);
+  }, []);
+
+  // Update unread count when initialUnreadCount prop changes
+  useEffect(() => {
+    setUnreadCount(initialUnreadCount);
+  }, [initialUnreadCount]);
 
   // Mark notification as read
   const markAsRead = async (notificationId) => {
@@ -243,7 +262,11 @@ export default function NotificationDropdown({ onUnreadCountChange }) {
           {notifications.length > 0 && (
             <div className="p-3 border-t border-gray-200 bg-gray-50">
               <a
-                href="/dashboard/renter/notifications"
+                href={
+                  window.location.pathname.includes("/guide/")
+                    ? "/dashboard/guide/notifications"
+                    : "/dashboard/renter/notifications"
+                }
                 className="block w-full text-center text-sm text-cyan-600 hover:text-cyan-700 font-medium py-2 hover:bg-cyan-50 rounded-lg transition-colors"
               >
                 View all notifications

@@ -3,7 +3,7 @@ import React from "react";
 // Simple Calendar component (controlled, reusable, left-aligned)
 const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
-const Calendar = ({ value, onChange }) => {
+const Calendar = ({ value, onChange, minDate, maxDate }) => {
   const today = new Date();
   const year = today.getFullYear();
   const month = today.getMonth();
@@ -13,7 +13,44 @@ const Calendar = ({ value, onChange }) => {
   // Parse selected date
   const selectedDay = value ? new Date(value).getDate() : null;
 
+  // Helper function to check if a date is disabled
+  const isDateDisabled = (date) => {
+    const currentDate = new Date(year, month, date);
+    const todayDate = new Date();
+    todayDate.setHours(0, 0, 0, 0); // Reset time to start of day
+
+    // Disable past dates (before today)
+    if (currentDate < todayDate) {
+      return true;
+    }
+
+    // Disable dates before minDate
+    if (minDate) {
+      const minDateObj = new Date(minDate);
+      minDateObj.setHours(0, 0, 0, 0);
+      if (currentDate < minDateObj) {
+        return true;
+      }
+    }
+
+    // Disable dates after maxDate
+    if (maxDate) {
+      const maxDateObj = new Date(maxDate);
+      maxDateObj.setHours(0, 0, 0, 0);
+      if (currentDate > maxDateObj) {
+        return true;
+      }
+    }
+
+    return false;
+  };
+
   const handleDateClick = (date) => {
+    // Don't allow selection of disabled dates
+    if (isDateDisabled(date)) {
+      return;
+    }
+
     const selected = new Date(year, month, date);
     if (onChange)
       onChange(
@@ -46,15 +83,19 @@ const Calendar = ({ value, onChange }) => {
         {Array.from({ length: daysInMonth }).map((_, i) => {
           const date = i + 1;
           const isSelected = selectedDay === date;
+          const isDisabled = isDateDisabled(date);
           return (
             <button
               key={date}
               onClick={() => handleDateClick(date)}
+              disabled={isDisabled}
               className={`w-8 h-8 rounded-full flex items-center justify-center transition-all
                 ${
-                  isSelected
+                  isDisabled
+                    ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                    : isSelected
                     ? "bg-cyan-600 text-white"
-                    : "hover:bg-cyan-100 text-gray-800"
+                    : "hover:bg-cyan-100 text-gray-800 cursor-pointer"
                 }`}
             >
               {date}

@@ -2,6 +2,7 @@ import TravelBuddyNavbar from "../../components/organisms/TravelBuddyNavbar";
 import Footer from "../../components/organisms/Footer";
 import Button from "../../components/atoms/Button";
 import CreatePostForm from "../../components/molecules/CreatePostForm";
+import TravelPlanCard from "../../components/molecules/TravelPlanCard";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { API } from "../../api";
@@ -181,12 +182,25 @@ export default function TravelBuddy() {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [currentUserId, setCurrentUserId] = useState(null);
   const navigate = useNavigate();
 
   // Load travel plans on component mount
   useEffect(() => {
     loadTravelPlans();
+    getCurrentUserId();
   }, []);
+
+  const getCurrentUserId = () => {
+    try {
+      const user = JSON.parse(localStorage.getItem("user"));
+      if (user && user.id) {
+        setCurrentUserId(user.id);
+      }
+    } catch (error) {
+      console.error("Error getting current user ID:", error);
+    }
+  };
 
   const loadTravelPlans = async () => {
     try {
@@ -222,6 +236,11 @@ export default function TravelBuddy() {
   };
 
   const handleRefreshPosts = () => {
+    loadTravelPlans();
+  };
+
+  const handleRequestSent = (plan) => {
+    // Refresh posts to update request counts
     loadTravelPlans();
   };
 
@@ -328,80 +347,14 @@ export default function TravelBuddy() {
                     </Button>
                   </div>
                 ) : (
-                  posts.map((p) => {
-                    // Determine activity icon based on activity type
-                    const getActivityIcon = (activity) => {
-                      if (activity.toLowerCase().includes("camping")) {
-                        return <TentIcon className="w-5 h-5 text-cyan-600" />;
-                      }
-                      if (activity.toLowerCase().includes("stargazing")) {
-                        return (
-                          <SparklesIcon className="w-5 h-5 text-cyan-600" />
-                        );
-                      }
-                      return <TentIcon className="w-5 h-5 text-cyan-600" />;
-                    };
-
-                    return (
-                      <article
-                        key={p.id}
-                        className="border rounded-lg shadow-sm p-5 max-w-2xl mx-auto"
-                      >
-                        <div className="flex items-start justify-between">
-                          <div className="flex items-center gap-3">
-                            <img
-                              src="/src/assets/auth/profile-pic.svg"
-                              alt={p.user}
-                              className="w-10 h-10 rounded-full"
-                            />
-                            <h3 className="text-lg font-semibold text-gray-900">
-                              {p.user}
-                            </h3>
-                          </div>
-                          <span className="text-sm text-gray-500">
-                            {p.time}
-                          </span>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-x-8 gap-y-2 mt-4 pl-4">
-                          <div className="flex items-center gap-2">
-                            <MapPinIcon className="w-5 h-5 text-cyan-600" />
-                            <span className="text-cyan-600 font-medium">
-                              {p.location}
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <UsersIcon className="w-5 h-5 text-cyan-600" />
-                            <span className="text-cyan-600 font-medium">
-                              {p.companions} companions needed
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            {getActivityIcon(p.activity)}
-                            <span className="text-cyan-600 font-medium">
-                              {p.activity}
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <CalendarDaysIcon className="w-5 h-5 text-cyan-600" />
-                            <span className="text-cyan-600 font-medium">
-                              {p.dateRange}
-                            </span>
-                          </div>
-                        </div>
-
-                        <p className="text-gray-700 mt-4 leading-relaxed">
-                          {p.description}
-                        </p>
-
-                        <div className="mt-4 bg-gray-200 rounded-md h-56 sm:h-72 w-full" />
-
-                        <div className="mt-4 flex justify-end">
-                          <Button size="md">Connect</Button>
-                        </div>
-                      </article>
-                    );
-                  })
+                  posts.map((p) => (
+                    <TravelPlanCard
+                      key={p.plan.plan_id}
+                      plan={p}
+                      currentUserId={currentUserId}
+                      onRequestSent={handleRequestSent}
+                    />
+                  ))
                 )}
               </div>
             </section>

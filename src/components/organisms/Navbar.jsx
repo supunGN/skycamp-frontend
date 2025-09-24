@@ -75,6 +75,83 @@ export default function Navbar() {
     }
   };
 
+  // Travel Buddy click handler - same logic as TravelBuddyCTA
+  const handleTravelBuddyClick = async (e) => {
+    e.preventDefault();
+
+    console.log("🚀 Navbar: Switch to Travel Buddy button clicked!");
+    console.log("🚀 Navbar: Event details:", {
+      type: e.type,
+      target: e.target,
+      timestamp: new Date().toISOString(),
+    });
+
+    if (!user) {
+      console.log("Navbar: No user found, navigating to login");
+      window.location.href = "/login";
+      return;
+    }
+
+    if (user.user_role !== "customer") {
+      console.log("Navbar: User is not a customer, role:", user.user_role);
+      return;
+    }
+
+    console.log(
+      "Navbar: User is authenticated customer, checking travel buddy status"
+    );
+
+    try {
+      // Check Travel Buddy status
+      console.log("Navbar: Calling API.travelBuddy.getStatus()");
+      const response = await API.travelBuddy.getStatus();
+      console.log("Navbar: API response data:", response);
+
+      // Check if travel buddy is available and enabled
+      // Note: The API is returning the full response object, not just the data
+      const data = response?.data || response;
+      console.log("Navbar: Extracted data:", data);
+
+      if (data && data.available === true && data.enabled === true) {
+        console.log("✅ Navbar: Travel Buddy is ENABLED!");
+        console.log("✅ Navbar: Navigating to /travel-buddy page");
+        window.location.href = "/travel-buddy";
+      } else {
+        console.log("❌ Navbar: Travel Buddy is NOT enabled");
+        console.log("❌ Navbar: Debug info:", {
+          available: data?.available,
+          enabled: data?.enabled,
+          status: data?.status,
+          reason: data?.reason,
+        });
+
+        if (data?.available === false) {
+          console.log("❌ Navbar: Travel Buddy not available:", data?.reason);
+        } else if (data?.enabled === false) {
+          console.log(
+            "❌ Navbar: Travel Buddy not enabled, status:",
+            data?.status
+          );
+        }
+
+        console.log(
+          "❌ Navbar: Showing alert - user needs to enable travel buddy"
+        );
+        alert(
+          "Travel Buddy feature is not enabled. Please enable it in your profile settings."
+        );
+      }
+    } catch (error) {
+      console.error("Navbar: Error checking Travel Buddy status:", error);
+      console.error("Navbar: Error details:", {
+        message: error.message,
+        stack: error.stack,
+        response: error.response,
+      });
+      alert("Failed to check Travel Buddy status. Please try again.");
+    }
+  };
+
   const getProfileLink = () => {
     if (!user) return "/profile";
     if (user.user_role === "customer") return "/profile";
@@ -152,11 +229,13 @@ export default function Navbar() {
           <div className="flex items-center space-x-4">
             {/* Travel Buddy Switch Button - Only for customers */}
             {user && user.user_role === "customer" && (
-              <Link to="/travel-buddy">
-                <Button variant="secondary" size="sm">
-                  Switch to Travel Buddy
-                </Button>
-              </Link>
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={handleTravelBuddyClick}
+              >
+                Switch to Travel Buddy
+              </Button>
             )}
 
             {/* Admin Dashboard Switch Button */}

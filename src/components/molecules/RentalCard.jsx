@@ -1,5 +1,6 @@
 import React from "react";
 import WishlistButton from "../atoms/WishlistButton";
+import profilePic from "../../assets/auth/profile-pic.svg";
 
 // RentalCard component for displaying rental package info
 const RentalCard = ({
@@ -16,7 +17,7 @@ const RentalCard = ({
       {/* Image Container */}
       <div className="relative overflow-hidden rounded-t-2xl">
         <img
-          src={image}
+          src={image || profilePic}
           alt={name}
           className="w-full h-56 object-cover group-hover:scale-105 transition-transform duration-300"
         />

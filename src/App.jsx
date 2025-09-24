@@ -34,7 +34,7 @@ import Guide from "./pages/Guide";
 import Cart from "./pages/Cart";
 import IndividualDestination from "./pages/IndividualDestination";
 import Wishlist from "./pages/Wishlist";
-import SelectedIndividualRenter from "./pages/selected_individualrenter";
+import IndividualRenter from "./pages/IndividualRenter";
 import FullRenter from "./pages/FullRenter";
 import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
@@ -286,10 +286,7 @@ function App() {
             }
           />
           <Route path="/contact-us" element={<ContactUs />} />
-          <Route
-            path="/selected_individualrenter"
-            element={<SelectedIndividualRenter />}
-          />
+          <Route path="/renter/:renterId" element={<IndividualRenter />} />
           <Route path="/fullrenter" element={<FullRenter />} />
           <Route path="/guide/:id" element={<Guide />} />
 

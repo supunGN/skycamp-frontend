@@ -54,6 +54,17 @@ export default function Notifications() {
             : notif
         )
       );
+
+      // Refresh unread count to update badges
+      const countResponse = await API.notifications.getUnreadCount();
+      if (countResponse.success) {
+        // This will trigger the dashboard to update badge counts
+        window.dispatchEvent(
+          new CustomEvent("notificationCountChanged", {
+            detail: { count: countResponse.data.count },
+          })
+        );
+      }
     } catch (err) {
       console.error("Error marking notification as read:", err);
     } finally {
@@ -68,6 +79,17 @@ export default function Notifications() {
       setNotifications((prev) =>
         prev.map((notif) => ({ ...notif, is_read: 1 }))
       );
+
+      // Refresh unread count to update badges
+      const countResponse = await API.notifications.getUnreadCount();
+      if (countResponse.success) {
+        // This will trigger the dashboard to update badge counts
+        window.dispatchEvent(
+          new CustomEvent("notificationCountChanged", {
+            detail: { count: countResponse.data.count },
+          })
+        );
+      }
     } catch (err) {
       console.error("Error marking all as read:", err);
     }
@@ -149,7 +171,16 @@ export default function Notifications() {
             <button
               onClick={async () => {
                 try {
-                  await API.renterDashboard.createTestNotifications();
+                  const response =
+                    await API.renterDashboard.createTestNotifications();
+                  if (response.success) {
+                    // Update badges immediately with the new count
+                    window.dispatchEvent(
+                      new CustomEvent("notificationCountChanged", {
+                        detail: { count: response.data.unread_count },
+                      })
+                    );
+                  }
                   fetchNotifications();
                 } catch (err) {
                   console.error("Error creating test notifications:", err);

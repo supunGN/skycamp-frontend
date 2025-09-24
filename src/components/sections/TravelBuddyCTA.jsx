@@ -23,33 +23,150 @@ export default function TravelBuddyCTA() {
   const handleConnectClick = async (e) => {
     e.preventDefault();
 
+    // Log when the Connect button is clicked
+    console.log("🚀 TravelBuddyCTA: Connect button clicked!");
+    console.log("🚀 TravelBuddyCTA: Event details:", {
+      type: e.type,
+      target: e.target,
+      timestamp: new Date().toISOString(),
+    });
+
     const user = getUser();
+    console.log("TravelBuddyCTA: User from localStorage:", user);
 
     // Check if user is authenticated
     if (!user) {
+      console.log("TravelBuddyCTA: No user found, navigating to login");
       navigate("/login");
       return;
     }
 
     // Check if user is a customer
     if (user.user_role !== "customer") {
+      console.log(
+        "TravelBuddyCTA: User is not a customer, role:",
+        user.user_role
+      );
+      console.log(
+        "TravelBuddyCTA: Travel Buddy is only available for customers"
+      );
       // Non-customers can't access Travel Buddy
       return;
     }
 
-    try {
-      // Check Travel Buddy status
-      const response = await API.travelBuddy.getStatus();
+    console.log(
+      "TravelBuddyCTA: User is authenticated customer, checking travel buddy status"
+    );
+    console.log("TravelBuddyCTA: Expected behavior:");
+    console.log(
+      "  - If travel_buddy_status = 'Active': Navigate to /travel-buddy"
+    );
+    console.log(
+      "  - If travel_buddy_status = 'Inactive': Show modal to enable"
+    );
+    console.log("  - If verification_status != 'Yes': May need verification");
 
-      if (response.data.enabled) {
+    try {
+      // Debug session first
+      console.log("TravelBuddyCTA: Calling debug endpoint first...");
+      try {
+        const debugResponse = await API.travelBuddy.debug();
+        console.log("TravelBuddyCTA: Debug response:", debugResponse);
+
+        // Log key debug information
+        if (debugResponse?.debug) {
+          console.log("TravelBuddyCTA: Debug info summary:", {
+            session_id: debugResponse.debug.session_id,
+            authenticated: debugResponse.debug.authenticated,
+            user_role: debugResponse.debug.user_role,
+            user_id: debugResponse.debug.user_id_from_session,
+            customer_info: debugResponse.debug.customer_info,
+          });
+
+          if (
+            debugResponse.debug.customer_info &&
+            typeof debugResponse.debug.customer_info === "object"
+          ) {
+            console.log(
+              "TravelBuddyCTA: Customer travel buddy status from debug:",
+              debugResponse.debug.customer_info.travel_buddy_status
+            );
+            console.log(
+              "TravelBuddyCTA: Customer verification status from debug:",
+              debugResponse.debug.customer_info.verification_status
+            );
+          }
+        }
+      } catch (debugError) {
+        console.error("TravelBuddyCTA: Debug endpoint failed:", debugError);
+      }
+
+      // Check Travel Buddy status
+      console.log("TravelBuddyCTA: Calling API.travelBuddy.getStatus()");
+      const response = await API.travelBuddy.getStatus();
+      console.log("TravelBuddyCTA: API response data:", response);
+      console.log("TravelBuddyCTA: Response type:", typeof response);
+      console.log(
+        "TravelBuddyCTA: Response keys:",
+        Object.keys(response || {})
+      );
+
+      // Debug the response structure
+      console.log("TravelBuddyCTA: Response structure debug:", {
+        available: response?.available,
+        enabled: response?.enabled,
+        status: response?.status,
+        reason: response?.reason,
+        success: response?.success,
+      });
+
+      // Check if travel buddy is available and enabled
+      // Note: The API is returning the full response object, not just the data
+      const data = response?.data || response;
+      console.log("TravelBuddyCTA: Extracted data:", data);
+
+      if (data && data.available === true && data.enabled === true) {
+        console.log("✅ TravelBuddyCTA: Travel Buddy is ENABLED!");
+        console.log("✅ TravelBuddyCTA: User's travel_buddy_status = 'Active'");
+        console.log("✅ TravelBuddyCTA: Status:", data.status);
+        console.log("✅ TravelBuddyCTA: Navigating to /travel-buddy page");
         // Travel Buddy is enabled, navigate to Travel Buddy page
         navigate("/travel-buddy");
       } else {
+        console.log("❌ TravelBuddyCTA: Travel Buddy is NOT enabled");
+        console.log("❌ TravelBuddyCTA: Debug info:", {
+          available: data?.available,
+          enabled: data?.enabled,
+          status: data?.status,
+          reason: data?.reason,
+        });
+
+        if (data?.available === false) {
+          console.log(
+            "❌ TravelBuddyCTA: Travel Buddy not available:",
+            data?.reason
+          );
+        } else if (data?.enabled === false) {
+          console.log(
+            "❌ TravelBuddyCTA: Travel Buddy not enabled, status:",
+            data?.status
+          );
+        }
+
+        console.log("❌ TravelBuddyCTA: Showing modal to enable travel buddy");
         // Travel Buddy is not enabled, show modal
         setShowModal(true);
       }
     } catch (error) {
-      console.error("Error checking Travel Buddy status:", error);
+      console.error(
+        "TravelBuddyCTA: Error checking Travel Buddy status:",
+        error
+      );
+      console.error("TravelBuddyCTA: Error details:", {
+        message: error.message,
+        stack: error.stack,
+        response: error.response,
+      });
       // On error, show modal as fallback
       setShowModal(true);
     }

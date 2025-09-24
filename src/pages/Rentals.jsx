@@ -36,7 +36,8 @@ const CampingGearSidebar = () => {
   }, []);
 
   const handleSearch = () => {
-    navigate("/selected_individualrenter");
+    // Navigate to a sample renter for demo purposes
+    navigate("/renter/3");
     window.scrollTo(0, 0);
   };
 
@@ -188,9 +189,7 @@ const Rentals = () => {
 
   const handleRentalClick = (renter) => {
     // Navigate to individual renter page
-    navigate("/selected_individualrenter", {
-      state: { renterId: renter.id },
-    });
+    navigate(`/renter/${renter.id}`);
     window.scrollTo(0, 0);
   };
 
@@ -361,10 +360,7 @@ const Rentals = () => {
                       style={{ cursor: "pointer" }}
                     >
                       <RentalCard
-                        image={
-                          renter.image ||
-                          "http://localhost/skycamp/skycamp-backend/storage/uploads/users/default-profile.png"
-                        }
+                        image={renter.image}
                         location={renter.location}
                         name={renter.name}
                         phone={renter.phone}

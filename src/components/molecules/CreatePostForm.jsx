@@ -1,129 +1,87 @@
-import React, { useState, useRef } from "react";
-import { XMarkIcon, PhotoIcon, ExclamationTriangleIcon } from "@heroicons/react/24/outline";
+import { useState, useEffect } from "react";
+import { API } from "../../api";
 import Button from "../atoms/Button";
-import { Input } from "./Input";
-import DropdownSelect from "./DropdownSelect";
+import {
+  X as XIcon,
+  MapPin as MapPinIcon,
+  Calendar as CalendarIcon,
+  Users as UsersIcon,
+  FileText as FileTextIcon,
+  Loader2 as LoaderIcon,
+} from "lucide-react";
 
 export default function CreatePostForm({ onClose, onSubmit }) {
   const [formData, setFormData] = useState({
-    location: "",
-    adventureType: "",
-    companions: "",
-    fromDate: "",
-    toDate: "",
-    description: "",
+    destination: "",
+    travel_date: "",
+    companions_needed: 1,
+    notes: "",
   });
-
-  const [images, setImages] = useState([]);
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
-  const imageUploadRef = useRef();
+  const [locations, setLocations] = useState([]);
+  const [loadingLocations, setLoadingLocations] = useState(false);
 
-  // Adventure type options
-  const adventureOptions = ["Camping", "Stargazing"];
-  
-  // Companions options (1-10)
-  const companionOptions = Array.from({ length: 10 }, (_, i) => (i + 1).toString());
+  // Load available locations
+  useEffect(() => {
+    loadLocations();
+  }, []);
 
-  const handleChange = (e) => {
-    const { id, value } = e.target;
-    setFormData({
-      ...formData,
-      [id]: value,
-    });
-
-    // Clear error when user starts typing
-    if (errors[id]) {
-      setErrors({
-        ...errors,
-        [id]: null,
-      });
+  const loadLocations = async () => {
+    try {
+      setLoadingLocations(true);
+      const response = await API.locations.getAllLocations();
+      setLocations(response.data || []);
+    } catch (error) {
+      console.error("Error loading locations:", error);
+    } finally {
+      setLoadingLocations(false);
     }
   };
 
-  const handleDropdownChange = (field, value) => {
-    setFormData({
-      ...formData,
-      [field]: value,
-    });
-
-    // Clear error when user selects
-    if (errors[field]) {
-      setErrors({
-        ...errors,
-        [field]: null,
-      });
-    }
-  };
-
-  const handleImageUpload = (e) => {
-    const files = Array.from(e.target.files);
-    
-    if (images.length + files.length > 2) {
-      alert("You can only upload up to 2 images");
-      return;
-    }
-
-    const validFiles = files.filter(file => {
-      const maxSize = 5 * 1024 * 1024; // 5MB
-      const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
-      
-      if (!allowedTypes.includes(file.type)) {
-        alert(`${file.name} is not a valid image file (JPG, PNG, or WebP)`);
-        return false;
-      }
-      
-      if (file.size > maxSize) {
-        alert(`${file.name} is too large. File size must be less than 5MB`);
-        return false;
-      }
-      
-      return true;
-    });
-
-    const newImages = validFiles.map(file => ({
-      file,
-      preview: URL.createObjectURL(file),
-      id: Date.now() + Math.random(),
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
     }));
 
-    setImages([...images, ...newImages]);
-  };
-
-  const removeImage = (imageId) => {
-    setImages(images.filter(img => img.id !== imageId));
+    // Clear error when user starts typing
+    if (errors[name]) {
+      setErrors((prev) => ({
+        ...prev,
+        [name]: "",
+      }));
+    }
   };
 
   const validateForm = () => {
     const newErrors = {};
 
-    if (!formData.location.trim()) {
-      newErrors.location = "Location is required";
-    }
-    if (!formData.adventureType) {
-      newErrors.adventureType = "Please select an adventure type";
-    }
-    if (!formData.companions) {
-      newErrors.companions = "Please select number of companions";
-    }
-    if (!formData.fromDate) {
-      newErrors.fromDate = "From date is required";
-    }
-    if (!formData.toDate) {
-      newErrors.toDate = "To date is required";
-    }
-    if (!formData.description.trim()) {
-      newErrors.description = "Please describe your adventure";
+    if (!formData.destination.trim()) {
+      newErrors.destination = "Destination is required";
     }
 
-    // Validate date range
-    if (formData.fromDate && formData.toDate) {
-      const fromDate = new Date(formData.fromDate);
-      const toDate = new Date(formData.toDate);
-      if (fromDate >= toDate) {
-        newErrors.toDate = "End date must be after start date";
+    if (!formData.travel_date) {
+      newErrors.travel_date = "Travel date is required";
+    } else {
+      const selectedDate = new Date(formData.travel_date);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      if (selectedDate <= today) {
+        newErrors.travel_date = "Travel date must be in the future";
       }
+    }
+
+    if (!formData.companions_needed || formData.companions_needed < 1) {
+      newErrors.companions_needed = "At least 1 companion is required";
+    } else if (formData.companions_needed > 10) {
+      newErrors.companions_needed = "Maximum 10 companions allowed";
+    }
+
+    if (formData.notes && formData.notes.length > 1000) {
+      newErrors.notes = "Notes cannot exceed 1000 characters";
     }
 
     setErrors(newErrors);
@@ -137,264 +95,197 @@ export default function CreatePostForm({ onClose, onSubmit }) {
       return;
     }
 
-    setIsSubmitting(true);
-
     try {
-      // Create FormData for file upload
-      const submitData = new FormData();
-      submitData.append("location", formData.location);
-      submitData.append("adventureType", formData.adventureType);
-      submitData.append("companions", formData.companions);
-      submitData.append("fromDate", formData.fromDate);
-      submitData.append("toDate", formData.toDate);
-      submitData.append("description", formData.description);
+      setIsSubmitting(true);
 
-      // Add image files
-      images.forEach((image, index) => {
-        submitData.append(`image_${index}`, image.file);
-      });
+      // Convert companions_needed to integer
+      const submitData = {
+        ...formData,
+        companions_needed: parseInt(formData.companions_needed),
+      };
 
-      // Call the onSubmit callback with the form data
-      if (onSubmit) {
-        await onSubmit(submitData);
-      }
-
-      // Reset form
-      setFormData({
-        location: "",
-        adventureType: "",
-        companions: "",
-        fromDate: "",
-        toDate: "",
-        description: "",
-      });
-      setImages([]);
-      setErrors({});
-
-      // Close the form
-      if (onClose) {
-        onClose();
-      }
-
+      await onSubmit(submitData);
     } catch (error) {
-      console.error("Error submitting post:", error);
-      alert("Failed to create post. Please try again.");
+      console.error("Error submitting form:", error);
     } finally {
       setIsSubmitting(false);
     }
   };
 
+  const handleClose = () => {
+    if (!isSubmitting) {
+      onClose();
+    }
+  };
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+      <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
-          <h2 className="text-2xl font-bold text-gray-900">Create Post</h2>
+          <h2 className="text-xl font-semibold text-gray-900">
+            Create Travel Plan
+          </h2>
           <button
-            type="button"
-            onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+            onClick={handleClose}
+            disabled={isSubmitting}
+            className="p-2 hover:bg-gray-100 rounded-full transition-colors disabled:opacity-50"
           >
-            <XMarkIcon className="w-6 h-6 text-gray-500" />
+            <XIcon className="w-5 h-5" />
           </button>
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-5">
-          {/* Location */}
+        <form onSubmit={handleSubmit} className="p-6 space-y-6">
+          {/* Destination */}
           <div>
-            <label htmlFor="location" className="block text-sm font-medium text-gray-700 mb-2">
-              Location
+            <label
+              htmlFor="destination"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
+              <MapPinIcon className="w-4 h-4 inline mr-1" />
+              Destination
             </label>
-            <Input
-              id="location"
-              placeholder="Where are you going?"
-              value={formData.location}
-              onChange={handleChange}
-              className={`w-full h-12 rounded-xl border-gray-300 focus:border-cyan-500 ${
-                errors.location ? "border-red-300 focus:border-red-500" : ""
+            <select
+              id="destination"
+              name="destination"
+              value={formData.destination}
+              onChange={handleInputChange}
+              className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 ${
+                errors.destination ? "border-red-300" : "border-gray-300"
               }`}
+              disabled={isSubmitting || loadingLocations}
+            >
+              <option value="">Select a destination</option>
+              {locations.map((location) => (
+                <option key={location.location_id} value={location.name}>
+                  {location.name} ({location.district})
+                </option>
+              ))}
+            </select>
+            {loadingLocations && (
+              <p className="mt-1 text-sm text-gray-500 flex items-center">
+                <LoaderIcon className="w-3 h-3 animate-spin mr-1" />
+                Loading destinations...
+              </p>
+            )}
+            {errors.destination && (
+              <p className="mt-1 text-sm text-red-600">{errors.destination}</p>
+            )}
+          </div>
+
+          {/* Travel Date */}
+          <div>
+            <label
+              htmlFor="travel_date"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
+              <CalendarIcon className="w-4 h-4 inline mr-1" />
+              Travel Date
+            </label>
+            <input
+              type="date"
+              id="travel_date"
+              name="travel_date"
+              value={formData.travel_date}
+              onChange={handleInputChange}
+              min={new Date().toISOString().split("T")[0]}
+              className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 ${
+                errors.travel_date ? "border-red-300" : "border-gray-300"
+              }`}
+              disabled={isSubmitting}
             />
-            {errors.location && (
-              <p className="text-sm text-red-600 mt-1 flex items-center gap-1">
-                <ExclamationTriangleIcon className="w-4 h-4" />
-                {errors.location}
+            {errors.travel_date && (
+              <p className="mt-1 text-sm text-red-600">{errors.travel_date}</p>
+            )}
+          </div>
+
+          {/* Companions Needed */}
+          <div>
+            <label
+              htmlFor="companions_needed"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
+              <UsersIcon className="w-4 h-4 inline mr-1" />
+              Companions Needed
+            </label>
+            <select
+              id="companions_needed"
+              name="companions_needed"
+              value={formData.companions_needed}
+              onChange={handleInputChange}
+              className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 ${
+                errors.companions_needed ? "border-red-300" : "border-gray-300"
+              }`}
+              disabled={isSubmitting}
+            >
+              {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
+                <option key={num} value={num}>
+                  {num} {num === 1 ? "companion" : "companions"}
+                </option>
+              ))}
+            </select>
+            {errors.companions_needed && (
+              <p className="mt-1 text-sm text-red-600">
+                {errors.companions_needed}
               </p>
             )}
           </div>
 
-          {/* Adventure Type */}
+          {/* Notes */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Select Adventure Type
-            </label>
-            <DropdownSelect
-              label="Choose your adventure (Camping or Stargazing)"
-              options={adventureOptions}
-              selected={formData.adventureType}
-              onSelect={(value) => handleDropdownChange("adventureType", value)}
-            />
-            {errors.adventureType && (
-              <p className="text-sm text-red-600 mt-1 flex items-center gap-1">
-                <ExclamationTriangleIcon className="w-4 h-4" />
-                {errors.adventureType}
-              </p>
-            )}
-          </div>
-
-          {/* Companions */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              No of Companions
-            </label>
-            <DropdownSelect
-              label="How many companions are with you?"
-              options={companionOptions}
-              selected={formData.companions}
-              onSelect={(value) => handleDropdownChange("companions", value)}
-            />
-            {errors.companions && (
-              <p className="text-sm text-red-600 mt-1 flex items-center gap-1">
-                <ExclamationTriangleIcon className="w-4 h-4" />
-                {errors.companions}
-              </p>
-            )}
-          </div>
-
-          {/* Date Range */}
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label htmlFor="fromDate" className="block text-sm font-medium text-gray-700 mb-2">
-                From
-              </label>
-              <Input
-                id="fromDate"
-                type="date"
-                value={formData.fromDate}
-                onChange={handleChange}
-                className={`w-full h-12 rounded-xl border-gray-300 focus:border-cyan-500 ${
-                  errors.fromDate ? "border-red-300 focus:border-red-500" : ""
-                }`}
-              />
-              {errors.fromDate && (
-                <p className="text-sm text-red-600 mt-1 flex items-center gap-1">
-                  <ExclamationTriangleIcon className="w-4 h-4" />
-                  {errors.fromDate}
-                </p>
-              )}
-            </div>
-            <div>
-              <label htmlFor="toDate" className="block text-sm font-medium text-gray-700 mb-2">
-                To
-              </label>
-              <Input
-                id="toDate"
-                type="date"
-                value={formData.toDate}
-                onChange={handleChange}
-                className={`w-full h-12 rounded-xl border-gray-300 focus:border-cyan-500 ${
-                  errors.toDate ? "border-red-300 focus:border-red-500" : ""
-                }`}
-              />
-              {errors.toDate && (
-                <p className="text-sm text-red-600 mt-1 flex items-center gap-1">
-                  <ExclamationTriangleIcon className="w-4 h-4" />
-                  {errors.toDate}
-                </p>
-              )}
-            </div>
-          </div>
-
-          {/* Add Images */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Add images
-            </label>
-            <div className="space-y-3">
-              {/* Image Upload Area */}
-              <div
-                className="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center cursor-pointer hover:border-cyan-400 hover:bg-gray-50 transition-colors"
-                onClick={() => imageUploadRef.current?.click()}
-              >
-                <PhotoIcon className="w-10 h-10 text-gray-400 mx-auto mb-2" />
-                <p className="text-sm text-gray-600 mb-1">Click to upload images</p>
-                <p className="text-xs text-gray-500">PNG, JPG, WebP up to 5MB each (max 2 images)</p>
-              </div>
-
-              <input
-                ref={imageUploadRef}
-                type="file"
-                accept="image/*"
-                multiple
-                onChange={handleImageUpload}
-                className="hidden"
-              />
-
-              {/* Image Previews */}
-              {images.length > 0 && (
-                <div className="grid grid-cols-2 gap-4">
-                  {images.map((image) => (
-                    <div key={image.id} className="relative">
-                      <img
-                        src={image.preview}
-                        alt="Preview"
-                        className="w-full h-32 object-cover rounded-lg border border-gray-200"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => removeImage(image.id)}
-                        className="absolute -top-2 -right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
-                      >
-                        <XMarkIcon className="w-4 h-4" />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Description */}
-          <div>
-            <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
-              Describe your upcoming adventure
+            <label
+              htmlFor="notes"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
+              <FileTextIcon className="w-4 h-4 inline mr-1" />
+              Additional Notes (Optional)
             </label>
             <textarea
-              id="description"
-              placeholder="Tell us about your camping or stargazing adventure!"
-              value={formData.description}
-              onChange={handleChange}
+              id="notes"
+              name="notes"
+              value={formData.notes}
+              onChange={handleInputChange}
               rows={4}
-              className={`w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500 min-h-[100px] resize-none transition-all duration-200 ${
-                errors.description
-                  ? "border-red-300 focus:border-red-500 focus:ring-red-500"
-                  : "border-gray-300 focus:border-cyan-500 hover:border-gray-400"
+              placeholder="Share details about your travel plan, activities, requirements, or anything else potential companions should know..."
+              className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 resize-none ${
+                errors.notes ? "border-red-300" : "border-gray-300"
               }`}
+              disabled={isSubmitting}
             />
-            {errors.description && (
-              <p className="text-sm text-red-600 mt-1 flex items-center gap-1">
-                <ExclamationTriangleIcon className="w-4 h-4" />
-                {errors.description}
-              </p>
-            )}
+            <div className="mt-1 flex justify-between text-sm">
+              {errors.notes ? (
+                <p className="text-red-600">{errors.notes}</p>
+              ) : (
+                <p className="text-gray-500">
+                  {formData.notes.length}/1000 characters
+                </p>
+              )}
+            </div>
           </div>
 
-          {/* Submit Button */}
-          <div className="flex justify-start pt-2">
+          {/* Submit Buttons */}
+          <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleClose}
+              disabled={isSubmitting}
+            >
+              Cancel
+            </Button>
             <Button
               type="submit"
               disabled={isSubmitting}
-              size="md"
-              variant="primary"
-              className="rounded-xl"
+              className="min-w-[120px]"
             >
               {isSubmitting ? (
-                <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  Posting...
-                </div>
+                <>
+                  <LoaderIcon className="w-4 h-4 animate-spin mr-2" />
+                  Creating...
+                </>
               ) : (
-                "Post"
+                "Create Plan"
               )}
             </Button>
           </div>

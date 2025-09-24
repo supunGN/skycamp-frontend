@@ -42,10 +42,27 @@ export default function TravelBuddyProtectedRoute({ children }) {
 
         // Check Travel Buddy status
         const response = await API.travelBuddy.getStatus();
+        console.log("TravelBuddyProtectedRoute: API response:", response);
 
-        if (response && response.enabled) {
+        // Note: The API is returning the full response object, not just the data
+        const data = response?.data || response;
+        console.log("TravelBuddyProtectedRoute: Extracted data:", data);
+
+        if (data && data.available === true && data.enabled === true) {
+          console.log(
+            "TravelBuddyProtectedRoute: Access granted - Travel Buddy enabled"
+          );
           setIsAuthorized(true);
         } else {
+          console.log(
+            "TravelBuddyProtectedRoute: Access denied - Travel Buddy not enabled"
+          );
+          console.log("TravelBuddyProtectedRoute: Response details:", {
+            available: data?.available,
+            enabled: data?.enabled,
+            status: data?.status,
+            reason: data?.reason,
+          });
           setError("Travel Buddy not enabled");
           setIsAuthorized(false);
           setShowModal(true);

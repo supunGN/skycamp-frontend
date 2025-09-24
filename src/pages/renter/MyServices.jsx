@@ -37,7 +37,10 @@ export default function MyServices() {
   const [submitting, setSubmitting] = useState(false);
   const [selectedPhoto, setSelectedPhoto] = useState(null);
   const [loadingStates, setLoadingStates] = useState({});
+  const [equipmentSearch, setEquipmentSearch] = useState("");
+  const [showSuggestions, setShowSuggestions] = useState(false);
   const fileInputRef = useRef(null);
+  const searchInputRef = useRef(null);
   const { showSuccess, showError } = useToast();
 
   // Confirmation modal state
@@ -121,6 +124,8 @@ export default function MyServices() {
     setConditionPhotos([]);
     setNewPhotos([]);
     setCurrentPhotos([]);
+    setEquipmentSearch("");
+    setShowSuggestions(false);
     setError(null);
   };
 
@@ -404,6 +409,78 @@ export default function MyServices() {
     return "Unknown Category";
   };
 
+  // Get all equipment as flat array for suggestions
+  const getAllEquipment = () => {
+    const allEquipment = [];
+    equipmentCatalog.forEach((category) => {
+      category.equipment.forEach((equipment) => {
+        allEquipment.push({
+          ...equipment,
+          category_name: category.name,
+          category_type: category.type,
+        });
+      });
+    });
+    return allEquipment;
+  };
+
+  // Get suggestions based on search term
+  const getSuggestions = () => {
+    if (!equipmentSearch.trim() || equipmentSearch.length < 2) {
+      return [];
+    }
+
+    const searchTerm = equipmentSearch.toLowerCase();
+    return getAllEquipment()
+      .filter((equipment) => equipment.name.toLowerCase().includes(searchTerm))
+      .slice(0, 8); // Limit to 8 suggestions
+  };
+
+  // Handle equipment selection from suggestions
+  const handleEquipmentSelect = (equipment) => {
+    setSelectedEquipment(equipment.equipment_id.toString());
+    setEquipmentSearch(equipment.name);
+    setShowSuggestions(false);
+  };
+
+  // Handle search input change
+  const handleSearchChange = (e) => {
+    const value = e.target.value;
+    setEquipmentSearch(value);
+    setShowSuggestions(value.length >= 2);
+
+    // If user types exact equipment name, select it
+    if (value) {
+      const exactMatch = getAllEquipment().find(
+        (equipment) => equipment.name.toLowerCase() === value.toLowerCase()
+      );
+      if (exactMatch) {
+        setSelectedEquipment(exactMatch.equipment_id.toString());
+      } else {
+        setSelectedEquipment("");
+      }
+    } else {
+      setSelectedEquipment("");
+    }
+  };
+
+  // Filter equipment based on search term (for dropdown)
+  const getFilteredEquipmentCatalog = () => {
+    if (!equipmentSearch.trim()) {
+      return equipmentCatalog;
+    }
+
+    const searchTerm = equipmentSearch.toLowerCase();
+    return equipmentCatalog
+      .map((category) => ({
+        ...category,
+        equipment: category.equipment.filter((equipment) =>
+          equipment.name.toLowerCase().includes(searchTerm)
+        ),
+      }))
+      .filter((category) => category.equipment.length > 0);
+  };
+
   if (loading) {
     return (
       <div className="p-6">
@@ -466,6 +543,65 @@ export default function MyServices() {
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Select Equipment <span className="text-red-500">*</span>
               </label>
+
+              {/* Search Bar with Autocomplete */}
+              <div className="mb-3 relative">
+                <input
+                  ref={searchInputRef}
+                  type="text"
+                  placeholder="Type to search equipment (e.g., 'tent', 'stove')..."
+                  value={equipmentSearch}
+                  onChange={handleSearchChange}
+                  onFocus={() =>
+                    setShowSuggestions(equipmentSearch.length >= 2)
+                  }
+                  onBlur={() => {
+                    // Delay hiding suggestions to allow clicks
+                    setTimeout(() => setShowSuggestions(false), 200);
+                  }}
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 text-sm"
+                />
+
+                {/* Suggestions Dropdown */}
+                {showSuggestions && getSuggestions().length > 0 && (
+                  <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                    {getSuggestions().map((equipment) => (
+                      <div
+                        key={equipment.equipment_id}
+                        onClick={() => handleEquipmentSelect(equipment)}
+                        className="px-4 py-3 hover:bg-cyan-50 cursor-pointer border-b border-gray-100 last:border-b-0"
+                      >
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <div className="font-medium text-gray-900">
+                              {equipment.name}
+                            </div>
+                            <div className="text-sm text-gray-500">
+                              {equipment.category_type} -{" "}
+                              {equipment.category_name}
+                            </div>
+                          </div>
+                          <div className="text-xs text-gray-400">
+                            ID: {equipment.equipment_id}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* No suggestions message */}
+                {showSuggestions &&
+                  getSuggestions().length === 0 &&
+                  equipmentSearch.length >= 2 && (
+                    <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg">
+                      <div className="px-4 py-3 text-gray-500 text-sm">
+                        No equipment found matching "{equipmentSearch}"
+                      </div>
+                    </div>
+                  )}
+              </div>
+
               <select
                 value={selectedEquipment}
                 onChange={(e) => setSelectedEquipment(e.target.value)}
@@ -474,7 +610,7 @@ export default function MyServices() {
                 required
               >
                 <option value="">Choose equipment to rent...</option>
-                {equipmentCatalog.map((category) => (
+                {getFilteredEquipmentCatalog().map((category) => (
                   <optgroup
                     key={category.category_id}
                     label={`${category.type} - ${category.name}`}
@@ -490,6 +626,43 @@ export default function MyServices() {
                   </optgroup>
                 ))}
               </select>
+
+              {/* Search Results Info */}
+              {equipmentSearch.trim() && (
+                <div className="mt-2">
+                  <p className="text-xs text-gray-500">
+                    {selectedEquipment ? (
+                      <>
+                        <span className="text-green-600 font-medium">
+                          ✓ Selected:
+                        </span>{" "}
+                        {
+                          getAllEquipment().find(
+                            (e) =>
+                              e.equipment_id.toString() === selectedEquipment
+                          )?.name
+                        }
+                      </>
+                    ) : (
+                      <>
+                        Showing{" "}
+                        {getFilteredEquipmentCatalog().reduce(
+                          (total, category) =>
+                            total + category.equipment.length,
+                          0
+                        )}{" "}
+                        equipment items matching "{equipmentSearch}"
+                      </>
+                    )}
+                  </p>
+                  {getSuggestions().length > 0 && (
+                    <p className="text-xs text-cyan-600 mt-1">
+                      💡 Click on suggestions above or select from dropdown
+                      below
+                    </p>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Item Condition */}
@@ -839,16 +1012,9 @@ export default function MyServices() {
           <h3 className="text-lg font-medium text-gray-900 mb-2">
             No Equipment Listed
           </h3>
-          <p className="text-gray-600 mb-6">
+          <p className="text-gray-600">
             Start by adding your first piece of equipment to rent out.
           </p>
-          <Button
-            onClick={handleAddEquipment}
-            className="flex items-center gap-2 mx-auto"
-          >
-            <PlusIcon className="w-5 h-5" />
-            Add Your First Equipment
-          </Button>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

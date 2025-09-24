@@ -13,15 +13,21 @@ export const http = axios.create({
 // Optional: request interceptor (add default headers etc.)
 http.interceptors.request.use((config) => {
   // Don't set Content-Type for FormData; Axios will set correct boundary.
+  // For JSON data, ensure Content-Type is set
+  if (config.data && !(config.data instanceof FormData)) {
+    config.headers["Content-Type"] = "application/json";
+  }
 
   // Add user ID from localStorage to headers for authentication
   const user = localStorage.getItem("user");
   if (user) {
     try {
       const userData = JSON.parse(user);
-      if (userData.id) {
-        config.headers["X-User-ID"] = userData.id;
-        config.headers["X-User-Role"] = userData.user_role;
+      // Use user_id if available, otherwise fall back to id
+      const userId = userData.user_id || userData.id;
+      if (userId) {
+        config.headers["x-user-id"] = userId;
+        config.headers["x-user-role"] = userData.user_role || userData.role;
       }
     } catch (e) {
       console.warn("Failed to parse user data from localStorage:", e);
@@ -396,6 +402,67 @@ export const API = {
     },
   },
 
+  // ==== GUIDE DASHBOARD ====
+  guideDashboard: {
+    getStats() {
+      return ok(http.get("/guide/dashboard/stats"));
+    },
+    getProfile() {
+      return ok(http.get("/guide/profile"));
+    },
+    updateProfile(data) {
+      return ok(http.post("/guide/profile", data));
+    },
+    getVerificationDocs() {
+      return ok(http.get("/guide/verification/docs"));
+    },
+    submitVerification(formData) {
+      return ok(http.post("/guide/verification/submit", formData));
+    },
+    getAvailability() {
+      return ok(http.get("/guide/availability"));
+    },
+    updateAvailability(data) {
+      return ok(http.post("/guide/availability", data));
+    },
+    getImages() {
+      return ok(http.get("/guide/images"));
+    },
+    uploadImages(formData) {
+      return ok(http.post("/guide/images", formData));
+    },
+    deleteImage(imageId) {
+      return ok(http.delete(`/guide/images/${imageId}`));
+    },
+    // Location Management
+    getAvailableLocations() {
+      return ok(http.get("/guide/locations/available"));
+    },
+    getGuideLocations() {
+      return ok(http.get("/guide/locations/coverage"));
+    },
+    updateGuideLocations(data) {
+      return ok(http.put("/guide/locations/update", data));
+    },
+    checkLocationRemoval(locationName) {
+      return ok(
+        http.get(
+          `/guide/locations/check-removal/${encodeURIComponent(locationName)}`
+        )
+      );
+    },
+    // Booking Management
+    getGuideBookings() {
+      return ok(http.get("/guide/bookings"));
+    },
+    markBookingAsFinished(bookingId) {
+      return ok(http.put(`/guide/bookings/${bookingId}/mark-finished`));
+    },
+    createTestNotifications() {
+      return ok(http.post("/guide/test-notifications"));
+    },
+  },
+
   guides: {
     list(params) {
       return ok(http.get("/guides", { params }));
@@ -454,8 +521,29 @@ export const API = {
     createPlan(data) {
       return ok(http.post("/travel-plans", data));
     },
+    getMyPlans(params) {
+      return ok(http.get("/travel-plans/my", { params }));
+    },
+    getPlan(id) {
+      return ok(http.get(`/travel-plans/${id}`));
+    },
+    updatePlan(id, data) {
+      return ok(http.put(`/travel-plans/${id}`, data));
+    },
+    deletePlan(id) {
+      return ok(http.delete(`/travel-plans/${id}`));
+    },
     requestJoin(data) {
       return ok(http.post("/travel-requests", data));
+    },
+    getMyRequests(params) {
+      return ok(http.get("/travel-requests/my", { params }));
+    },
+    acceptRequest(id) {
+      return ok(http.post(`/travel-requests/${id}/accept`));
+    },
+    rejectRequest(id) {
+      return ok(http.post(`/travel-requests/${id}/reject`));
     },
     listMessages(params) {
       return ok(http.get("/travel-messages", { params }));
@@ -465,6 +553,9 @@ export const API = {
     },
     getStatus() {
       return ok(http.get("/travel-buddy/status"));
+    },
+    debug() {
+      return ok(http.get("/travel-buddy/debug"));
     },
   },
 };
