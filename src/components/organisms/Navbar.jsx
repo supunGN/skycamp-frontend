@@ -16,6 +16,7 @@ import Button from "../atoms/Button";
 import { API } from "../../api";
 import { useNotifications } from "../../hooks/useNotifications";
 import { useWishlistContext } from "../../contexts/WishlistContext";
+import { useCartContext } from "../../contexts/CartContext";
 import NotificationDropdown from "../molecules/NotificationDropdown";
 import { getProfilePictureUrl } from "../../utils/cacheBusting";
 
@@ -35,6 +36,9 @@ export default function Navbar() {
   // Get wishlist count from context (only for customers)
   const { itemCount: wishlistCount, isAuthenticated: isCustomer } =
     useWishlistContext();
+
+  // Get cart count from context (only for customers)
+  const { itemCount: cartCount } = useCartContext();
 
   // Read user and admin from localStorage on mount
   React.useEffect(() => {
@@ -282,9 +286,14 @@ export default function Navbar() {
             {/* Only show cart and wishlist for non-admin users */}
             {!admin && (
               <>
-                <Link to="/cart">
+                <Link to="/cart" className="relative">
                   <div className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors cursor-pointer">
                     <ShoppingCartIcon className="w-6 h-6" />
+                    {cartCount > 0 && (
+                      <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-semibold">
+                        {cartCount > 99 ? "99+" : cartCount}
+                      </span>
+                    )}
                   </div>
                 </Link>
                 <Link to="/wishlist" className="relative">
@@ -590,7 +599,14 @@ export default function Navbar() {
                   onClick={() => setMenuOpen(false)}
                   className="flex items-center space-x-3 text-lg font-medium text-gray-900 hover:text-cyan-600"
                 >
-                  <ShoppingCartIcon className="w-6 h-6 text-gray-600" />
+                  <div className="relative">
+                    <ShoppingCartIcon className="w-6 h-6 text-gray-600" />
+                    {cartCount > 0 && (
+                      <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-semibold">
+                        {cartCount > 99 ? "99+" : cartCount}
+                      </span>
+                    )}
+                  </div>
                   <span>Cart</span>
                 </Link>
                 <Link

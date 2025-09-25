@@ -310,6 +310,15 @@ export const API = {
     getByDistrict(district) {
       return ok(http.get("/renters/by-district", { params: { district } }));
     },
+    getByEquipment(equipmentIds) {
+      // equipmentIds: array of numbers
+      const q = Array.isArray(equipmentIds)
+        ? equipmentIds.filter((v) => !!v).join(",")
+        : String(equipmentIds || "");
+      return ok(
+        http.get(`/renters/by-equipment`, { params: { equipment_ids: q } })
+      );
+    },
     show(id) {
       return ok(http.get(`/renters/${id}`));
     },
@@ -491,14 +500,20 @@ export const API = {
     get() {
       return ok(http.get("/cart"));
     },
+    create(cartData) {
+      return ok(http.post("/cart", cartData));
+    },
+    updateQuantity(cartItemId, quantity) {
+      return ok(http.put("/cart/item/quantity", { cartItemId, quantity }));
+    },
+    removeItem(cartItemId) {
+      return ok(http.delete("/cart/item", { data: { cartItemId } }));
+    },
     addItem(body) {
       return ok(http.post("/cart/items", body));
     },
     updateItem(id, body) {
       return ok(http.put(`/cart/items/${id}`, body));
-    },
-    removeItem(id) {
-      return ok(http.delete(`/cart/items/${id}`));
     },
     checkout(body) {
       return ok(http.post("/cart/checkout", body));
@@ -511,6 +526,21 @@ export const API = {
     },
     show(id) {
       return ok(http.get(`/bookings/${id}`));
+    },
+    create(bookingData) {
+      return ok(http.post("/bookings", bookingData));
+    },
+    confirmPayment(paymentData) {
+      return ok(http.post("/bookings/confirm-payment", paymentData));
+    },
+    cancelPayment(paymentData) {
+      return ok(http.post("/bookings/cancel-payment", paymentData));
+    },
+    getPaymentStatus(orderId) {
+      return ok(http.get(`/bookings/payment-status/${orderId}`));
+    },
+    getPaymentDetails(bookingId) {
+      return ok(http.get(`/bookings/payment-details/${bookingId}`));
     },
   },
   // ==== TRAVEL BUDDY ====

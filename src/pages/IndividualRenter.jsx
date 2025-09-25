@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import Navbar from "../components/organisms/Navbar";
 import Footer from "../components/organisms/Footer";
 import Button from "../components/atoms/Button";
@@ -7,6 +7,7 @@ import Calendar from "../components/molecules/Calendar";
 import RatingReviewSection from "../components/sections/RatingReviewSection";
 import GearItemCard from "../components/molecules/GearItemCard";
 import { API } from "../api";
+import { useCartContext } from "../contexts/CartContext";
 import { useToast } from "../components/atoms/ToastProvider";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import L from "leaflet";
@@ -26,7 +27,9 @@ L.Icon.Default.mergeOptions({
 const IndividualRenter = () => {
   const { renterId } = useParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { showSuccess, showError } = useToast();
+  const { addToCart } = useCartContext();
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -34,12 +37,25 @@ const IndividualRenter = () => {
   const [selectedItems, setSelectedItems] = useState([]);
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
+  const [selectedEquipmentIds, setSelectedEquipmentIds] = useState([]);
 
   useEffect(() => {
     if (renterId) {
       fetchRenterData();
     }
   }, [renterId]);
+
+  // Parse selected equipment IDs from URL parameters
+  useEffect(() => {
+    const selectedParam = searchParams.get("selected");
+    if (selectedParam) {
+      const ids = selectedParam
+        .split(",")
+        .map((id) => parseInt(id.trim()))
+        .filter((id) => !isNaN(id));
+      setSelectedEquipmentIds(ids);
+    }
+  }, [searchParams]);
 
   const fetchRenterData = async () => {
     try {
@@ -96,7 +112,7 @@ const IndividualRenter = () => {
   );
 
   // Handle add to cart
-  const handleAddToCart = () => {
+  const handleAddToCart = async () => {
     if (selectedItems.length === 0) {
       showError("Please select at least one item");
       return;
@@ -115,44 +131,84 @@ const IndividualRenter = () => {
       return;
     }
 
-    // Create cart item data
-    const cartItems = selectedItems.map((item) => ({
-      id: item.id,
-      name: item.name,
-      price: item.pricePerDay,
-      quantity: item.quantity,
-      image: item.image,
-      renterId: renterId,
-      renterName: renterData.name,
-      equipmentId: item.equipmentId,
-      stockQuantity: item.stockQuantity,
-    }));
+    // Check if user is logged in
+    const user = localStorage.getItem("user");
+    if (!user) {
+      showError("Please log in to add items to cart");
+      return;
+    }
 
-    // Store cart data in localStorage
-    const cartData = {
-      renterId: renterId,
-      renterName: renterData.name,
-      renterLocation: renterData.location,
-      items: cartItems,
-      startDate: startDate,
-      endDate: endDate,
-      totalPrice: totalPrice,
-      addedAt: new Date().toISOString(),
-    };
+    try {
+      // Create cart data
+      console.log(
+        "IndividualRenter - startDate type:",
+        typeof startDate,
+        "value:",
+        startDate
+      );
+      console.log(
+        "IndividualRenter - endDate type:",
+        typeof endDate,
+        "value:",
+        endDate
+      );
 
-    // Get existing cart or initialize empty array
-    const existingCart = JSON.parse(
-      localStorage.getItem("skycamp_cart") || "[]"
-    );
+      // Convert dates to proper format
+      let formattedStartDate = startDate;
+      let formattedEndDate = endDate;
 
-    // Add new cart data
-    existingCart.push(cartData);
+      if (startDate) {
+        if (startDate instanceof Date) {
+          formattedStartDate = startDate.toISOString().split("T")[0];
+        } else if (typeof startDate === "string" && startDate !== "") {
+          // If it's already a string, try to format it
+          const date = new Date(startDate);
+          if (!isNaN(date.getTime())) {
+            formattedStartDate = date.toISOString().split("T")[0];
+          }
+        }
+      }
 
-    // Save back to localStorage
-    localStorage.setItem("skycamp_cart", JSON.stringify(existingCart));
+      if (endDate) {
+        if (endDate instanceof Date) {
+          formattedEndDate = endDate.toISOString().split("T")[0];
+        } else if (typeof endDate === "string" && endDate !== "") {
+          // If it's already a string, try to format it
+          const date = new Date(endDate);
+          if (!isNaN(date.getTime())) {
+            formattedEndDate = date.toISOString().split("T")[0];
+          }
+        }
+      }
 
-    showSuccess("Items added to cart successfully!");
-    navigate("/cart");
+      console.log(
+        "IndividualRenter - formatted dates:",
+        formattedStartDate,
+        formattedEndDate
+      );
+
+      const cartData = {
+        renterId: renterId,
+        items: selectedItems.map((item) => ({
+          renterEquipmentId: item.id,
+          quantity: item.quantity,
+        })),
+        startDate: formattedStartDate,
+        endDate: formattedEndDate,
+      };
+
+      const result = await addToCart(cartData);
+
+      if (result.success) {
+        showSuccess("Items added to cart successfully!");
+        navigate("/cart");
+      } else {
+        showError(result.message || "Failed to add items to cart");
+      }
+    } catch (err) {
+      console.error("Error adding to cart:", err);
+      showError("Failed to add items to cart");
+    }
   };
 
   // Check if item is selected
@@ -164,6 +220,42 @@ const IndividualRenter = () => {
   const getSelectedQuantity = (itemId) => {
     const item = selectedItems.find((item) => item.id === itemId);
     return item ? item.quantity : 1;
+  };
+
+  // Separate equipment into selected and remaining items
+  const getEquipmentSections = () => {
+    if (!renterData || !renterData.equipment) {
+      return { selectedEquipment: [], remainingEquipment: [] };
+    }
+
+    // Get items that were originally selected via URL parameters
+    const originallySelectedEquipment = renterData.equipment.filter((item) =>
+      selectedEquipmentIds.includes(item.equipmentId)
+    );
+
+    // Get items that are currently selected by the user (in cart)
+    const currentlySelectedEquipment = renterData.equipment.filter((item) =>
+      isItemSelected(item.id)
+    );
+
+    // Combine originally selected and currently selected items
+    const allSelectedEquipment = [...originallySelectedEquipment];
+    currentlySelectedEquipment.forEach((item) => {
+      if (!allSelectedEquipment.find((selected) => selected.id === item.id)) {
+        allSelectedEquipment.push(item);
+      }
+    });
+
+    // Remaining items are those not in the combined selected list
+    const remainingEquipment = renterData.equipment.filter(
+      (item) =>
+        !allSelectedEquipment.find((selected) => selected.id === item.id)
+    );
+
+    return {
+      selectedEquipment: allSelectedEquipment,
+      remainingEquipment,
+    };
   };
 
   if (loading) {
@@ -267,42 +359,91 @@ const IndividualRenter = () => {
 
             {/* Equipment Listings */}
             <div className="">
-              <h3 className="text-lg font-bold mb-4 text-gray-900 mt-8">
-                Available Equipment ({renterData.equipment.length} items)
-              </h3>
-              <div className="flex flex-col items-start w-full">
-                {renterData.equipment.map((item) => (
-                  <GearItemCard
-                    key={item.id}
-                    id={item.id}
-                    image={item.image || "/default-equipment.png"}
-                    name={item.name}
-                    description={item.description}
-                    price={item.pricePerDay}
-                    quantity={getSelectedQuantity(item.id)}
-                    selected={isItemSelected(item.id)}
-                    onSelect={() =>
-                      handleSelect(item, !isItemSelected(item.id))
-                    }
-                    onQuantityChange={(qty) =>
-                      handleQuantityChange(item.id, qty)
-                    }
-                    className="max-w-xl w-full"
-                    disabled={!item.isAvailable}
-                    stockQuantity={item.stockQuantity}
-                    condition={item.condition}
-                  />
-                ))}
-              </div>
-            </div>
+              {(() => {
+                const { selectedEquipment, remainingEquipment } =
+                  getEquipmentSections();
+                const hasSelectedItems = selectedEquipment.length > 0;
 
-            {renterData.equipment.length === 0 && (
-              <div className="text-center py-8">
-                <p className="text-gray-500">
-                  No equipment available at the moment.
-                </p>
-              </div>
-            )}
+                return (
+                  <>
+                    {/* Selected Items Section */}
+                    {hasSelectedItems && (
+                      <div className="mb-8">
+                        <h3 className="text-lg font-bold mb-4 text-teal-600">
+                          Selected Items ({selectedEquipment.length} items)
+                        </h3>
+                        <div className="flex flex-col items-start w-full">
+                          {selectedEquipment.map((item) => (
+                            <GearItemCard
+                              key={item.id}
+                              id={item.id}
+                              image={item.image || "/default-equipment.png"}
+                              name={item.name}
+                              description={item.description}
+                              price={item.pricePerDay}
+                              quantity={getSelectedQuantity(item.id)}
+                              selected={isItemSelected(item.id)}
+                              onSelect={() =>
+                                handleSelect(item, !isItemSelected(item.id))
+                              }
+                              onQuantityChange={(qty) =>
+                                handleQuantityChange(item.id, qty)
+                              }
+                              className="max-w-xl w-full"
+                              disabled={!item.isAvailable}
+                              stockQuantity={item.stockQuantity}
+                              condition={item.condition}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Remaining Items Section */}
+                    {remainingEquipment.length > 0 && (
+                      <div className="mb-8">
+                        <h3 className="text-lg font-bold mb-4 text-teal-600">
+                          Remaining Items ({remainingEquipment.length} items)
+                        </h3>
+                        <div className="flex flex-col items-start w-full">
+                          {remainingEquipment.map((item) => (
+                            <GearItemCard
+                              key={item.id}
+                              id={item.id}
+                              image={item.image || "/default-equipment.png"}
+                              name={item.name}
+                              description={item.description}
+                              price={item.pricePerDay}
+                              quantity={getSelectedQuantity(item.id)}
+                              selected={isItemSelected(item.id)}
+                              onSelect={() =>
+                                handleSelect(item, !isItemSelected(item.id))
+                              }
+                              onQuantityChange={(qty) =>
+                                handleQuantityChange(item.id, qty)
+                              }
+                              className="max-w-xl w-full"
+                              disabled={!item.isAvailable}
+                              stockQuantity={item.stockQuantity}
+                              condition={item.condition}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* No items message */}
+                    {renterData.equipment.length === 0 && (
+                      <div className="text-center py-8">
+                        <p className="text-gray-500">
+                          No equipment available at the moment.
+                        </p>
+                      </div>
+                    )}
+                  </>
+                );
+              })()}
+            </div>
           </div>
 
           {/* Right: Sticky OpenStreetMap */}
@@ -372,6 +513,12 @@ const IndividualRenter = () => {
                   <Calendar
                     value={startDate}
                     onChange={(date) => {
+                      console.log(
+                        "Calendar onChange - startDate received:",
+                        date,
+                        "type:",
+                        typeof date
+                      );
                       setStartDate(date);
                       // Reset end date if it's before the new start date
                       if (endDate && new Date(endDate) < new Date(date)) {
@@ -393,7 +540,15 @@ const IndividualRenter = () => {
                   />
                   <Calendar
                     value={endDate}
-                    onChange={setEndDate}
+                    onChange={(date) => {
+                      console.log(
+                        "Calendar onChange - endDate received:",
+                        date,
+                        "type:",
+                        typeof date
+                      );
+                      setEndDate(date);
+                    }}
                     minDate={startDate || new Date().toISOString()} // End date must be after start date
                   />
                 </div>

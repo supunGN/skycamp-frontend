@@ -289,32 +289,50 @@ export default function Wishlist() {
                   );
                 } else if (item.item_type === "equipment") {
                   return (
-                    <RentalCard
+                    <div
                       key={`${item.item_type}-${item.item_id}`}
-                      image={item.image_url || "/placeholder.svg"}
-                      location="Equipment Rental"
-                      name={item.name}
-                      phone="Contact for details"
-                      rating={4.5} // Default rating
-                      reviewCount={30} // Fixed review count
-                      equipmentId={item.item_id}
-                    />
+                      onClick={() => {
+                        // Navigate to individual renter page
+                        window.location.href = `/renter/${item.item_id}`;
+                      }}
+                      className="cursor-pointer"
+                    >
+                      <RentalCard
+                        image={item.image_url || "/placeholder.svg"}
+                        location="Equipment Rental"
+                        name={item.name}
+                        phone="Contact for details"
+                        rating={4.5} // Default rating
+                        reviewCount={30} // Fixed review count
+                        equipmentId={item.item_id}
+                      />
+                    </div>
                   );
                 } else if (item.item_type === "guide") {
                   return (
-                    <GuideCard
+                    <div
                       key={`${item.item_type}-${item.item_id}`}
-                      location="Guide Service"
-                      name={item.name}
-                      contact="Contact for details"
-                      rate={
-                        item.price ? `${item.price} LKR/Day` : "Rate on request"
-                      }
-                      rating={4.5} // Default rating
-                      reviews={25} // Fixed review count
-                      profileImage={item.image_url || "/placeholder.svg"}
-                      guideId={item.item_id}
-                    />
+                      onClick={() => {
+                        // Navigate to individual guide page
+                        window.location.href = `/guide/${item.item_id}`;
+                      }}
+                      className="cursor-pointer"
+                    >
+                      <GuideCard
+                        location="Guide Service"
+                        name={item.name}
+                        contact="Contact for details"
+                        rate={
+                          item.price
+                            ? `${item.price} LKR/Day`
+                            : "Rate on request"
+                        }
+                        rating={4.5} // Default rating
+                        reviews={25} // Fixed review count
+                        profileImage={item.image_url || "/placeholder.svg"}
+                        guideId={item.item_id}
+                      />
+                    </div>
                   );
                 }
 
@@ -392,13 +410,18 @@ export default function Wishlist() {
                           className="flex-1"
                           onClick={() => {
                             // Navigate to item details based on type
-                            const basePath =
-                              item.item_type === "equipment"
-                                ? "/rentals"
-                                : item.item_type === "location"
-                                ? "/destinations"
-                                : "/guides";
-                            window.location.href = `${basePath}/${item.item_id}`;
+                            if (item.item_type === "equipment") {
+                              window.location.href = `/renter/${item.item_id}`;
+                            } else if (item.item_type === "location") {
+                              const urlFriendlyName = item.name
+                                .toLowerCase()
+                                .replace(/[^a-z0-9\s-]/g, "")
+                                .replace(/\s+/g, "-")
+                                .trim();
+                              window.location.href = `/destination/${item.item_id}/${urlFriendlyName}`;
+                            } else if (item.item_type === "guide") {
+                              window.location.href = `/guide/${item.item_id}`;
+                            }
                           }}
                         >
                           <EyeIcon className="w-4 h-4 mr-2" />

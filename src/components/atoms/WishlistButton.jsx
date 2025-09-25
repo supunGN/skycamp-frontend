@@ -150,7 +150,7 @@ export default function WishlistButton({
       )}
       {showText && (
         <span className="text-sm font-medium">
-          {isInWishlist ? "Saved" : "Save"}
+          {isInWishlist ? "Remove from Wishlist" : "Add to Wishlist"}
         </span>
       )}
     </button>

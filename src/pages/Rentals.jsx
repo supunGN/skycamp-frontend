@@ -8,11 +8,11 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { API } from "../api";
 
 // Camping Gear Sidebar Section (dynamic from database)
-const CampingGearSidebar = () => {
-  const navigate = useNavigate();
+const CampingGearSidebar = ({ onSearchSelected }) => {
   const [equipmentCategories, setEquipmentCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [selectedMap, setSelectedMap] = useState({}); // equipmentId -> boolean
 
   useEffect(() => {
     const fetchEquipmentCategories = async () => {
@@ -35,10 +35,15 @@ const CampingGearSidebar = () => {
     fetchEquipmentCategories();
   }, []);
 
+  const toggleEquipment = (equipmentId) => {
+    setSelectedMap((prev) => ({ ...prev, [equipmentId]: !prev[equipmentId] }));
+  };
+
   const handleSearch = () => {
-    // Navigate to a sample renter for demo purposes
-    navigate("/renter/3");
-    window.scrollTo(0, 0);
+    const selectedIds = Object.keys(selectedMap)
+      .filter((k) => !!selectedMap[k])
+      .map((k) => Number(k));
+    onSearchSelected?.(selectedIds);
   };
 
   if (loading) {
@@ -104,7 +109,12 @@ const CampingGearSidebar = () => {
                   key={equipment.equipmentId}
                   className="flex items-center gap-2"
                 >
-                  <input type="checkbox" /> {equipment.name}
+                  <input
+                    type="checkbox"
+                    checked={!!selectedMap[equipment.equipmentId]}
+                    onChange={() => toggleEquipment(equipment.equipmentId)}
+                  />
+                  {equipment.name}
                 </label>
               ))}
             </div>
@@ -134,6 +144,8 @@ const Rentals = () => {
   const [showAll, setShowAll] = useState(false);
   const [selectedDistrict, setSelectedDistrict] = useState("");
   const [isFiltered, setIsFiltered] = useState(false);
+  const [equipmentFiltered, setEquipmentFiltered] = useState(false);
+  const [selectedEquipmentIds, setSelectedEquipmentIds] = useState([]);
 
   // Handle URL parameters for initial filtering
   useEffect(() => {
@@ -188,8 +200,12 @@ const Rentals = () => {
   };
 
   const handleRentalClick = (renter) => {
-    // Navigate to individual renter page
-    navigate(`/renter/${renter.id}`);
+    // Navigate to individual renter page with selected equipment IDs if any
+    const url =
+      equipmentFiltered && selectedEquipmentIds.length > 0
+        ? `/renter/${renter.id}?selected=${selectedEquipmentIds.join(",")}`
+        : `/renter/${renter.id}`;
+    navigate(url);
     window.scrollTo(0, 0);
   };
 
@@ -240,11 +256,46 @@ const Rentals = () => {
       if (response.success) {
         setRenters(response.data);
         setIsFiltered(false);
+        setEquipmentFiltered(false);
+        setSelectedEquipmentIds([]);
         setSelectedDistrict("");
         setShowAll(false);
       }
     } catch (err) {
       console.error("Error resetting renters:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Handle equipment search from sidebar
+  const handleEquipmentSearch = async (equipmentIds) => {
+    try {
+      setLoading(true);
+      if (!equipmentIds || equipmentIds.length === 0) {
+        // No selection => show all renters per requirement
+        const resAll = await API.renters.list();
+        setRenters(resAll.success ? resAll.data : []);
+        setEquipmentFiltered(false);
+        setIsFiltered(false);
+        setSelectedEquipmentIds([]);
+        setShowAll(false);
+        return;
+      }
+
+      const response = await API.renters.getByEquipment(equipmentIds);
+      if (response.success) {
+        setRenters(response.data);
+        setEquipmentFiltered(true);
+        setIsFiltered(false);
+        setSelectedEquipmentIds(equipmentIds);
+        setShowAll(false);
+      } else {
+        setError("Failed to filter renters by equipment");
+      }
+    } catch (err) {
+      console.error("Error filtering renters by equipment:", err);
+      setError("Failed to filter renters by equipment");
     } finally {
       setLoading(false);
     }
@@ -277,12 +328,14 @@ const Rentals = () => {
             className="flex-shrink-0 w-full lg:w-72 sticky top-28 self-start overflow-y-auto"
             style={{ maxHeight: "80vh" }}
           >
-            <CampingGearSidebar />
+            <CampingGearSidebar onSearchSelected={handleEquipmentSearch} />
           </div>
           {/* Rental Cards Section */}
           <div className="flex-1">
             <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-6">
-              {isFiltered
+              {equipmentFiltered
+                ? "Gear Rentals (filtered by equipment)"
+                : isFiltered
                 ? `Gear Rentals in ${selectedDistrict}`
                 : "Gear Rentals"}
             </h2>
